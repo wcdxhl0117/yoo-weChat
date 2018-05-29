@@ -1,0 +1,12 @@
+<template lang="pug">
+  view test
+</template>
+<script>
+  import wepy from 'wepy'
+
+  export default class VipLearnClub extends wepy.page {
+    data= {}
+
+    methods = {}
+  }
+</script>
