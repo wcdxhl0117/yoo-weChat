@@ -1,0 +1,15 @@
+{
+	"description": "A WePY project",
+	"setting": {
+		"urlCheck": false,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wx01a40c521cb8f06b",
+	"projectname": "wechat-app",
+	"miniprogramRoot": "./dist",
+	"condition": {}
+}
