@@ -42,6 +42,12 @@ module.exports = {
     }
   },
   plugins: {
+    'autoprefixer': {
+      filter: /\.(wxss||scss)$/,
+      config: {
+        browsers: ['last 11 iOS versions']
+      }
+    },
   },
   appConfig: {
     noPromiseAPI: ['createSelectorQuery']
