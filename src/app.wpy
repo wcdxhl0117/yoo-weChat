@@ -13,6 +13,7 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/user',
       'pages/index',
       'pages/child-input',
       'pages/vip-learn-club'
@@ -34,6 +35,11 @@ export default class extends wepy.app {
         iconPath: 'static/resources/statistics.png',
         selectedIconPath: 'static/resources/statistics_select.png',
         text: 'VIP学习社'
+      }, {
+        pagePath: 'pages/user',
+        iconPath: 'static/resources/statistics.png',
+        selectedIconPath: 'static/resources/statistics_select.png',
+        text: '我'
       }]
     }
   }
@@ -49,20 +55,18 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
-
+    // this.getUserInfo()
   }
 
   getUserInfo(cb) {
-    const that = this
     if (this.globalData.userInfo) {
-      return this.globalData.userInfo
+      return new Promise(this.globalData.userInfo)
     }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
-      }
-    })
+    return wepy.getUserInfo()
+      .then((res)=>{
+        this.globalData.userInfo = res.userInfo
+        return res
+      })
   }
 }
 </script>

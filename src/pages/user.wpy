@@ -1,0 +1,52 @@
+<template lang="pug">
+  view.container.flex.flex-column
+    text {{userInfo.nickName}}
+    view( @tap="hdlCallService" ) 电话客服
+    view( @tap="hdlUnbound" ) 解除绑定
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class User extends wepy.page {
+    data= {
+      userInfo: {
+        nickName: '加载中...'
+      }
+    }
+
+    methods = {
+      hdlCallService () {
+        wepy.makePhoneCall({
+          phoneNumber: '10086'
+        })
+      },
+      hdlUnbound() {
+        wepy.showModal({
+          title: '提示',
+          content: '这是一个模态弹窗'
+        }).then((res) => {
+          console.log(res)
+        })
+      }
+    }
+
+    onLoad () {
+      /*
+      * 如果当前组件是page，那么this.$parent是$app
+      * 如果当前组件是component, 那么this.$parent是父层component，this.$root是顶层的page，所以你可以这么写this.$root.$parent
+      */
+      this.$parent.getUserInfo()
+        .then((res) => {
+          console.log(res)
+          this.userInfo = res.userInfo
+          this.$apply()
+        })
+    }
+  }
+</script>
+
+<style scoped lang="scss">
+
+</style>
