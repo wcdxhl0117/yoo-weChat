@@ -13,6 +13,7 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/echarts-demo',
       'pages/user',
       'pages/index',
       'pages/child-input',
