@@ -1,5 +1,5 @@
 <template>
-  <PieGraph></PieGraph>
+  <PieGraph :pied.sync="pied"></PieGraph>
   <view class="container">
     <ec-canvas id="mychart-dom-bar" canvas-id="mychart-bar" ec="{{ ec }}"></ec-canvas>
   </view>
@@ -133,7 +133,10 @@
     }
 
     data= {
-      ec: { lazyLoad: true }
+      ec: { lazyLoad: true },
+      pied: {
+        value: 0
+      }
     }
 
     methods = {
@@ -143,6 +146,10 @@
     onReady () {
       this.$wxpage.selectComponent('#mychart-dom-bar').data.ec.onInit = initChart
       this.$wxpage.selectComponent('#mychart-dom-bar').init()
+      var thiz = this
+      setTimeout(function() {
+        thiz.pied.value = 66
+      }, 2000)
     }
   }
 </script>

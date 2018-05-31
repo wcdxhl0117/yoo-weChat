@@ -15,7 +15,7 @@
 <script>
   import wepy from 'wepy'
 
-  export default class Index extends wepy.page {
+  export default class Home extends wepy.page {
     data= {
       imgUrls: [
         'http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg',

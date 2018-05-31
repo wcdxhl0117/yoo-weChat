@@ -8,89 +8,30 @@
   import * as echarts from '../static/lib/ec-canvas/echarts'
 
   let chart = null
+  let option = {}
   function initChart(canvas, width, height) {
-    // console.log('init')
-    // console.dir(canvas)
     chart = echarts.init(canvas, null, {
       width: width,
       height: height
     })
     canvas.setChart(chart)
 
-    var option = {
-      title: {
-        text: '75%',
-        x: 'center',
-        y: 'center',
-        textStyle: {
-          fontWeight: 'normal',
-          color: '#0bb6f0'
-          // fontSize: 75
-        }
-      },
-
-      color: ['#eb644b', '#313443', '#fff'],
-      legend: {
-        show: false,
-        itemGap: 12,
-        data: ['01', '02']
-      },
-      toolbox: {
-        show: false,
-        feature: {
-          dataView: {
-            show: true,
-            readOnly: false
-          },
-          restore: {
-            show: true
-          },
-          saveAsImage: {
-            show: true
-          }
-        }
-      },
-      series: [{
-        name: 'Line 1',
-        type: 'pie',
-        clockWise: false,
-        radius: ['95%', '100%'],
-        itemStyle: {
-          normal: {
-            label: {
-              show: false
-            },
-            labelLine: {
-              show: false
-            }
-            // shadowBlur: 40,
-            // shadowColor: 'rgba(40, 40, 40, 0.5)',
-          }
-        },
-        // hoverAnimation: false,
-
-        data: [{
-          value: 75,
-          name: '01'
-        }, {
-          value: 25,
-          name: 'invisible'
-          // itemStyle: placeHolderStyle
-        }
-
-        ]
-      }
-
-      ]
-    }
-
     chart.setOption(option)
     return chart
   }
 
-  export default class PieGraph extends wepy.page {
+  export default class PieGraph extends wepy.component {
     config = {
       'usingComponents': { 'ec-canvas': './../static/lib/ec-canvas/ec-canvas' }
+    }
+
+    props = {
+      pied: {
+        default: {
+          value: 0
+        }
+      },
+      test: Number
     }
 
     data= {
@@ -101,9 +42,104 @@
 
     }
 
+    watch = {
+
+    }
+
     onLoad () {
+      var thiz = this
+      option = {
+        title: {
+          text: thiz.pied.value + '%',
+          x: 'center',
+          y: 'center',
+          textStyle: {
+            fontWeight: 'normal',
+            color: '#0bb6f0'
+            // fontSize: 75
+          }
+        },
+        color: ['#eb644b', '#313443', '#fff'],
+        legend: {
+          show: false,
+          itemGap: 12,
+          data: ['01', '02']
+        },
+        toolbox: {
+          show: false,
+          feature: {
+            dataView: {
+              show: true,
+              readOnly: false
+            },
+            restore: {
+              show: true
+            },
+            saveAsImage: {
+              show: true
+            }
+          }
+        },
+        series: [{
+          name: 'Line 1',
+          type: 'pie',
+          clockWise: false,
+          radius: ['95%', '100%'],
+          itemStyle: {
+            normal: {
+              label: {
+                show: false
+              },
+              labelLine: {
+                show: false
+              }
+              // shadowBlur: 40,
+              // shadowColor: 'rgba(40, 40, 40, 0.5)',
+            }
+          },
+          // hoverAnimation: false,
+
+          data: [{
+            value: thiz.pied.value,
+            name: '01'
+          }, {
+            value: 100 - thiz.pied.value,
+            name: 'invisible'
+          }]
+        }]
+        // animationType: 'scale',
+        // animationDurationUpdate: function (idx) {
+        //   // 越往后的数据延迟越大
+        //   return idx * 300
+        // }
+      }
       this.$wxpage.selectComponent('#pie-graph').data.ec.onInit = initChart
       this.$wxpage.selectComponent('#pie-graph').init()
+
+      let watch = {}
+      watch.pied = JSON.stringify(thiz.pied)
+      function watchPie () {
+        setTimeout(function() {
+          if (watch.pied !== JSON.stringify(thiz.pied)) {
+            let option = {
+              title: {
+                text: thiz.pied.value + '%'
+              },
+              series: [{
+                data: [{
+                  value: thiz.pied.value
+                }, {
+                  value: 100 - thiz.pied.value
+                }]
+              }]
+            }
+            chart.setOption(option)
+            watch.pied = JSON.stringify(thiz.pied)
+          }
+          watchPie()
+        }, 1000)
+      }
+      watchPie()
     }
   }
 </script>
