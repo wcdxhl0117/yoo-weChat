@@ -25,8 +25,8 @@
 
     events = {}
 
-    onLoad() {
-      console.log(12)
-    }
+    onLoad() {}
+
+    onReady () {}
   }
 </script>
