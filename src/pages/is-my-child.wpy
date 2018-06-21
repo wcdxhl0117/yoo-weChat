@@ -30,9 +30,14 @@
     methods = {
       isMy() {
         console.log('是我的孩子')
+        // 后台交互，绑定成功条home
       },
       notMy() {
         console.log('不是我的孩子')
+        // 跳转绑定孩子
+        wepy.redirectTo({
+          url: `/pages/child-input`
+        })
       }
     }
 

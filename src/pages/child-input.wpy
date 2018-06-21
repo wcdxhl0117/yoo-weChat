@@ -1,36 +1,28 @@
-<style lang="less">
-  
-</style>
 <template>
   <view class="container">
-    bangd
+    <form bindsubmit="formSubmit" bindreset="formReset">
+      <text class="title">请输入孩子的悠数学账号和密码 </text>
+      <view class="section">
+        <input name="account" placeholder="请输入孩子的账号或绑定的手机号" />
+      </view>
+      <view class="section">
+        <input name="password" placeholder="请输入密码" password="true" />
+      </view>
+      <view class="btn-area">
+        <button formType="submit">Submit</button>
+      </view>
+    </form>
   </view>
 </template>
-
 <script>
   import wepy from 'wepy'
-  export default class childInput extends wepy.page {
-    config = {
-      navigationBarTitleText: '悠数学-家长'
-    }
-    components = {}
 
-    mixins = []
-
-    data = {}
-
-    computed = {}
-
-    methods = {}
-
-    events = {}
-
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
-        }
-      })
+  export default class ChildInput extends wepy.page {
+    methods = {
+      formSubmit (e) {
+        console.log('form发生了submit事件，携带数据为：', e.detail.value)
+      }
     }
   }
+
 </script>
