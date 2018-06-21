@@ -1,9 +1,12 @@
-<style lang="less">
-  
-</style>
 <template>
   <view class="container">
-    is-my-child3
+    <view class="topTip">该微信号已绑定悠数学学生端</view>
+    <block>
+      <image src="{{headUrl}}" />
+    </block>
+    <text class="theName">{{theName}}</text>
+    <button class="btn btnCom" bindtap="isMy" open-type="getUserInfo"> 是我的孩子 </button>
+    <button class="btnCom" bindtap="notMy" open-type="getUserInfo"> 不是我的孩子 </button>
   </view>
 </template>
 
@@ -11,26 +14,45 @@
   import wepy from 'wepy'
   export default class isMyChild extends wepy.page {
     config = {
-      navigationBarTitleText: '悠数学-家长'
+      navigationBarTitleText: '关联孩子账号'
     }
     components = {}
 
     mixins = []
 
-    data = {}
+    data = {
+      headUrl: 'http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg',
+      theName: '学生姓名'
+    }
 
     computed = {}
 
-    methods = {}
+    methods = {
+      isMy() {
+        console.log('是我的孩子')
+      },
+      notMy() {
+        console.log('不是我的孩子')
+      }
+    }
 
     events = {}
 
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
-        }
-      })
-    }
+    onLoad() {}
   }
 </script>
+<style lang="less">
+  .btnCom{
+    width: 690rpx;
+    font-size: 32rpx;
+    font-weight: 900;
+    height: 90rpx;
+    line-height: 90rpx;
+    color: #999999;
+    margin-top: 40rpx;
+  }
+  .btn{
+    background: #007AFF;
+    color: #ffffff;
+  }
+</style>

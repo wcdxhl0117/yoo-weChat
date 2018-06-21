@@ -51,7 +51,7 @@
     methods = {
       toLink() {
         // 获取信息权限<button open-type="getUserInfo"></button>
-        wepy.navigateTo({
+        wepy.redirectTo({
           url: `/pages/child-input`
         })
       }
@@ -60,8 +60,8 @@
     events = {}
 
     onLoad() {
-      // 后台查看是否关联过孩子,关联跳转至首页（home），公众好友绑定，跳转是否是我的孩子（is-my-child）
-      wepy.navigateTo({
+      // 后台查看是否关联过孩子,关联跳转至首页（home），公众好友绑定，跳转是否是我的孩子（is-my-child带头像和名字）
+      wepy.redirectTo({
         url: `/pages/is-my-child`
       })
     }
