@@ -9,9 +9,9 @@
       interval="{{interval}}" 
       duration="{{duration}}"
     >
-      <repeat for="{{imgUrls}}" key="index" index="index" item="item">
-        <swiper-item>
-          <image src="{{item }}" class="slide-image" />
+      <repeat for="{{imgUrls}}" key="index" index="index" item="item" style="width:100%; height:100%;">
+        <swiper-item style="width:100%; height:100%;">
+          <image src="{{item }}" class="slide-image" style="width:100%; height:100%;" />
         </swiper-item>
       </repeat>
     </swiper>
@@ -19,7 +19,7 @@
     <view class="btm">
       <view class="txt1">暂未关联孩子账号</view>
       <view class="txt2">关联孩子账号随时了解孩子的学习情况</view>
-      <button class="btn"> 关联孩子的悠数学账号 </button>
+      <button class="btn" bindtap="toLink" open-type="getUserInfo"> 关联孩子的悠数学账号 </button>
     </view>
   </view>
 </template>
@@ -48,11 +48,23 @@
 
     computed = {}
 
-    methods = {}
+    methods = {
+      toLink() {
+        // 获取信息权限<button open-type="getUserInfo"></button>
+        wepy.navigateTo({
+          url: `/pages/child-input`
+        })
+      }
+    }
 
     events = {}
 
-    onLoad() {}
+    onLoad() {
+      // 后台查看是否关联过孩子,关联跳转至首页（home），公众好友绑定，跳转是否是我的孩子（is-my-child）
+      wepy.navigateTo({
+        url: `/pages/is-my-child`
+      })
+    }
   }
 </script>
 
@@ -87,7 +99,7 @@
     .btn{
       background: #007AFF;
       color: #ffffff;
-      font-size: 30rpx;
+      font-size: 32rpx;
       font-weight: 900;
       height: 90rpx;
       line-height: 90rpx;

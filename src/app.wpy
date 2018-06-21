@@ -23,8 +23,11 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/home',
       'pages/vip-learn-club',
-      'pages/user'
+      'pages/user',
+      'pages/child-input',
+      'pages/is-my-child'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -34,7 +37,7 @@ export default class extends wepy.app {
     },
     tabBar: {
       list: [{
-        pagePath: 'pages/index',
+        pagePath: 'pages/home',
         iconPath: 'static/workbook.png',
         selectedIconPath: 'static/workbook.png',
         text: '首页'

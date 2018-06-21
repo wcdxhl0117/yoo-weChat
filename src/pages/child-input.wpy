@@ -3,13 +3,13 @@
 </style>
 <template>
   <view class="container">
-    我
+    bangd
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  export default class User extends wepy.page {
+  export default class childInput extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
@@ -25,6 +25,12 @@
 
     events = {}
 
-    onLoad() {}
+    onLoad() {
+      wepy.login({
+        success: function(res) {
+          console.log(res.code)
+        }
+      })
+    }
   }
 </script>
