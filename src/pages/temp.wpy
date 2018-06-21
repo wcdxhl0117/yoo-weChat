@@ -11,7 +11,7 @@
   import wepy from 'wepy'
   export default class Index extends wepy.page {
     config = {
-      navigationBarTitleText: 'test'
+      navigationBarTitleText: '悠数学-家长'
     }
     components = {}
 
@@ -25,8 +25,12 @@
 
     events = {}
 
-    onLoad() {}
-
-    onReady () {}
+    onLoad() {
+      wepy.login({
+        success: function(res) {
+          console.log(res.code)
+        }
+      })
+    }
   }
 </script>

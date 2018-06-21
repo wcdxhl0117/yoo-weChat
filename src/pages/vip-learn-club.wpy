@@ -3,7 +3,7 @@
 </style>
 <template>
   <view class="container">
-    123456
+    vip优配
   </view>
 </template>
 
@@ -25,12 +25,6 @@
 
     events = {}
 
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
-        }
-      })
-    }
+    onLoad() {}
   }
 </script>

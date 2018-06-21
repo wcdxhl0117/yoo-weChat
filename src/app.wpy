@@ -22,13 +22,33 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      'pages/index',
+      'pages/vip-learn-club',
+      'pages/user'
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
+      navigationBarTitleText: '悠数学-家长',
       navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      list: [{
+        pagePath: 'pages/index',
+        iconPath: 'static/workbook.png',
+        selectedIconPath: 'static/workbook.png',
+        text: '首页'
+      }, {
+        pagePath: 'pages/vip-learn-club',
+        iconPath: 'static/workbook.png',
+        selectedIconPath: 'static/workbook.png',
+        text: 'VIP培优'
+      }, {
+        pagePath: 'pages/user',
+        iconPath: 'static/workbook.png',
+        selectedIconPath: 'static/workbook.png',
+        text: '我'
+      }]
     }
   }
 
