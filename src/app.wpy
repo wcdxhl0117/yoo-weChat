@@ -63,6 +63,20 @@ export default class extends wepy.app {
 
   onLaunch() {
     this.testAsync()
+    wepy.login({
+      success: function(res) {
+        if (res.code) {
+          // 传后台要token,存本地
+          // console.log(res.code)
+          // wepy.setStorage({
+          //   key: 'code',
+          //   data: res.code
+          // })
+        } else {
+          console.log('登录失败！' + res.errMsg)
+        }
+      }
+    })
   }
 
   sleep (s) {

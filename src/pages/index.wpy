@@ -1,6 +1,6 @@
 <template>
-  <!-- banner -->
   <view class="container">
+    <!-- banner -->
     <swiper 
       indicator-dots="{{indicatorDots}}"
       indicator-color="#0882ff"
@@ -15,7 +15,12 @@
         </swiper-item>
       </repeat>
     </swiper>
-    
+    <!-- 关联结构 -->
+    <view class="btm">
+      <view class="txt1">暂未关联孩子账号</view>
+      <view class="txt2">关联孩子账号随时了解孩子的学习情况</view>
+      <button class="btn"> 关联孩子的悠数学账号 </button>
+    </view>
   </view>
 </template>
 
@@ -60,5 +65,32 @@
     height:230rpx;
     width:690rpx;
     margin: 30rpx auto;
+  }
+  .btm{
+    width: 690rpx;
+    height: auto;
+    margin: 0 auto;
+    margin-top: 200rpx;
+    .txt1{
+      width: 100%;
+      text-align: center;
+      font-size: 36rpx;
+      height: 70rpx;
+      font-weight: 900;
+    }
+    .txt2{
+      width: 100%;
+      text-align: center;
+      font-size: 30rpx;
+      height: 70rpx;
+    }
+    .btn{
+      background: #007AFF;
+      color: #ffffff;
+      font-size: 30rpx;
+      font-weight: 900;
+      height: 90rpx;
+      line-height: 90rpx;
+    }
   }
 </style>
