@@ -22,8 +22,13 @@
       <button class="btn" bindtap="toLink" open-type="getUserInfo"> 关联孩子的悠数学账号 </button>
     </view>
     <!-- 已关联展示home结构 -->
-     <view class="content" wx:if="{{isBind}}">
-      123456
+    <view class="content" wx:if="{{isBind}}">
+      <!-- 作业报告部分 -->
+      <view class="report">
+        <view class="head">作业报告</view>
+        <view class="near">近期作业：《04月24日作业》</view>
+        <view class="read">查看</view>
+      </view>
     </view>
   </view>
 </template>
@@ -82,8 +87,45 @@
     width:690rpx;
     margin: 30rpx auto;
   }
-
-
+  // home相关结构
+  .content{
+    width: 690rpx;
+    margin: 0 auto;
+    height: auto;
+    .report{
+      width: 100%;
+      height: 160rpx;
+      position: relative;
+      border-bottom: 1rpx solid #cce4ff;
+      .head{
+        position: absolute;
+        top: 15rpx;
+        left: 0;
+        font-size: 40rpx;
+        font-weight: 900;
+      }
+      .near{
+        font-size: 30rpx;
+        color: #999999;
+        position: absolute;
+        bottom: 30rpx;
+        left: 0;
+      }
+      .read{
+        position: absolute;
+        top: 30rpx;
+        right: 0;
+        width: 160rpx;
+        height: 60rpx;
+        color: #007AFF;
+        background: #cce4ff;
+        border-radius: 30rpx;
+        text-align: center;
+        line-height: 60rpx;
+        font-size: 30rpx;
+      }
+    }
+  }
   // 关联结构
   .btm{
     width: 690rpx;
