@@ -1,9 +1,22 @@
-<style lang="less">
-  
-</style>
 <template>
   <view class="container">
-    123456
+    <!-- 不是vip -->
+    <view class="notVip" wx:if="{{!vip}}">
+      <view class="imgWrap">
+        <image src="http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg" />
+      </view>
+      <view class="list">
+        <view class="lis"><image src="../static/tipVip.png" />未按时写作业，立即提醒</view>
+        <view class="lis"><image src="../static/tipVip.png" />作业正确率太低，立即提醒</view>
+        <view class="lis"><image src="../static/tipVip.png" />错题未及时订正，立即提醒</view>
+      </view>
+      <view class="btn" bindtap="toBuyVip">加入VIP培优计划</view>
+    </view>
+    <!-- 是vip -->
+    <view wx:if="{{vip}}" class="contentWrap">
+      123456
+    </view>
+    
   </view>
 </template>
 
@@ -13,18 +26,57 @@
     config = {
       navigationBarTitleText: '智能提醒'
     }
-    components = {}
+    data = {
+      vip: false
+    }
 
-    mixins = []
-
-    data = {}
-
-    computed = {}
-
-    methods = {}
-
-    events = {}
+    methods = {
+      toBuyVip() {
+        console.log('购买vip')
+        wepy.switchTab({
+          url: `/pages/vip-learn-club`
+        })
+      }
+    }
 
     onLoad() {}
   }
 </script>
+<style lang="less">
+  page{
+    height: 100%;
+  }
+  .imgWrap{
+    width: 690rpx;
+    height: 300rpx;
+    margin: 0 auto;
+    image{
+      width: 100%;
+      height: 100%;
+      border-radius: 8rpx;
+    }
+  }
+  .list{
+    width: 100%;
+    line-height: 60rpx;
+    font-size: 30rpx;
+    margin-top: 60rpx;
+    image{
+      width: 18rpx;
+      height: 18rpx;
+      margin-right: 20rpx;
+    }
+  }
+  .btn{
+    margin-top: 30rpx;
+    width: 100%;
+    height: 90rpx;
+    line-height: 90rpx;
+    text-align: center;
+    font-size:30rpx;
+    font-weight: 900;
+    color: #ffffff;
+    background: #fcb922;
+    border-radius: 10rpx;
+  }
+</style>
