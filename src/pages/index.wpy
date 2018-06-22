@@ -34,22 +34,22 @@
       <view class="vip">
         <view class="vipHead">VIP培优服务<image src="../static/vip.png" /></view>
         <!-- 监控 -->
-        <view class="monitor" wx:if="{{!isVip}}">
+        <view class="monitor" bindtap="toMonitor" wx:if="{{!isVip}}">
           <view class="left">监控学习情况，有问题立即提醒</view>
           <view class="right">了解详情<image src="../static/right-arrow.png" /></view>
         </view>
         <!-- vip没有报警 -->
-        <view class="monitor notHaveTip" wx:if="{{isVip&&!haveTip}}">
+        <view class="monitor notHaveTip" bindtap="toMonitor" wx:if="{{isVip&&!haveTip}}">
           <view class="left"><image src="../static/notHaveTip.png" />正在监控中...学习情况正常</view>
         </view>
         <!-- vip有报警 -->
-        <view class="monitor HaveTip" wx:if="{{isVip&&haveTip}}">
+        <view class="monitor HaveTip" bindtap="toMonitor" wx:if="{{isVip&&haveTip}}">
           <view class="left"><image src="../static/HaveTip.png" />有1条异常警报：作业[05月06</view>
         </view>
 
         <!-- 学习动态  -->
         <view class="base learnState" bindtap="toState">
-          <view class="topH">学习动态<image src="../static/new.png" /></view>
+          <view class="topH">学习动态<image wx:if="{{newShow}}" src="../static/new.png" /></view>
           <view class="txt">05-26 15:30 开始自主练习</view>
           <!-- <view class="txt">暂无学习动态</view> -->
         </view>
@@ -78,6 +78,7 @@
       isHasRep: true, // 是否有作业报告,false为没有
       isVip: true, // 是否是vip
       haveTip: true, // vip是否有报警
+      newShow: true, // 学习动态
       imgUrls: [
         'http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg',
         'http://img06.tooopen.com/images/20160818/tooopen_sy_175866434296.jpg',
@@ -104,11 +105,19 @@
       },
       toState() {
         // 跳转学习动态页面
+        this.newShow = false
         console.log('跳转学习动态页面')
       },
       toAnalysis() {
         // 跳转学情分析页面
         console.log('跳转学情分析页面')
+      },
+      toMonitor() {
+        // 跳转警告页
+        console.log('跳转警告页')
+        wepy.navigateTo({
+          url: `/pages/warn`
+        })
       }
     }
 
@@ -116,7 +125,7 @@
 
     onLoad() {
       // 后台查看是否关联过孩子,isBind变为true
-      // this.isBind = true
+      this.isBind = true
     }
   }
 </script>

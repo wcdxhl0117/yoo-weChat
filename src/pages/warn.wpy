@@ -1,0 +1,30 @@
+<style lang="less">
+  
+</style>
+<template>
+  <view class="container">
+    123456
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class warn extends wepy.page {
+    config = {
+      navigationBarTitleText: '智能提醒'
+    }
+    components = {}
+
+    mixins = []
+
+    data = {}
+
+    computed = {}
+
+    methods = {}
+
+    events = {}
+
+    onLoad() {}
+  }
+</script>
