@@ -26,8 +26,9 @@
       <!-- 作业报告部分 -->
       <view class="report">
         <view class="head">作业报告</view>
-        <view class="near">近期作业：《04月24日作业》</view>
-        <view class="read">查看</view> 
+        <view wx:if="{{isHasRep}}" class="near">近期作业：《04月24日作业》</view>
+        <view wx:if="{{!isHasRep}}" class="near">近期作业：暂无作业</view>
+        <view class="read" bindtap="readReport()">查看</view>
       </view>
       <!-- VIP培优服务 -->
       <view class="vip">
@@ -47,14 +48,16 @@
         </view>
 
         <!-- 学习动态  -->
-        <view class="base learnState">
+        <view class="base learnState" bindtap="toState">
           <view class="topH">学习动态<image src="../static/new.png" /></view>
           <view class="txt">05-26 15:30 开始自主练习</view>
+          <!-- <view class="txt">暂无学习动态</view> -->
         </view>
-        <!-- 学习动态  -->
-        <view class="base learnAnalysis">
+        <!-- 学情分析  -->
+        <view class="base learnAnalysis" bindtap="toAnalysis">
           <view class="topH">学情分析<image src="" /></view>
           <view class="txt">03.21 ~ 03.27 周成绩报告</view>
+          <!-- <view class="txt">暂无成绩报告</view> -->
         </view>
       </view>
 
@@ -72,6 +75,7 @@
 
     data = {
       isBind: false, // 是否绑定孩子
+      isHasRep: true, // 是否有作业报告,false为没有
       isVip: true, // 是否是vip
       haveTip: true, // vip是否有报警
       imgUrls: [
@@ -93,17 +97,26 @@
         wepy.redirectTo({
           url: `/pages/child-input`
         })
+      },
+      readReport() {
+        // 跳转报告页
+        console.log(123456789)
+      },
+      toState() {
+        // 跳转学习动态页面
+        console.log('跳转学习动态页面')
+      },
+      toAnalysis() {
+        // 跳转学情分析页面
+        console.log('跳转学情分析页面')
       }
     }
 
     events = {}
 
     onLoad() {
-      // 后台查看是否关联过孩子,isBind变为true，公众好友绑定，跳转是否是我的孩子（is-my-child带头像和名字）
-      // wepy.redirectTo({
-      //   url: `/pages/is-my-child`
-      // })
-      this.isBind = true
+      // 后台查看是否关联过孩子,isBind变为true
+      // this.isBind = true
     }
   }
 </script>
