@@ -3,17 +3,20 @@
     <form bindsubmit="formSubmit" bindreset="formReset">
       <view class="title" class="title">请输入孩子的悠数学账号和密码 </view>
       <view class="section">
-        <input name="account" placeholder="请输入孩子的账号或绑定的手机号" />
+        <input bindinput="countValChange" name="account" placeholder="请输入孩子的账号或绑定的手机号" />
       </view>
       <view class="section">
-        <input name="password" placeholder="请输入密码" password="{{!showPsd}}" />
+        <input bindinput="psdValChange" name="password" placeholder="请输入密码" password="{{!showPsd}}" />
         <view class="imgWrap" bindtap="showPsd">
           <image wx:if="{{!showPsd}}" src="../static/password1.png" />
           <image wx:if="{{showPsd}}" src="../static/password2.png" />
         </view>
       </view>
-      <view class="btn-area">
+      <view class="btn-area" wx-if="{{isSub}}">
         <button formType="submit">关联账号</button>
+      </view>
+      <view class="btn-area notSub" wx-if="{{!isSub}}">
+        <button>关联账号</button>
       </view>
     </form>
   </view>
@@ -29,17 +32,44 @@
     components = {}
 
     data = {
-      showPsd: false
+      showPsd: false,
+      count: '',
+      psd: ''
     }
 
     methods = {
       formSubmit (e) {
+        // 后台交互
         console.log('form发生了submit事件，携带数据为：', e.detail.value)
+        // 弹窗
+        // wepy.showToast({
+        //   title: '成功',
+        //   icon: 'none',
+        //   duration: 2000
+        // })
       },
       showPsd() {
         this.showPsd = !this.showPsd
+      },
+      countValChange(e) {
+        this.count = e.detail.value
+      },
+      psdValChange(e) {
+        this.psd = e.detail.value
       }
     }
+
+    computed = {
+      isSub() {
+        if (this.count && this.psd) {
+          return true
+        } else {
+          return false
+        }
+      }
+    }
+
+    onLoad() {}
   }
 
 </script>
@@ -85,6 +115,14 @@
     }
     .btn-area{
       margin-top: 50rpx;
+      button{
+        color: #ffffff;
+        background: #007AFF;
+      }
+    }
+    .notSub button{
+      background: #cccccc;
+      color: #999999;
     }
   }
   

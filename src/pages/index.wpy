@@ -16,10 +16,14 @@
       </repeat>
     </swiper>
     <!-- 关联结构 -->
-    <view class="btm">
+    <view class="btm" wx:if="{{!isBind}}">
       <view class="txt1">暂未关联孩子账号</view>
       <view class="txt2">关联孩子账号随时了解孩子的学习情况</view>
       <button class="btn" bindtap="toLink" open-type="getUserInfo"> 关联孩子的悠数学账号 </button>
+    </view>
+    <!-- 已关联展示home结构 -->
+     <view class="content" wx:if="{{isBind}}">
+      123456
     </view>
   </view>
 </template>
@@ -32,9 +36,8 @@
     }
     components = {}
 
-    mixins = []
-
     data = {
+      isBind: false,
       imgUrls: [
         'http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg',
         'http://img06.tooopen.com/images/20160818/tooopen_sy_175866434296.jpg',
@@ -60,10 +63,11 @@
     events = {}
 
     onLoad() {
-      // 后台查看是否关联过孩子,关联跳转至首页（home），公众好友绑定，跳转是否是我的孩子（is-my-child带头像和名字）
-      wepy.redirectTo({
-        url: `/pages/is-my-child`
-      })
+      // 后台查看是否关联过孩子,isBind变为true，公众好友绑定，跳转是否是我的孩子（is-my-child带头像和名字）
+      // wepy.redirectTo({
+      //   url: `/pages/is-my-child`
+      // })
+      this.isBind = true
     }
   }
 </script>
@@ -78,6 +82,9 @@
     width:690rpx;
     margin: 30rpx auto;
   }
+
+
+  // 关联结构
   .btm{
     width: 690rpx;
     height: auto;

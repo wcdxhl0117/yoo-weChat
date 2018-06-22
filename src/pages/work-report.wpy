@@ -3,15 +3,15 @@
 </style>
 <template>
   <view class="container">
-    home
+    报告
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  export default class Home extends wepy.page {
+  export default class workReport extends wepy.page {
     config = {
-      navigationBarTitleText: '悠数学-家长'
+      navigationBarTitleText: '作业报告'
     }
     components = {}
 
