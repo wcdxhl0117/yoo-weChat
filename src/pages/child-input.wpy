@@ -1,28 +1,91 @@
 <template>
   <view class="container">
     <form bindsubmit="formSubmit" bindreset="formReset">
-      <text class="title">请输入孩子的悠数学账号和密码 </text>
+      <view class="title" class="title">请输入孩子的悠数学账号和密码 </view>
       <view class="section">
         <input name="account" placeholder="请输入孩子的账号或绑定的手机号" />
       </view>
       <view class="section">
-        <input name="password" placeholder="请输入密码" password="true" />
+        <input name="password" placeholder="请输入密码" password="{{!showPsd}}" />
+        <view class="imgWrap" bindtap="showPsd">
+          <image wx:if="{{!showPsd}}" src="../static/password1.png" />
+          <image wx:if="{{showPsd}}" src="../static/password2.png" />
+        </view>
       </view>
       <view class="btn-area">
-        <button formType="submit">Submit</button>
+        <button formType="submit">关联账号</button>
       </view>
     </form>
   </view>
 </template>
+
 <script>
   import wepy from 'wepy'
 
   export default class ChildInput extends wepy.page {
+    config = {
+      navigationBarTitleText: '关联孩子账号'
+    }
+    components = {}
+
+    data = {
+      showPsd: false
+    }
+
     methods = {
       formSubmit (e) {
         console.log('form发生了submit事件，携带数据为：', e.detail.value)
+      },
+      showPsd() {
+        this.showPsd = !this.showPsd
       }
     }
   }
 
 </script>
+<style lang="less">
+  .container{
+    width: 690rpx;
+    margin: 0 auto;
+    form{
+      width: 100%;
+      height: auto;
+    }
+    .title{
+      margin: 30rpx 0;
+      font-size: 40rpx;
+      font-weight: 900;
+      padding: 0;
+    }
+    .section{
+      height: 90rpx;
+      width: 100%;
+      border-bottom: 1rpx solid #cccccc;
+      margin-top: 20rpx;
+      position: relative;
+      input{
+        height: 100%;
+        line-height: 90rpx;
+      }
+      .imgWrap{
+        width: 48rpx;
+        height: 48rpx;
+        display: black;
+        padding: 15rpx;
+        position: absolute;
+        top: 0;
+        right: 15rpx;
+        z-index: 99;
+        image{
+          width: 48rpx;
+          height: 48rpx;
+        }
+      }
+      
+    }
+    .btn-area{
+      margin-top: 50rpx;
+    }
+  }
+  
+</style>

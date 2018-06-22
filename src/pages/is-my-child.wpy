@@ -46,7 +46,26 @@
     onLoad() {}
   }
 </script>
-<style lang="less">
+<style>
+  .topTip{
+    margin-top: 100rpx;
+    line-height: 60rpx;
+    height: 60rpx;
+    font-size: 40rpx;
+    font-weight: 900;
+  }
+  image{
+    width: 180rpx;
+    height: 180rpx;
+    border-radius: 50%;
+    display: block;
+    margin: 60rpx auto;
+    margin-bottom: 20rpx;
+  }
+  .theName{
+    color: #999999;
+    font-size: 30rpx;
+  }
   .btnCom{
     width: 690rpx;
     font-size: 32rpx;
