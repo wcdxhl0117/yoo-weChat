@@ -25,12 +25,8 @@
 
     events = {}
 
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
-        }
-      })
+    onLoad(option) {
+      console.log(option.id)
     }
   }
 </script>

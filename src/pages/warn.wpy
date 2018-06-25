@@ -25,16 +25,35 @@
       </view>
       <!--非空 -->
       <view class="lisWrap">
-        <view class="time">08:30</view>
-        <view class="lisCon">
+        <view class="time"><text>08:30</text></view>
+        <!-- 作业成绩报警提醒 -->
+        <!-- <view class="lisCon">
           <view class="topHead">作业成绩报警提醒</view>
           <view class="p1">作业名称：05月06日作业</view>
           <view class="p2">正确率：68%</view>
           <view class="p3">答错：2题</view>
           <view class="p4">请及时督促孩子进行错题订正与归因</view>
-          <view class="detail">查看详情 <image src="../static/right-arrow.png" /></view>
+          <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
+        </view> -->
+         <!-- 按时完成作业报警提醒 -->
+        <!-- <view class="lisCon">
+          <view class="topHead">按时完成作业报警提醒</view>
+          <view class="p1">作业名称：05月06日作业</view>
+          <view class="p2">距截止时间：剩余20分钟</view>
+          <view class="p4">请及时督促孩子按时完成作业</view>
+          <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
+        </view> -->
+         <!-- 即时订正报警提醒 -->
+        <view class="lisCon">
+          <view class="topHead">即时订正报警提醒</view>
+          <view class="p1">作业名称：05月06日作业</view>
+          <view class="p2">答错：2题</view>
+          <view class="p3">已订正：0题</view>
+          <view class="p4">请及时督促孩子进行错题订正与归因</view>
+          <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
         </view>
       </view>
+      
       <!-- 设置弹窗 -->
       <view class="setPop">
 
@@ -60,6 +79,12 @@
         console.log('购买vip')
         wepy.switchTab({
           url: `/pages/vip-learn-club`
+        })
+      },
+      toReport(id) {
+        console.log(id)
+        wepy.navigateTo({
+          url: `/pages/work-report?id=` + id
         })
       }
     }
@@ -145,15 +170,46 @@
     }
     .lisWrap{
       .time{
-        width: 174rpx;
+        width: auto;
         height: 36rpx;
         font-size: 24rpx;
-        text-align: center;
         line-height: 36rpx;
-        color: #ffffff;
-        background: #CCCCCC;
         margin: 30rpx auto;
+        margin-bottom: 20rpx;
         border-radius: 4rpx;
+        text-align: center;
+        text{
+          padding: 0 20rpx;
+          margin: 0 auto;
+          color: #ffffff;
+          background: #CCCCCC;
+        }
+      }
+      .lisCon{
+        width: 630rpx;
+        height: auto;
+        margin: 0 auto;
+        padding: 30rpx;
+        background: #ffffff;
+        border-radius: 10rpx;
+        line-height: 48rpx;
+        font-size: 30rpx;
+        .topHead{
+          line-height: 56rpx;
+          font-size: 34rpx;
+          font-weight: 900;
+        }
+        .detail{
+          margin-top: 20rpx;
+          height: 60rpx;
+          line-height: 90rpx;
+          border-top: 1rpx solid #f0f0f0;
+          image{
+            width: 12rpx;
+            height: 22rpx;
+            margin-left: 490rpx;
+          }
+        }
       }
     }
     .setPop{}
