@@ -168,9 +168,9 @@
       if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] === timeNow[2])) {
         return moment(timeTep).format('HH:mm')
       } if (timeGet[0] === timeNow[0]) {
-        return moment(timeTep).format('MM-DD HH:mm')
+        return moment(timeTep).format('MM/DD HH:mm')
       } if (timeGet[0] !== timeNow[0]) {
-        return moment(timeTep).format('YYYY-MM-DD HH:mm')
+        return moment(timeTep).format('YYYY/MM/DD HH:mm')
       }
     }
 

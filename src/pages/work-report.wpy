@@ -9,6 +9,8 @@
 
 <script>
   import wepy from 'wepy'
+  import moment from 'moment'
+  moment().format()
   export default class workReport extends wepy.page {
     config = {
       navigationBarTitleText: '作业报告'
@@ -27,6 +29,27 @@
 
     onLoad(option) {
       console.log(option.id)
+      console.log(this.timeSet())
+    }
+    // 可返回今明天
+    timeSet(t) {
+      // 1529928850000 //26号
+      let timeTep = 1529948850000
+      let timeGet = moment(timeTep).format('YYYY-MM-DD-HH:mm').split('-')
+      let timeNow = moment(moment()).format('YYYY-MM-DD-HH:mm').split('-')
+      // 年月日时同一天，就只展示时间
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] === timeNow[2])) {
+        return '今天' + moment(timeTep).format('HH:mm')
+      }
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] - timeNow[2] === 1)) {
+        return '明天' + moment(timeTep).format('HH:mm')
+      }
+      if (timeGet[0] === timeNow[0]) {
+        return moment(timeTep).format('MM/DD HH:mm')
+      }
+      if (timeGet[0] !== timeNow[0]) {
+        return moment(timeTep).format('YYYY/MM/DD HH:mm')
+      }
     }
   }
 </script>
