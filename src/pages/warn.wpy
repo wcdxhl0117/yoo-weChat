@@ -86,7 +86,6 @@
 <script>
   import wepy from 'wepy'
   import moment from 'moment'
-  moment().format()
   export default class warn extends wepy.page {
     config = {
       navigationBarTitleText: '智能提醒'

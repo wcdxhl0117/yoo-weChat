@@ -1,23 +1,17 @@
-<style lang="less">
-  
-</style>
 <template>
   <view class="container">
-    报告
+    <!-- 没有内容 -->
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import moment from 'moment'
-  moment().format()
   export default class workReport extends wepy.page {
     config = {
       navigationBarTitleText: '作业报告'
     }
     components = {}
-
-    mixins = []
 
     data = {}
 
@@ -31,7 +25,7 @@
       console.log(option.id)
       console.log(this.timeSet())
     }
-    // 可返回今明天0
+    // 可返回今明天
     timeSet(t) {
       // 1529928850000 //26号
       let timeTep = 1529948850000
@@ -53,3 +47,6 @@
     }
   }
 </script>
+<style lang="less">
+  
+</style>
