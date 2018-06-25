@@ -25,7 +25,7 @@
       </view>
       <!--非空 -->
       <view class="lisWrap">
-        <view class="time"><text>08:30</text></view>
+        <view class="time"><text>{{timeSet()}}</text></view>
         <!-- 作业成绩报警提醒 -->
         <!-- <view class="lisCon">
           <view class="topHead">作业成绩报警提醒</view>
@@ -59,17 +59,17 @@
           <view class="tophead">提醒设置</view>
           <view class="con con1">
             <view class="p1">1.当作业正确率低于</view>
-            <view class="p2"><input bindinput="setVal(1)" type="number" placeholder="点击设置" /><view>%</view></view>
+            <view class="p2"><input class="{{red1?'active':''}}" bindinput="setVal(1)" type="number" placeholder="点击设置" /><view>%</view></view>
             <view class="p3">进行报警提醒<br/></view>
           </view>
           <view class="con con2">
             <view class="p1">2.作业截止时间剩余</view>
-            <view class="p2"><input bindinput="setVal(2)" type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p2"><input class="{{red2?'active':''}}" bindinput="setVal(2)" type="number" placeholder="点击设置" /><view>分钟</view></view>
             <view class="p3">还未提交作业，进行报警提醒</view>
           </view>
           <view class="con con3">
             <view class="p1">3.作业批改完成后</view>
-            <view class="p2"><input bindinput="setVal(3)" type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p2"><input class="{{red3?'active':''}}" bindinput="setVal(3)" type="number" placeholder="点击设置" /><view>分钟</view></view>
             <view class="p3">错题未全部订正，进行报警提醒</view>
           </view>
           <view class="btnWrap">
@@ -97,7 +97,10 @@
       setPop: false,
       rightRate: 0,
       timeOver: 0,
-      haveCorrect: 0
+      haveCorrect: 0,
+      red1: false,
+      red2: false,
+      red3: false
     }
 
     methods = {
@@ -123,26 +126,31 @@
         }
       },
       setUp() {
-        console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'))
         this.setPop = true
       },
       closePop() {
         this.setPop = false
       },
       sureSet() {
+        this.red1 = false
+        this.red2 = false
+        this.red3 = false
         if (this.rightRate >= 99 || this.rightRate < 1) {
+          this.red1 = true
           wepy.showToast({
             title: '请输入1~99之间的数字',
             icon: 'none',
             duration: 1500
           })
         } else if (this.timeOver >= 160 || this.timeOver < 1) {
+          this.red2 = true
           wepy.showToast({
             title: '请输入1~160之间的数字',
             icon: 'none',
             duration: 1500
           })
         } else if (this.haveCorrect >= 480 || this.haveCorrect < 1) {
+          this.red3 = true
           wepy.showToast({
             title: '请输入1~480之间的数字',
             icon: 'none',
@@ -151,7 +159,22 @@
         }
       }
     }
+    timeSet(t) {
+      // 1529928850000 //26号
+      let timeTep = t
+      let timeGet = moment(timeTep).format('YYYY-MM-DD-HH:mm').split('-')
+      let timeNow = moment(moment()).format('YYYY-MM-DD-HH:mm').split('-')
+      // 年月日时同一天，就只展示时间
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] === timeNow[2])) {
+        return moment(timeTep).format('HH:mm')
+      } if (timeGet[0] === timeNow[0]) {
+        return moment(timeTep).format('MM-DD HH:mm')
+      } if (timeGet[0] !== timeNow[0]) {
+        return moment(timeTep).format('YYYY-MM-DD HH:mm')
+      }
+    }
 
+    // 后台获取数据后，先循环改变时间格式
     onLoad() {}
   }
 </script>
@@ -334,6 +357,9 @@
               text-align: center;
               float: left;
             }
+            .active{
+              border-color: red;
+            }
           }
           .p3{
             float: left;
@@ -354,7 +380,7 @@
           view{
             flex: 1;
             text-align: center;
-            color: #000;
+            color: #999;
           }
           .cancel{
             border-right: 1rpx solid #f0f0f0;
