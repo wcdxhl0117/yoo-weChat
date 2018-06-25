@@ -1,7 +1,13 @@
 <template>
   <view class="container">
     <!-- 没有内容 -->
+    <view wx:if="{{notHave}}" class="noCon">暂无作业</view>
+    <!-- 存在内容 -->
+    <view wx:if="{{!notHave}}" class="conWrap">
+      123456
+    </view>
   </view>
+  <view></view>
 </template>
 
 <script>
@@ -13,7 +19,9 @@
     }
     components = {}
 
-    data = {}
+    data = {
+      notHave: false
+    }
 
     computed = {}
 
@@ -48,5 +56,15 @@
   }
 </script>
 <style lang="less">
-  
+  .container{
+    height: 100%;
+    border-top: 1rpx solid #f0f0f0;
+  }
+  .noCon{
+    font-size: 36rpx;
+    color: #999999;
+    font-weight: 900;
+    margin-top: 500rpx;
+  }
+
 </style>
