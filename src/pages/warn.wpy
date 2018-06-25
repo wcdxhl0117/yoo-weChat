@@ -17,7 +17,7 @@
       <!-- top -->
       <view class="topBar">
         <view class="left">提醒设置</view>
-        <view class="right">设置</view>
+        <view bindtap="setUp" class="right">设置</view>
       </view>
       <!-- 空 -->
       <view class="kong" wx:if="{{!havePro}}">
@@ -59,22 +59,22 @@
           <view class="tophead">提醒设置</view>
           <view class="con con1">
             <view class="p1">1.当作业正确率低于</view>
-            <view class="p2"><input type="number" placeholder="点击设置" /><view>%</view></view>
+            <view class="p2"><input bindinput="setVal(1)" type="number" placeholder="点击设置" /><view>%</view></view>
             <view class="p3">进行报警提醒<br/></view>
           </view>
           <view class="con con2">
             <view class="p1">2.作业截止时间剩余</view>
-            <view class="p2"><input type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p2"><input bindinput="setVal(2)" type="number" placeholder="点击设置" /><view>分钟</view></view>
             <view class="p3">还未提交作业，进行报警提醒</view>
           </view>
           <view class="con con3">
             <view class="p1">3.作业批改完成后</view>
-            <view class="p2"><input type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p2"><input bindinput="setVal(3)" type="number" placeholder="点击设置" /><view>分钟</view></view>
             <view class="p3">错题未全部订正，进行报警提醒</view>
           </view>
           <view class="btnWrap">
-            <view class="cancel">取消</view>
-            <view>确定</view>
+            <view bindtap="closePop" class="cancel">取消</view>
+            <view bindtap="sureSet" class="sure">确定</view>
           </view>
         </view>
       </view>
@@ -85,6 +85,8 @@
 
 <script>
   import wepy from 'wepy'
+  import moment from 'moment'
+  moment().format()
   export default class warn extends wepy.page {
     config = {
       navigationBarTitleText: '智能提醒'
@@ -92,7 +94,10 @@
     data = {
       vip: true,
       havePro: true,
-      setPop: true
+      setPop: false,
+      rightRate: 0,
+      timeOver: 0,
+      haveCorrect: 0
     }
 
     methods = {
@@ -107,6 +112,43 @@
         wepy.navigateTo({
           url: `/pages/work-report?id=` + id
         })
+      },
+      setVal(num, e) {
+        if (num === '1') {
+          this.rightRate = e.detail.value
+        } else if (num === '2') {
+          this.timeOver = e.detail.value
+        } else if (num === '3') {
+          this.haveCorrect = e.detail.value
+        }
+      },
+      setUp() {
+        console.log(moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'))
+        this.setPop = true
+      },
+      closePop() {
+        this.setPop = false
+      },
+      sureSet() {
+        if (this.rightRate >= 99 || this.rightRate < 1) {
+          wepy.showToast({
+            title: '请输入1~99之间的数字',
+            icon: 'none',
+            duration: 1500
+          })
+        } else if (this.timeOver >= 160 || this.timeOver < 1) {
+          wepy.showToast({
+            title: '请输入1~160之间的数字',
+            icon: 'none',
+            duration: 1500
+          })
+        } else if (this.haveCorrect >= 480 || this.haveCorrect < 1) {
+          wepy.showToast({
+            title: '请输入1~480之间的数字',
+            icon: 'none',
+            duration: 1500
+          })
+        }
       }
     }
 
@@ -316,6 +358,9 @@
           }
           .cancel{
             border-right: 1rpx solid #f0f0f0;
+          }
+          .sure{
+            color: #007AFF;
           }
         }
       }
