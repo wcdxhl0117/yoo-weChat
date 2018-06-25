@@ -53,10 +53,30 @@
           <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
         </view>
       </view>
-      
       <!-- 设置弹窗 -->
-      <view class="setPop">
-
+      <view class="setPop" wx:if="{{setPop}}">
+        <view class="popCon">
+          <view class="tophead">提醒设置</view>
+          <view class="con con1">
+            <view class="p1">1.当作业正确率低于</view>
+            <view class="p2"><input type="number" placeholder="点击设置" /><view>%</view></view>
+            <view class="p3">进行报警提醒<br/></view>
+          </view>
+          <view class="con con2">
+            <view class="p1">2.作业截止时间剩余</view>
+            <view class="p2"><input type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p3">还未提交作业，进行报警提醒</view>
+          </view>
+          <view class="con con3">
+            <view class="p1">3.作业批改完成后</view>
+            <view class="p2"><input type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p3">错题未全部订正，进行报警提醒</view>
+          </view>
+          <view class="btnWrap">
+            <view class="cancel">取消</view>
+            <view>确定</view>
+          </view>
+        </view>
       </view>
     </view>
     <view></view>
@@ -71,7 +91,8 @@
     }
     data = {
       vip: true,
-      havePro: true
+      havePro: true,
+      setPop: true
     }
 
     methods = {
@@ -212,6 +233,92 @@
         }
       }
     }
-    .setPop{}
+    .setPop{
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      .popCon{
+        width: 560rpx;
+        height: 646rpx;
+        padding: 0 20rpx;
+        background: #ffffff;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -343rpx;
+        margin-left: -300rpx;
+        border-radius: 8rpx;
+        .tophead{
+          padding-top: 30rpx;
+          height: 100rpx;
+          line-height: 100rpx;
+          font-size:  36rpx;
+          font-weight: 900;
+          text-align: center;
+        }
+        .con{
+          padding: 0 20rpx;
+          height: auto;
+          overflow: hidden;
+          line-height: 50rpx;
+          font-size: 30rpx;
+          margin-bottom: 30rpx;
+          .p1{
+            float: left;
+            width: 260rpx;
+            line-height: 50rpx;
+          }
+          .p2{
+            float: right;
+            width: 240rpx;
+            line-height: 50rpx;
+            height: 50rpx;
+            view{
+              display: inline-block;
+              height: 50rpx;
+              line-height: 60rpx;
+              float: left;
+            }
+            input{
+              display: inline-block;
+              width: 150rpx;
+              height: 50rpx;
+              line-height: 50rpx;
+              border: 1rpx solid #f0f0f0;
+              margin: 0 10rpx;
+              text-align: center;
+              float: left;
+            }
+          }
+          .p3{
+            float: left;
+            width: 100%;
+            line-height: 60rpx;
+          }
+        }
+        .btnWrap{
+          width: 100%;
+          height: 100rpx;
+          display: flex;
+          line-height: 100rpx;
+          font-size: 34rpx;
+          border-top: 1rpx solid #f0f0f0;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          view{
+            flex: 1;
+            text-align: center;
+            color: #000;
+          }
+          .cancel{
+            border-right: 1rpx solid #f0f0f0;
+          }
+        }
+      }
+    }
   }
 </style>
