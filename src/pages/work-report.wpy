@@ -31,7 +31,7 @@
       console.log(option.id)
       console.log(this.timeSet())
     }
-    // 可返回今明天
+    // 可返回今明天0
     timeSet(t) {
       // 1529928850000 //26号
       let timeTep = 1529948850000
