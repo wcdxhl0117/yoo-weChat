@@ -1,9 +1,35 @@
-<style lang="less">
-  
-</style>
 <template>
-  <view class="container">
-    我
+  <view id="user">
+    <view class="userInfo {{isBinding?'binding':'unbinding'}}" @tap="showToast">
+      <view class="info">
+        <view class="name" wx:if="{{isBinding}}">{{name}}</view>
+        <view class="name" wx:if="{{!isBinding}}">未绑定悠数学账号</view>
+        <view class="account" wx:if="{{isBinding}}">孩子账号：xyzx同学甲</view>
+        <view class="describe" wx:if="{{isBinding && !isJoin}}">未加入VIP培优计划</view>
+        <view class="describe" wx:if="{{isBinding && isJoin}}">已加入VIP培优计划：2018-12-06 到期</view>
+      </view>
+      <view class="viaWrap">
+        <image class="viaImg {{isVip?'vip':''}}" src="{{baseViaSrc}}"/>
+        <image class="vipImg" wx:if="{{isVip}}" src="{{vipSrc}}"/>
+      </view>
+    </view>
+    <button class="item" open-type="contact">
+      <view class="label">微信客服</view>
+      <image class="arrowImg" src="{{baseArrowSrc}}"/>
+    </button>
+    <view class="item" @tap="showCallActionSheet">
+      <view class="label">电话客服</view>
+      <image class="arrowImg" src="{{baseArrowSrc}}"/>
+    </view>
+    <view class="item" wx:if="{{!isBinding}}">
+      <view class="label">绑定孩子悠数学账号</view>
+      <image class="arrowImg" src="{{baseArrowSrc}}"/>
+    </view>
+    <view class="item" wx:if="{{isBinding}}" @tap="showUnbindingModal">
+      <view class="label">解除绑定</view>
+      <image class="arrowImg" src="{{baseArrowSrc}}"/>
+    </view>
+    <view class="mask"></view>
   </view>
 </template>
 
@@ -13,18 +39,188 @@
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
-    components = {}
 
     mixins = []
 
-    data = {}
+    data = {
+      title: '确定解除绑定？',
+      content: '解除绑定后公众号中将不再接收作业提醒推送',
+      isBinding: true,
+      isJoin: true,
+      isVip: false,
+      name: '同学甲的家长',
+      baseViaSrc: '../static/baseVia.png',
+      baseArrowSrc: '../static/base-right-arrow.png',
+      vipSrc: '../static/vip.png'
+    }
 
     computed = {}
 
-    methods = {}
+    methods = {
+      showUnbindingModal () {
+        wx.showModal({
+          title: '确定解除绑定？',
+          content: '解除绑定后公众号中将不再接收作业提醒推送',
+          confirmColor: '#007AFF',
+          success (res) {
+            if (res.confirm) {
+              console.log('用户点击确认')
+            } else if (res.cancel) {
+              console.log('用户点击取消')
+            }
+          }
+        })
+      },
+      showToast () {
+        wx.showToast({
+          title: '成功',
+          icon: 'success',
+          image: '../static/baseVia.png',
+          duration: 2000
+        })
+      },
+      showCallActionSheet () {
+        let that = this
+        wx.showActionSheet({
+          itemList: ['拨打 400-828-6506'],
+          itemColor: '#007AFF',
+          success (res) {
+            console.dir(res)
+            if (res.tapIndex === 0) {
+            } else if (res.tapIndex === 1) {
+              that._callService()
+            }
+          }
+        })
+      }
+    }
+    // 拨打客服电话
+    _callService () {
+      wx.makePhoneCall({
+        phoneNumber: '123456789' // 仅为示例，并非真实的电话号码
+      })
+    }
 
     events = {}
 
-    onLoad() {}
+    onLoad () {}
   }
 </script>
+<style lang="scss" scoped>
+#user{
+  display: flex;
+  flex-direction: column;
+  // .mask{
+  //   position: fixed;
+  //   top: 0;
+  //   left: 0;
+  //   right: 0;
+  //   bottom: 0;
+  //   background: #000;
+  //   opacity: 0.6;
+  // }
+  .userInfo{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    min-height: 230rpx;
+    margin: 30rpx 30rpx 10rpx;
+    border-radius: 10rpx;
+    padding: 40rpx;
+    box-sizing: border-box;
+    &.binding{
+      background: #007AFF;
+      .info{
+        .name{
+          color: #FFFFFF;
+        }
+        .account{
+          color: #FFFFFF;
+        }
+        .describe{
+          color: #64AFFF;
+        }
+      }
+    }
+    &.unbinding{
+      background: #F6F6F6;
+      .info{
+        .name{
+          color: #000000;
+        }
+      }
+    }
+    .info{
+      display: flex;
+      flex: 0 1 auto;
+      flex-direction: column;
+      .name{
+        font-weight: bold;
+        font-size: 40rpx;
+        letter-spacing: 1rpx;
+      }
+      .account{
+        font-weight: bold;
+        font-size: 30rpx;
+        letter-spacing: 1rpx;
+        margin: 20rpx 0 25rpx;
+      }
+      .describe{
+        font-weight: bold;
+        font-size: 30rpx;
+        letter-spacing: 1rpx;
+        white-space: nowrap;
+      }
+    }
+    .viaWrap{
+      position: absolute;
+      right: 40rpx;
+      display: flex;
+      flex-direction: column;
+      flex:0 0 auto;
+      align-items: center;
+      .viaImg{
+        display: block;
+        width: 100rpx;
+        height: 100rpx;
+        border-radius: 100%;
+        &.vip{
+          border: 4rpx solid #ffbc01;
+        }
+      }
+      .vipImg{
+        display: block;
+        width: 45rpx;
+        height: 24rpx;
+        margin-top: -14rpx; 
+      }
+    }
+  }
+  .item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40rpx 32rpx 40rpx 0;
+    margin: 0 0 0 30rpx;
+    outline: none;
+    line-height: 30rpx;
+    border: 0 solid #fff;
+    color: #000;
+    border-radius: 0;
+    border-bottom: 1rpx solid #CCCCCC;
+    background: #fff;
+    .label{
+      font-weight: bold;
+      font-size: 40rpx;
+      letter-spacing: 1rpx;
+    }
+    .arrowImg{
+      width: 14rpx;
+      height: 24rpx;
+    }
+  }
+  button::after{
+    border:none;
+  }
+}
+</style>

@@ -1,0 +1,311 @@
+<template>
+  <view class="container">
+    <view class="zyInfo">作业信息</view>
+    <!-- 作业信息 -->
+    <view class="Tinfo">
+      <view class="tg">1206作业-函数的基本性质函数的基本 性质函数的基本性质</view>
+      <view class="tDetail">
+        <view>共1题</view>
+        <view>限时5分钟</view>
+        <view>难度简单</view>
+      </view>
+      <!-- pressBar -->
+      <view class="pressBar">
+        <view class="left base">
+          <view class="circle"></view>
+          <view class="line"></view>
+        </view>
+        <view class="right base">
+          <!-- <view class="line"></view>
+          <view class="circle"></view> -->
+          <!-- 未提交，线和圆为灰色 -->
+          <view class="line grey"></view>
+          <view class="circle grey"></view>
+          <!-- 未做答，圆为红色 -->
+          <!-- <view class="line"></view>
+          <view class="circle red"></view> -->
+        </view>
+      </view>
+      <view class="barTitle">
+        <view>已布置</view>
+        <!-- 未提交 -->
+        <view class="status">暂未</view>
+        <!-- 未做答 -->
+        <!-- <view class="noDa">未做答</view> -->
+        <!-- 已提交 -->
+        <!-- <view>已提交</view> -->
+      </view>
+      <view class="timeWrap">
+        <view>07-06 14:30</view>
+        <!-- <view>07-06 14:30</view> -->
+        <!-- 未提交 -->
+        <view>提交作业</view>
+      </view>
+    </view>
+    <!-- 作业状态提示 -->
+    <view class="prossTip">
+      <!-- 批改结果没出来展示tip -->
+      <view wx:if="{{1>2}}" class="tip">
+        <!-- 未提交 -->
+        <!-- <text>孩子暂未提交作业\n请家长及时督促孩子尽快完成</text> -->
+        <!-- 未做答 -->
+        <!-- <text>此份作业孩子没有做\n可在学生端通过错题订正的方式进行补交</text> -->
+        <!-- 已提交，等待批改 -->
+        <!-- <view>
+          <text>作业正在排队批改中预计15:40批改完成</text>
+          <view @tap="toBuyVip" class="btn">加入VIP培优计划，专享极速批改通道</view>
+          <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text>点击关注公众号</text></view>
+        </view> -->
+        <!-- 已提交，正在批改 -->
+        <view>
+          <text>作业正在优先批改中</text>
+           <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text>点击关注公众号</text></view>
+        </view>
+      </view>
+      <!-- 批改结果出来就展示批改结果 -->
+      <view class="result">
+        <view class="topT">作业情况</view>
+        <view class="rightRate">
+          <view class="left base">
+            <!-- 'pre_60':(correctRate<60),
+            'pre_70':(correctRate<70&&correctRate>=60),
+            'pre_85':(correctRate>=70&&correctRate<85),
+            'pre_100':(correctRate<100&&correctRate>=85)}" -->
+            <view wx:if="{{1>0}}" class="rate pre_60">56%</view>
+            <view wx:if="{{1>2}}" class="rate pre_70">56%</view>
+            <view wx:if="{{1>2}}" class="rate pre_85">56%</view>
+            <view wx:if="{{1>2}}" class="rate pre_100">56%</view>
+            <view class="Title">正确率</view>
+          </view>
+          <view class="right base">
+            <view class="useTime">18'26''</view>
+            <view class="Title">用时</view>
+          </view>
+        </view>
+        <view class="detailJ"><text space="emsp">答对：4题 答错：1题 半对：0题</text></view>
+        <!-- 有错题展示 -->
+        <view class="btmTip">
+          <view class="left">错题订正：0/1</view>
+          <!-- 有题需要订正 -->
+          <!-- <view class="right">请及时督促孩子进行错题订正</view> -->
+          <!-- 全部订正后 -->
+          <view class="coplate">订正后,
+            <text>正确率100%</text>
+            <text>正确率100%</text>
+            <text>正确率100%</text>
+            <text>正确率100%</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+  <view class=""></view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class reportDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: '作业详情'
+    }
+    components = {}
+
+    data = {
+      status: 'defaut' // 判断此份作业当前状态（未提交，未做答，（已提交-待批改-批改中-已批改）=>已提交，待批改，批改中，已批改）
+    }
+
+    computed = {}
+
+    methods = {
+      toBuyVip() {
+        console.log('购买vip')
+        wepy.switchTab({
+          url: `/pages/vip-learn-club`
+        })
+      }
+    }
+
+    events = {}
+
+    onLoad() {}
+  }
+</script>
+<style lang="less">
+  .container{
+    font-size: 30rpx;
+  }
+  .zyInfo{
+    width:690rpx;
+    height: 120rpx;
+    line-height: 120rpx;
+    margin: 0 auto;
+    font-size:40rpx;
+    color:rgba(51,51,51,1);
+  }
+  .Tinfo{
+    width: 630rpx;
+    height: auto;
+    padding: 30rpx;
+    margin: 0 auto;
+    background: #F6F6F6;
+    border-radius:10px;
+    .tg{
+      font-size:34rpx;
+      font-weight: 600;
+      color:#333333;
+      line-height:48rpx;
+    }
+    .tDetail{
+      width: 100%;
+      height: 90rpx;
+      line-height: 90rpx;
+      color: #999;
+      display: flex;
+      padding-bottom: 20rpx;
+      view{
+        padding-right: 40rpx;
+      }
+    }
+    .pressBar{
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      .base{
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        .circle{
+          width: 24rpx;
+          height: 24rpx;
+          border-radius: 50%;
+          background: #007AFF;
+        }
+        .line{
+          margin-top: 10rpx;
+          height: 5rpx;
+          width: 292rpx;
+          background: #007AFF;
+        }
+        .grey{
+          background: #999999;
+        }
+        .red{
+          background: #F14B40;
+        }
+      }
+      
+    }
+    .barTitle{
+      width: 100%;
+      display: flex;
+      padding-top: 10rpx;
+      justify-content: space-between;
+      line-height: 40rpx;
+      font-size: 24rpx;
+      font-weight: 600;
+      color: #007AFF;
+      .status{
+        color: #000000;
+      }
+      .noDa{
+        color: #F14B40;
+      }
+    }
+    .timeWrap{
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      line-height: 30rpx;
+      font-size: 24rpx;
+      color: #999999;
+    }
+
+  }
+  .prossTip{
+    height: auto;
+    width: 690rpx;
+    margin: 0 auto;
+    .tip{
+      font-size: 36rpx;
+      padding: 50rpx 0;
+      padding-top: 80rpx;
+      color: #999999;
+      text-align: center;
+      .btn{
+        font-size: 30rpx;
+        color: #ffffff;
+        background: #FFBB00;
+        height: 90rpx;
+        line-height: 90rpx;
+        margin-top: 50rpx;
+        margin-bottom: 30rpx;
+        border-radius: 10rpx;
+        text-align: center;
+      }
+      .weChatTip{
+        font-size: 30rpx;
+        color: #999999;
+        line-height: 36rpx;
+        padding-top: 15rpx;
+        text-align: left;
+        text{
+          color: #007AFF;
+        }
+      }
+    }
+    .result{
+      .topT{
+        padding: 30rpx 0 50rpx 0;
+        font-size: 40rpx;
+        color: #333333;
+        font-weight: 900;
+      }
+      .rightRate{
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 50rpx;
+        .base{
+          color: #999999;
+          .rate{
+            font-size: 40rpx;
+          }
+          .Title{
+            font-size: 30rpx;
+            color: #999;
+            text-align: center;
+          }
+          .useTime{
+            font-size: 40rpx;
+            color: #007AFF; 
+          }
+          .pre_60{
+            color: #F14B40;
+          }
+          .pre_70{
+            color: #F8C438;
+          }
+          .pre_85{
+            color: #7DCA60;
+          }
+          .pre_100{
+            color: #00BB9D;
+          }
+        }
+      }
+      .detailJ{
+        margin-bottom: 50rpx;
+      }
+      .btmTip{
+        margin-bottom: 50rpx;
+        display: flex;
+        justify-content: space-between;
+        .right{
+          color: #999;
+        }
+      }
+
+    }
+  }
+</style>

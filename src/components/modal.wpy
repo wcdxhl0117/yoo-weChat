@@ -1,0 +1,78 @@
+<template>
+  <view id="modal">
+    <view class="modalWrap">
+      <slot name="title">
+        <view class="title">{{title}}</view>
+      </slot>
+      <slot name="content">
+        <view class="content">{{content}}</view>
+      </slot>
+      <slot name="footer">
+        <view class="footer">
+          <view class="cancel" bind:tap="cancel">取消</view>
+          <view class="confirm" bind:tap="confirm">确定</view>
+        </view>
+      </slot>
+    </view>
+    <view class="mask"></view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class modal extends wepy.component {
+    config = {
+      navigationBarTitleText: '悠数学-家长'
+    }
+
+    props = {
+      title: String,
+      content: String
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {
+
+    }
+
+    computed = {}
+
+    methods = {}
+
+    cancel () {
+      console.log('on-cancel')
+      this.$emit('on-cancel')
+    }
+
+    confirm () {
+      console.log('on-confirm')
+      this.$emit('on-confirm')
+    }
+
+    events = {}
+
+    onLoad () {
+
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#modal{
+  .mask{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    opacity: 0.6;
+  }
+  .modalWrap{
+    z-index: 1;
+    background: #fff;
+  }
+}
+</style>

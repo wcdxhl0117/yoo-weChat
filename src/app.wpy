@@ -22,9 +22,10 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/report-detail',
       'pages/work-report',
-      'pages/warn',
       'pages/index',
+      'pages/warn',
       'pages/child-input',
       'pages/vip-learn-club',
       'pages/user'
@@ -36,20 +37,21 @@ export default class extends wepy.app {
       navigationBarTextStyle: 'black'
     },
     tabBar: {
+      selectedColor: '#007AFF',
       list: [{
         pagePath: 'pages/index',
-        iconPath: 'static/workbook.png',
-        selectedIconPath: 'static/workbook.png',
+        iconPath: 'static/icon-home.png',
+        selectedIconPath: 'static/icon-home-selected.png',
         text: '首页'
       }, {
         pagePath: 'pages/vip-learn-club',
-        iconPath: 'static/workbook.png',
-        selectedIconPath: 'static/workbook.png',
+        iconPath: 'static/icon-vip.png',
+        selectedIconPath: 'static/icon-vip-selected.png',
         text: 'VIP培优'
       }, {
         pagePath: 'pages/user',
-        iconPath: 'static/workbook.png',
-        selectedIconPath: 'static/workbook.png',
+        iconPath: 'static/icon-mine.png',
+        selectedIconPath: 'static/icon-mine-selected.png',
         text: '我'
       }]
     }

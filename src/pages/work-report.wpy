@@ -4,7 +4,49 @@
     <view wx:if="{{notHave}}" class="noCon">暂无作业</view>
     <!-- 存在内容 -->
     <view wx:if="{{!notHave}}" class="conWrap">
-      123456
+      <!-- 待完成作业 -->
+      <view class="notCompleted">
+        <view class="headTitle">待完成的作业(2)</view>
+        <!-- 循环结构 -->
+        <view class="lis">
+          <view class="top">
+            <text class="left">作业中</text>
+            <text class="right">共9题 • 07/05 10:00 - 07/06 09:59</text>
+          </view>
+          <view class="theName">学会从三个方向看物体的形状</view>
+          <view class="sum">0/9 题已做</view>
+        </view>
+      </view>
+      <view class="kong"></view>
+      <!-- 已完成作业 -->
+      <view class="notCompleted">
+        <view class="headTitle">已完成作业(2)</view>
+        <!-- 循环结构 -->
+        <view class="lis">
+          <view class="top">
+            <view>
+              <text class="left">已截止</text>
+              <text class="right">共9题 • 07/05 10:00 - 07/06 09:59</text>
+            </view>
+            <view class="dai">待批改</view>
+          </view>
+          <view class="theName">学会从三个方向看物体的形状</view>
+          <view class="btm">
+            <!-- 没正确率 -->
+            <!-- "{'nohave':(correctRate=='--'),
+            'pre_60':(correctRate<60),
+            'pre_70':(correctRate<70&&correctRate>=60),
+            'pre_85':(correctRate>=70&&correctRate<85),
+            'pre_100':(correctRate<100&&correctRate>=85)}" -->
+            <view wx:if="{{1>2}}" class="noRate">-- 正确率</view>
+            <view wx:if="{{1>2}}"><view class="pre_60">44%</view> <view>正确率</view></view>
+            <view wx:if="{{1>0}}"><view class="pre_70">71%</view> 正确率</view>
+            <view wx:if="{{1>2}}"><view class="pre_85">86%</view> 正确率</view>
+            <view wx:if="{{1>2}}"><view class="pre_100">44%</view> 正确率</view>
+            <view>3题待订正</view>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
   <view></view>
@@ -59,12 +101,99 @@
   .container{
     height: 100%;
     border-top: 1rpx solid #f0f0f0;
+    font-size: 30rpx;
   }
   .noCon{
     font-size: 36rpx;
     color: #999999;
     font-weight: 900;
     margin-top: 500rpx;
+  }
+  .conWrap{
+    width: 100%;
+    height: auto;
+    padding: 20rpx 0;
+    .headTitle{
+      margin-top: 30rpx;
+      font-size: 40rpx;
+      color: #333333;
+      font-weight: 900;
+      padding-left: 30rpx;
+    }
+    .lis{
+      height: auto;
+      width: 690rpx;
+      margin: 0 auto;
+      padding: 25rpx 0;
+      border-bottom: 1rpx solid #f0f0f0;
+      .top{
+        width: 100%;
+        font-size: 24rpx;
+        line-height: 60rpx;
+        color: #999999;
+        display: flex;
+        justify-content: space-between;
+        .left{
+          display: inline-block;
+          width: 80rpx;
+          height: 32rpx;
+          text-align: center;
+          line-height: 32rpx;
+          color: #ffffff;
+          background: #7fc865;
+          padding: 4rpx;
+          margin-right: 10rpx;
+        }
+        .dai{
+          color: red;
+          font-size: 24rpx;
+        }
+      }
+      .theName{
+        font-size: 34rpx;
+        color: #333333;
+        font-weight: 600;
+        line-height: 60rpx;
+      }
+      .sum{
+        font-size: 30rpx;
+        color: #333333;
+        line-height: 60rpx;
+      }
+      .btm{
+        display: flex;
+        justify-content: space-between;
+        font-size: 30rpx;
+        color: #333333;
+        line-height: 60rpx;
+        view{
+          display: flex;
+          .pre_60{
+            color: #F14B40;
+            padding-right: 10rpx;
+          }
+          .pre_70{
+            color: #F8C438;
+            padding-right: 10rpx;
+          }
+          .pre_85{
+            color: #7DCA60;
+            padding-right: 10rpx;
+          }
+          .pre_100{
+            color: #00BB9D;
+            padding-right: 10rpx;
+          }
+        }
+      }
+    }
+    .lis:last-child{
+      border: none;
+    }
+    .kong{
+      height: 20rpx;
+      background: #f0f0f0;
+    }
   }
 
 </style>

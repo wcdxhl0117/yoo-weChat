@@ -79,7 +79,6 @@
         </view>
       </view>
     </view>
-    <view></view>
   </view>
 </template>
 
@@ -332,7 +331,7 @@
           margin-bottom: 30rpx;
           .p1{
             float: left;
-            width: 260rpx;
+            width: 274rpx;
             line-height: 50rpx;
           }
           .p2{

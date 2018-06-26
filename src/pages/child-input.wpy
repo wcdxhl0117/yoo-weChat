@@ -1,7 +1,7 @@
 <template>
   <view class="container">
     <form bindsubmit="formSubmit" bindreset="formReset">
-      <view class="title" class="title">请输入孩子的悠数学账号和密码 </view>
+      <view class="title">请输入孩子的悠数学账号和密码 </view>
       <view class="section">
         <input bindinput="countValChange" name="account" placeholder="请输入孩子的账号或绑定的手机号" />
       </view>
