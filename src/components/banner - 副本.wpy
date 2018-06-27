@@ -1,8 +1,10 @@
+<style lang="less">
+  
+</style>
 <template>
   <view class="container">
     123456
   </view>
-  <view class=""></view>
 </template>
 
 <script>
@@ -32,6 +34,3 @@
     }
   }
 </script>
-<style lang="less">
-  
-</style>

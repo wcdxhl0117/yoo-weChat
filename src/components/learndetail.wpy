@@ -1,0 +1,293 @@
+<template>
+  <view class="learndetail {{active?'active':''}}">
+    <view class="detailContainer {{scroll?'scroll':''}}">
+      <view class="headerWrap">
+        <view class="title">{{date}}</view>
+        <image class="scrollImg {{scroll?'scroll':''}}" src="../static/black-arrow.png" @tap="click" wx:if="{{active}}"/>
+      </view>
+      <view class="listWrap" wx:if="{{scroll}}">
+        <view class="list" wx:for="{{list}}" wx:key="listIdx" wx:for-index="listIdx" wx:for-item="listItem">
+          <view class="hourTimeHeader">
+            <image class="hourTimeImg" src="../static/baseClock.png" wx:if="{{!active}}"/>
+            <image class="hourTimeImg" src="../static/clock.png" wx:if="{{active}}"/>
+            <view class="hourTime">{{listItem.hourTime}}</view>
+          </view>
+          <view class="hourTimeContent" wx:for="{{listItem.list}}" wx:key="contentIdx" wx:for-index="contentIdx" wx:for-item="contentItem">
+            <view class="detailTimeWrap" wx:for="{{contentItem}}" wx:key="detailIdx" wx:for-index="detailIdx" wx:for-item="detailItem">
+              <view class="detailTime">{{detailItem.time}}</view>
+              <image class="detailTimeImg" src="../static/exercise.png" wx:if="{{detailItem.type=='exercise'}}"/>
+              <image class="detailTimeImg" src="../static/homework.png" wx:if="{{detailItem.type=='homework'}}"/>
+              <image class="detailTimeImg" src="../static/complete.png" wx:if="{{detailItem.type=='complete'}}"/>
+              <image class="detailTimeImg" src="../static/revisal.png" wx:if="{{detailItem.type=='revisal'}}"/>
+              <image class="detailTimeImg" src="../static/exit.png" wx:if="{{detailItem.type=='exit'}}"/>
+              <view class="titleWrap">
+                <view class="title">{{detailItem.title}}</view>
+                <view class="subTitle" wx:if="{{detailItem.subTitle}}">{{detailItem.subTitle}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class learndetail extends wepy.component {
+    components = {}
+
+    mixins = []
+
+    data = {
+
+    }
+
+    props = {
+      index: String,
+      scroll: {
+        type: Boolean,
+        default: false
+      },
+      active: {
+        type: Boolean,
+        default: false
+      },
+      date: String,
+      hourTime: String,
+      list: {
+        type: Array,
+        default: []
+      }
+    }
+
+    // watch = {
+    //   scroll (val) {
+    //     console.log(val)
+    //   }
+    // }
+
+    computed = {}
+
+    methods = {
+      click () {
+        this.$emit('on-click', this.index)
+      }
+    }
+
+    events = {}
+
+    onLoad () {
+
+    }
+  }
+// date: '06-30（星期三）',
+// hourTime: '21:00',
+// list: [
+//   {
+//     hourTime: '21:00',
+//     list: [
+//       [{
+//         time: '21:30',
+//         type: 'exercise', // exercise homework complete revisal exit
+//         title: '开始自主练习「智能出卷」',
+//         subTitle: ''
+//       },
+//       {
+//         time: '21:33',
+//         type: 'exit',
+//         title: '退出自主练习',
+//         subTitle: '用时8分3秒；完成5道题目练习'
+//       }]
+//     ]
+//   },
+//   {
+//     hourTime: '20:00',
+//     list: [
+//       [{
+//         time: '20:10',
+//         type: 'exercise', // exercise homework complete revisal exit
+//         title: '开始自主练习「智能出卷」',
+//         subTitle: ''
+//       },
+//       {
+//         time: '20:16',
+//         type: 'exit',
+//         title: '退出自主练习',
+//         subTitle: '用时8分3秒；完成5道题目练习'
+//       }],
+//       [{
+//         time: '20:33',
+//         type: 'exercise', // exercise homework complete revisal exit
+//         title: '开始自主练习「智能出卷」',
+//         subTitle: ''
+//       },
+//       {
+//         time: '20:45',
+//         type: 'complete',
+//         title: '提交作业',
+//         subTitle: '用时8分3秒；完成5道题目练习'
+//       }]
+//     ]
+//   }
+// ]
+</script>
+<style lang="scss" scoped>
+.learndetail{
+  display: flex;
+  flex-direction: column;
+  &.active{
+    // border-bottom: 1rpx solid #CCCCCC;
+    padding: 0 0 0 30rpx;
+    .detailContainer{
+      // padding: 0 0 0 30rpx;
+      border-bottom: 2rpx solid #CCCCCC;
+      &.scroll{
+        padding-bottom: 40rpx;
+      }
+      .headerWrap + .list{
+        .hourTimeHeader{
+          margin: 0;
+        }
+      }
+      // .list{
+      //   &:last-child{
+      //     .hourTimeContent{
+      //       &:last-child{
+      //         margin-bottom: 40rpx;
+      //         border-bottom: 1rpx solid #CCCCCC;
+      //       }
+      //     }
+      //   }
+      // }
+      .headerWrap{
+        height: 100rpx;
+        .title{
+          color: #000000;
+        }
+      }
+      .hourTimeHeader{
+        .hourTime{
+          color: #007AFF;
+          background: #b3d7ff;
+        }
+      }
+      .hourTimeContent{
+        margin-right: 30rpx;
+        .detailTimeWrap{
+          .detailTime{
+            color: #000000;
+          }
+          .titleWrap{
+            .title{
+              color: #333333;
+            }
+          }
+        }
+      }
+    }
+  }
+  .headerWrap{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .title{
+      font-weight: bold;
+      font-size: 40rpx;
+      color: #AAAAAA;
+    }
+    .scrollImg{
+      display: inline-block;
+      width: 37rpx;
+      height: 21rpx;
+      padding: 31.5rpx 28rpx;
+      transition:  transform 0.2s;
+      &.scroll{
+        transform: rotate(180deg);
+      }
+      // margin-right: 28rpx;
+    }
+  }
+  .hourTimeHeader{
+    margin: 30rpx 0 0 0;
+    display: flex;
+    align-items: center;
+    height: 40rpx;
+    .hourTimeImg{
+      display: inline-block;
+      width: 40rpx;
+      height: 40rpx;
+      z-index: 2;
+      position: relative;
+    }
+    .hourTime{
+      display: flex;
+      align-items: center;
+      color: #AAAAAA;
+      background: #e5e5e5;
+      font-weight: bold;
+      font-size: 30rpx;
+      height: 40rpx;
+      padding: 0 30rpx 0 60rpx;
+      border-radius: 40rpx;
+      margin-left: -40rpx;
+    }
+  }
+  .hourTimeContent{
+    margin: 20rpx 0 0;
+    display: flex;
+    flex-direction: column;
+    background: #f6f6f6;
+    border-radius: 10rpx;
+    .detailTimeWrap{
+      margin: 40rpx 0 24rpx;
+      display: flex;
+      align-items: center;
+      position: relative;
+      &:nth-child(n+2){
+        margin: 24rpx 0 24rpx;
+        &::after{
+          align-self: flex-start;
+          content: "";
+          position: absolute;
+          width: 4rpx;
+          height: 52rpx;
+          left: 176rpx;
+          top: -50rpx;
+          background: #cccccc;
+        }
+      }
+      .detailTime{
+        margin: 0 0 0 30rpx;
+        color: #AAAAAA;
+        font-weight: bold;
+        font-size: 30rpx;
+      }
+      .detailTimeImg{
+        margin: 0 0 0 30rpx;
+        flex-shrink: 0;
+        display: inline-block;
+        width: 90rpx;
+        height: 90rpx;
+        border-radius: 50%;
+      }
+      .titleWrap{
+        margin: 0 0 0 30rpx;
+        display: flex;
+        flex-direction: column;
+        .title{
+          font-weight: bold;
+          font-size: 30rpx;
+          line-height: 40rpx;
+          color: #AAAAAA;
+        }
+        .subTitle{
+          font-size: 24rpx;
+          line-height: 40rpx;
+          color: #AAAAAA;
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,122 @@
+<template>
+  <view class="container">
+    <!-- 柱形图 -->
+    <view class="chart">
+      <repeat for="{{charts}}" key="index" index="index" item="item">
+        <view class="lis">
+          <view class="rs"><text>{{item.title}}\n{{item.num}}人</text></view>
+          <view class="zhu" style="{{charts[index].sty}}"></view>
+        </view>
+       </repeat>
+    </view>
+    <!-- 列表 -->
+    <view class="rankWrap">
+      <!-- 我的孩子 -->
+      <view class="theLis">
+        
+      </view>
+    </view>
+  </view>
+
+  <view class=""></view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  // 返回数组最大值
+  // var n = Math.max(10, 5, 20, 5, 5)
+  // console.log(n)
+  export default class honorRank extends wepy.page {
+    config = {
+      navigationBarTitleText: '光荣榜'
+    }
+    components = {}
+
+    mixins = []
+
+    data = {
+      // 算各个分数段的柱形图高度（240*（分数段人数 / 人数最分数段人数））eg:优秀：10，良好：5，及格：20，不及格：5，未提交：5--->[10, 5, 20, 5, 5]
+      yx: {h: 240 * (10 / 20), num: 10},
+      lh: {h: 240 * (5 / 20), num: 5},
+      jg: {h: 240 * (20 / 20), num: 20},
+      bjg: {h: 240 * (5 / 20), num: 8},
+      wtj: {h: 240 * (5 / 20), num: 7}
+    }
+
+    computed = {
+      charts() {
+        return [
+          {
+            sty: 'height: ' + this.yx.h + 'rpx; width: 40rpx; background: #00BB9D;',
+            title: '优秀',
+            num: this.yx.num
+          },
+          {
+            sty: 'height: ' + this.lh.h + 'rpx; width: 40rpx; background: #7DCA60;',
+            title: '良好',
+            num: this.lh.num
+          },
+          {
+            sty: 'height: ' + this.jg.h + 'rpx; width: 40rpx; background: #F8C438;',
+            title: '及格',
+            num: this.jg.num
+          },
+          {
+            sty: 'height: ' + this.bjg.h + 'rpx; width: 40rpx; background: #F64848;',
+            title: '不及格',
+            num: this.bjg.num
+          },
+          {
+            sty: 'height: ' + this.wtj.h + 'rpx; width: 40rpx; background: #CCCCCC;',
+            title: '未提交',
+            num: this.wtj.num
+          }
+        ]
+      }
+    }
+
+    methods = {}
+
+    events = {}
+
+    onLoad() {
+      wepy.login({
+        success: function(res) {
+          console.log(res.code)
+        }
+      })
+    }
+  }
+</script>
+<style lang="less">
+  .container{
+    height: 100%;
+    background: #f0f0f0;
+  }
+  .chart{
+    width: 690rpx;
+    height: 320rpx;
+    display: flex;
+    justify-content: space-around;
+    font-size: 24rpx;
+    color: #999;
+    padding: 30rpx 30rpx;
+    background: #ffffff;
+    margin-bottom: 15rpx;
+    .lis{
+      height: 320rpx;
+      width: 100rpx;
+      text-align: center;
+      display: flex;
+      flex-direction: column-reverse;
+      .zhu{
+        margin: 0 auto;
+      }
+    }
+  }
+  .rankWrap{
+    width: 690rpx;
+    padding: 0 30rpx;
+    background: #ffffff;
+  }
+</style>

@@ -107,6 +107,12 @@
         // 跳转学习动态页面
         this.newShow = false
         console.log('跳转学习动态页面')
+        // wepy.navigateTo({
+        //   url: '/pages/not-join-trend'
+        // })
+        wepy.navigateTo({
+          url: '/pages/join-trend'
+        })
       },
       toAnalysis() {
         // 跳转学情分析页面

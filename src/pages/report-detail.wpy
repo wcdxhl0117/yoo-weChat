@@ -16,6 +16,7 @@
           <view class="line"></view>
         </view>
         <view class="right base">
+          <!-- 已提交 -->
           <!-- <view class="line"></view>
           <view class="circle"></view> -->
           <!-- 未提交，线和圆为灰色 -->
@@ -42,10 +43,11 @@
         <view>提交作业</view>
       </view>
     </view>
+
     <!-- 作业状态提示 -->
     <view class="prossTip">
       <!-- 批改结果没出来展示tip -->
-      <view wx:if="{{1>2}}" class="tip">
+      <view wx:if="{{1>0}}" class="tip">
         <!-- 未提交 -->
         <!-- <text>孩子暂未提交作业\n请家长及时督促孩子尽快完成</text> -->
         <!-- 未做答 -->
@@ -62,7 +64,7 @@
            <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text>点击关注公众号</text></view>
         </view>
       </view>
-      <!-- 批改结果出来就展示批改结果 -->
+      <!-- 批改结果出来就展示批改结果 （作业情况）-->
       <view class="result">
         <view class="topT">作业情况</view>
         <view class="rightRate">
@@ -82,7 +84,8 @@
             <view class="Title">用时</view>
           </view>
         </view>
-        <view class="detailJ"><text space="emsp">答对：4题 答错：1题 半对：0题</text></view>
+        <!-- 半对为0不展示 -->
+        <view class="detailJ"><text space="emsp">答对：4题 答错：1题 <text wx:if="{{1>0}}">半对：0题</text></text></view>
         <!-- 有错题展示 -->
         <view class="btmTip">
           <view class="left">错题订正：0/1</view>
@@ -90,15 +93,59 @@
           <!-- <view class="right">请及时督促孩子进行错题订正</view> -->
           <!-- 全部订正后 -->
           <view class="coplate">订正后,
-            <text>正确率100%</text>
-            <text>正确率100%</text>
-            <text>正确率100%</text>
-            <text>正确率100%</text>
+            <text wx:if="{{1>2}}" class="pre_60">正确率100%</text>
+            <text wx:if="{{1>0}}" class="pre_70">正确率100%</text>
+            <text wx:if="{{1>2}}" class="pre_85">正确率100%</text>
+            <text wx:if="{{1>2}}" class="pre_100">正确率100%</text>
           </view>
         </view>
       </view>
     </view>
 
+    <!-- 班级整体情况对比 -->
+    <view class="contrast">
+      <view class="topTitle">班级整体情况对比</view>
+      <view class="lis">
+        <view class="left"><text space="ensp">作业排名：第 8 名</text></view>
+        <view class="right"><text space="ensp" class="grb" bindtap="toBillboard">查看光荣榜</text></view>
+      </view>
+      <view class="lis">
+        <view class="left"><text space="ensp">平均正确率：95%</text></view>
+        <view class="right"><text space="ensp">最高正确率：100%</text></view>
+      </view>
+      <view class="lis">
+        <view class="left"><text space="ensp">平均用时：01'58''</text></view>
+        <view class="right"><text space="ensp">最短用时：00'32''</text></view>
+      </view>
+    </view>
+
+    <!-- 作业学情分析(批改完才会有应该) -->
+    <view class="analysis">
+      <view class="topTitle">作业学情分析</view>
+      <view class="topList">
+        <!-- 没有错题不展示 -->
+        <view class="theLis"><image src="../static/wrong.png" /> 本次作业共 5 道错题</view>
+        <view class="theLis"><image src="../static/up.png" /> 与上次作业相比进步了 3 名</view>
+        <view class="theLis"><image src="../static/arm.png" /> 待提升知识点 3 个</view>
+      </view>
+      <view class="weak">
+        <!-- for -->
+        <view class="weakLis">
+          <view class="left">全等三角形的性质</view>
+          <view class="right">
+            <view class="ico">薄弱</view>
+            <view class="arrow"><image src="../static/right-arrow.png" /></view>
+          </view>
+        </view>
+        <view class="advice">建议家长督促孩子通过学生端错题针对性练习加强 对错题和薄弱知识点的巩固认识</view>
+      </view>
+    </view>
+
+    <!-- 下载客户端 -->
+    <view class="down" bindtap="toDownApp">
+      <view class="left">下载悠数学-学生端 查看作业题目</view>
+      <view class="right">下载</view>
+    </view>
   </view>
   <view class=""></view>
 </template>
@@ -122,6 +169,15 @@
         console.log('购买vip')
         wepy.switchTab({
           url: `/pages/vip-learn-club`
+        })
+      },
+      toBillboard() {
+        console.log(123)
+      },
+      toDownApp() {
+        // https://m.yoomath.com/app/
+        wepy.navigateTo({
+          url: `/pages/down-app`
         })
       }
     }
@@ -298,14 +354,136 @@
         margin-bottom: 50rpx;
       }
       .btmTip{
-        margin-bottom: 50rpx;
+        padding-bottom: 50rpx;
         display: flex;
         justify-content: space-between;
+        border-bottom: 1rpx solid #f0f0f0;
         .right{
           color: #999;
         }
+        .pre_60{
+          color: #F14B40;
+        }
+        .pre_70{
+          color: #F8C438;
+        }
+        .pre_85{
+          color: #7DCA60;
+        }
+        .pre_100{
+          color: #00BB9D;
+        }
       }
 
+    }
+  }
+  .contrast{
+    width: 690rpx;
+    margin: 0 auto;
+    height: auto;
+    padding: 40rpx 0;
+    border-bottom: 1rpx solid #f0f0f0; 
+    .topTitle{
+      font-size:40rpx;
+      color: #333333;
+      font-weight: 600;
+    }
+    .lis{
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 50rpx;
+      font-size: 30rpx;
+      .grb{
+        color: #007AFF
+      }
+    }
+  }
+  .analysis{
+    width: 690rpx;
+    margin: 0 auto;
+    height: auto;
+    padding: 40rpx 0;
+    .topTitle{
+      font-size: 40rpx;
+      color: #333333;
+      font-weight: 900;
+    }
+    .topList{
+      height: auto;
+      width: 100%;
+      padding-bottom: 40rpx;
+      border-bottom: 1rpx solid #f0f0f0;
+      .theLis{
+        margin-top: 40rpx;
+        image{
+          width: 30rpx;
+          height: 30rpx;
+          margin-right: 6rpx;
+          vertical-align: middle;
+          margin-top: -4rpx;
+        }
+      }
+    }
+    .weak{
+      width: 100%;
+      height: auto;
+      .weakLis{
+        display: flex;
+        justify-content: space-between;
+        height: 120rpx;
+        line-height: 120rpx;
+        padding-left: 20rpx;
+        border-bottom: 1rpx solid #f0f0f0;
+        .left{
+          color: #007AFF;
+        }
+        .right{
+          display: flex;
+          justify-content: space-between;
+          .ico{
+            width: 70rpx;
+            height: 36rpx;
+            line-height: 36rpx;
+            text-align: center;
+            font-size: 28rpx;
+            border-radius: 4rpx;
+            background: #F14B40;
+            color: #ffffff;
+            margin-right: 20rpx;
+            margin-top: 40rpx;
+          }
+          .arrow{
+            width: 14rpx;
+            height: 25rpx;
+            image{
+              width: 14rpx;
+              height: 25rpx;
+            }
+          }
+        }
+      }
+      .advice{
+        font-size: 30rpx;
+        margin: 30rpx 0 40rpx 0;
+        width: 100%;
+        line-height: 42rpx;
+      }
+    }
+  }
+  .down{
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30rpx;
+    margin-bottom: 80rpx;
+    height: 100rpx;
+    border: 1rpx solid #E5E5E5;
+    width: 630rpx;
+    border-radius: 10rpx;
+    line-height: 100rpx;
+    font-size: 30rpx;
+    .right{
+      color: #007AFF;
     }
   }
 </style>

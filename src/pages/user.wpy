@@ -29,7 +29,6 @@
       <view class="label">解除绑定</view>
       <image class="arrowImg" src="{{baseArrowSrc}}"/>
     </view>
-    <view class="mask"></view>
   </view>
 </template>
 
@@ -39,6 +38,8 @@
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
+
+    components = {}
 
     mixins = []
 
@@ -86,10 +87,7 @@
           itemColor: '#007AFF',
           success (res) {
             console.dir(res)
-            if (res.tapIndex === 0) {
-            } else if (res.tapIndex === 1) {
-              that._callService()
-            }
+            that._callService()
           }
         })
       }
@@ -97,7 +95,7 @@
     // 拨打客服电话
     _callService () {
       wx.makePhoneCall({
-        phoneNumber: '123456789' // 仅为示例，并非真实的电话号码
+        phoneNumber: '4008286506' // 仅为示例，并非真实的电话号码
       })
     }
 
@@ -110,15 +108,6 @@
 #user{
   display: flex;
   flex-direction: column;
-  // .mask{
-  //   position: fixed;
-  //   top: 0;
-  //   left: 0;
-  //   right: 0;
-  //   bottom: 0;
-  //   background: #000;
-  //   opacity: 0.6;
-  // }
   .userInfo{
     position: relative;
     display: flex;

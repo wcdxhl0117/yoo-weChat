@@ -1,13 +1,15 @@
+<style lang="less">
+  
+</style>
 <template>
   <view class="container">
-    123456
+    <web-view src="http://h5.test2.yoomath.com"></web-view>
   </view>
-  <view class=""></view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  export default class Index extends wepy.page {
+  export default class downApp extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
@@ -23,15 +25,6 @@
 
     events = {}
 
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
-        }
-      })
-    }
+    onLoad() {}
   }
 </script>
-<style lang="less">
-  
-</style>

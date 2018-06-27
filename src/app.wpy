@@ -22,13 +22,17 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/honor-rank',
       'pages/report-detail',
-      'pages/work-report',
       'pages/index',
+      'pages/not-join-trend',
+      'pages/work-report',
+      'pages/join-trend',
       'pages/warn',
       'pages/child-input',
       'pages/vip-learn-club',
-      'pages/user'
+      'pages/user',
+      'pages/down-app'
     ],
     window: {
       backgroundTextStyle: 'light',

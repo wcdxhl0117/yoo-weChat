@@ -54,6 +54,12 @@ if (prod) {
 
   // 压缩js
   module.exports.plugins = {
+  	autoprefixer: {
+        filter: /\.wxss$/,
+        config: {
+          browsers: ['last 11 iOS versions']
+        }
+    },
     uglifyjs: {
       filter: /\.js$/,
       config: {

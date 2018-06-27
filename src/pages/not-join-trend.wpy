@@ -1,0 +1,156 @@
+<template>
+  <view id="notJoinTrend">
+    <view class="title">加入VIP学习社，查看孩子的学习动态</view>
+    <view class="subTitle">随时掌握孩子学习过程，不再担心孩子沉溺玩手机</view>
+    <view class="button" @tap="showJoinVip">加入VIP培优计划</view>
+    <view class="header">
+      <image class="lineImg rotate" src="{{lineSrc}}"/>
+      <view class="title">示例动态</view>
+      <image class="lineImg" src="{{lineSrc}}"/>
+    </view>
+    <!-- <detail :date="date" :hourTime="hourTime" :list="list"></detail> -->
+    <detail :scroll="scroll" :date="date" :hourTime="hourTime" :list="list"></detail>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import learndetail from '../components/learndetail'
+  export default class notJoinTrend extends wepy.page {
+    config = {
+      navigationBarTitleText: '学习动态'
+    }
+
+    components = {
+      detail: learndetail
+    }
+
+    mixins = []
+
+    data = {
+      scroll: true,
+      date: '06-30（星期三）',
+      hourTime: '21:00',
+      active: true,
+      list: [
+        {
+          hourTime: '21:00',
+          list: [
+            [{
+              time: '21:30',
+              type: 'exercise', // exercise homework complete revisal exit
+              title: '开始自主练习「智能出卷」',
+              subTitle: ''
+            },
+            {
+              time: '21:33',
+              type: 'exit',
+              title: '退出自主练习',
+              subTitle: '用时8分3秒；完成5道题目练习'
+            }]
+          ]
+        },
+        {
+          hourTime: '20:00',
+          list: [
+            [{
+              time: '20:10',
+              type: 'exercise', // exercise homework complete revisal exit
+              title: '开始自主练习「智能出卷」',
+              subTitle: ''
+            },
+            {
+              time: '20:16',
+              type: 'exit',
+              title: '退出自主练习',
+              subTitle: '用时8分3秒；完成5道题目练习'
+            }],
+            [{
+              time: '20:33',
+              type: 'exercise', // exercise homework complete revisal exit
+              title: '开始自主练习「智能出卷」',
+              subTitle: ''
+            },
+            {
+              time: '20:45',
+              type: 'complete',
+              title: '提交作业',
+              subTitle: '用时8分3秒；完成5道题目练习'
+            }]
+          ]
+        }
+      ],
+      isJoin: false,
+      isPractice: false,
+      lineSrc: '../static/line.png'
+    }
+
+    computed = {}
+
+    methods = {
+      showJoinVip () {
+        console.log('加入VIP培优计划')
+      }
+    }
+
+    events = {}
+
+    onLoad () {
+
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#notJoinTrend{
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx 30rpx 60rpx;
+  &>.title{
+    margin-top: 30rpx;
+    text-align: center;
+    font-weight: bold;
+    font-size: 36rpx;
+    line-height: 40rpx;
+  }
+  &>.subTitle{
+    margin-top: 36rpx;
+    text-align: center;
+    font-weight: bold;
+    font-size: 30rpx;
+    line-height: 40rpx;
+    color: #999999;
+  }
+  &>.button{
+    margin-top: 56rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 30rpx;
+    font-weight: bold;
+    height: 90rpx;
+    background: #ffbb00;
+    border-radius: 10rpx;
+  }
+  &>.header{
+    margin: 60rpx 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .title{
+      color: #007AFF;
+      font-weight: bold;
+      font-size: 36rpx;
+      margin: 0 20rpx;
+    }
+    .lineImg{
+      display: inline-block;
+      width: 112rpx;
+      height: 12rpx;
+      &.rotate{
+        transform: rotate(180deg)
+      }
+    }
+  }
+}
+</style>

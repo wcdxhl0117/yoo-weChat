@@ -1,0 +1,197 @@
+<template>
+  <view id="joinTrend" class="{{noTrend?'noTrend':''}}">
+    <view class="content" wx:if="{{noTrend}}">
+      <view class="paragraph">近15天孩子暂无学习动态</view>
+      <view class="paragraph">去鼓励孩子进行在线练习吧</view>
+    </view>
+    <view class="content" wx:else>
+      <!-- <detail :index="index" :scroll.sync="scroll" :active="active" :date="date" :hourTime="hourTime" :list="list" @on-click.user="click"></detail> -->
+      <repeat for="{{list}}" key="index" index="index" item="item">
+        <detail :index="index" :scroll.sync="item.scroll" :active="item.active" :date="item.date" :hourTime="item.hourTime" :list="item.list" @on-click.user="click"></detail>
+      </repeat>
+      <view class="footer">到底了，支持查看近15天的学习动态</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import learndetail from '../components/learndetail'
+  export default class joinTrend extends wepy.page {
+    config = {
+      navigationBarTitleText: '学习动态'
+    }
+
+    components = {
+      detail: learndetail
+    }
+
+    mixins = []
+
+    data = {
+      noTrend: false,
+      list: [{
+        scroll: true,
+        date: '06-30（星期三）',
+        hourTime: '21:00',
+        active: true,
+        list: [
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '20:00',
+            list: [
+              [{
+                time: '20:10',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '20:16',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }],
+              [{
+                time: '20:33',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '20:45',
+                type: 'complete',
+                title: '提交作业',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          }
+        ]
+      },
+      {
+        scroll: false,
+        date: '06-30（星期三）',
+        hourTime: '21:00',
+        active: true,
+        list: [
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '20:00',
+            list: [
+              [{
+                time: '20:10',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '20:16',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }],
+              [{
+                time: '20:33',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '20:45',
+                type: 'complete',
+                title: '提交作业',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          }
+        ]
+      }]
+    }
+    computed = {}
+
+    methods = {
+      click () {
+        if (this.list[arguments[0]]) {
+          this.list[arguments[0]].scroll = !this.list[arguments[0]].scroll
+        }
+      },
+      showJoinVip () {
+        console.log('加入VIP培优计划')
+      }
+    }
+
+    events = {}
+
+    onLoad () {
+
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#joinTrend{
+  display: flex;
+  flex-direction: column;
+  border-top: 1rpx solid #EEEEEE;
+  &.noTrend{
+    border-top: 0;
+    flex: 1 1 auto;
+    height: 100vh;
+    .content{
+      display: flex;
+      flex-direction: column;
+      flex:1 1 auto;
+      align-items: center;
+      justify-content: center;
+      .paragraph{
+        display: flex;
+        color: #999999;
+        font-size: 36rpx;
+        line-height: 48rpx;  
+        justify-content: center;     
+      }
+    }
+  }
+  .content{
+    .footer{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #CCCCCC;
+      height: 88rpx;
+      font-size: 30rpx;
+    }
+  }
+}
+</style>
