@@ -1,0 +1,212 @@
+<template>
+  <view id="pay">
+    <view class="infoWrap">
+      <image class="viaImg" src="../static/via-lin.png"/>
+      <view class="info">
+        <view class="name">sxjz汪洋</view>
+        <view class="join">您当前未加入VIP学习社</view>
+      </view>
+    </view>
+    <view class="titleWrap">
+      <view class="line"></view>
+      <view class="title">VIP培优计划套餐</view>
+      <view class="line"></view>
+    </view>
+    <view class="item {{current==0?'active':''}}" data-tab="0" @tap="click">
+      <view class="goodsWrap" data-tab="0">
+        <view class="goods" data-tab="0">
+          <view class="text" data-tab="0">1年VIP会员</view>
+        </view>
+      </view>
+      <view class="priceWrap" data-tab="0">
+        <view class="discount" data-tab="0">¥488</view>
+      </view>
+    </view>
+    <view class="item {{current==1?'active':''}}" data-tab="1" @tap="click">
+      <view class="goodsWrap" data-tab="1">
+        <view class="goods" data-tab="1">
+          <view class="text" data-tab="1">2年VIP会员</view>
+          <view class="tag" data-tab="1">超值</view>
+        </view>
+        <view class="extra" data-tab="1">赠送1年会员</view>
+      </view>
+      <view class="priceWrap" data-tab="1">
+        <view class="discount" data-tab="1">¥960</view>
+        <view class="price" data-tab="1">¥1440</view>
+      </view>
+    </view>
+    <view class="agreement">悠数学收费服务协议</view>
+    <view class="btn">确认支付</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class pay extends wepy.page {
+    config = {
+      navigationBarTitleText: '悠数学-家长'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {
+      current: 0
+    }
+
+    computed = {}
+
+    methods = {
+      click (event) {
+        this.current = event.target.dataset.tab
+      }
+    }
+
+    events = {}
+
+    onLoad () {}
+  }
+</script>
+<style lang="scss" scoped>
+#pay{
+  .infoWrap{
+    margin: 30rpx;
+    padding: 40rpx;
+    background: #f6f6f6;
+    border-radius: 10rpx;
+    display: flex;
+    align-items: center;
+    .viaImg{
+      display: block;
+      flex-shrink: 1;
+      width: 100rpx;
+      height: 100rpx;
+      margin-right: 30rpx;
+    }
+    .info{
+      display: flex;
+      flex-direction: column;
+      .name{
+        font-weight: bold;
+        color: #000000;
+        font-size: 30rpx;
+        line-height: 40rpx;
+      }
+      .join{
+        color: #999999;
+        font-size: 30rpx;
+        line-height: 40rpx;
+      }
+    }
+  }
+  .titleWrap{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30rpx 0 0;
+    .line{
+      width: 30rpx;
+      height: 2rpx;
+      background:#999999;
+    }
+    .title{
+      color: #999999;
+      font-size: 30rpx;
+      line-height: 40rpx;
+      margin: 0 10rpx;
+    }
+  }
+  .item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    margin: 30rpx;
+    padding: 30rpx 40rpx;
+    height: 130rpx;
+    border: 2rpx solid #cccccc;
+    border-radius:12rpx;
+    &.active{
+      border-color: #007AFF;
+    }
+    .goodsWrap{
+      .goods{
+        display: flex;
+        align-items: center;
+      }
+      .text{
+        color: #000000;
+        font-size: 34rpx;
+        line-height: 40rpx;
+        font-weight: bold;
+      }
+      .tag{
+        position: relative;
+        margin-left: 20rpx;
+        box-sizing: border-box;
+        padding: 0 14rpx;
+        background: #00BB9D;
+        letter-spacing: 1Px;
+        color: #ffffff;
+        font-size: 18rpx;
+        border-radius: 5rpx;
+        &::after{
+          position: absolute;
+          left: 0;
+          content: '';
+          width:0;
+          height:0;
+          margin-top: 5rpx;
+          margin-left: -12rpx;
+          border-width: 8rpx 14rpx 8rpx 0;
+          border-style: solid;
+          border-color: transparent #00BB9D transparent transparent;
+        }
+      }
+      .extra{
+        color: #999999;
+        font-size: 24rpx;
+      }
+    }
+    .priceWrap{
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      .discount{
+        font-weight: bold;
+        color: #F14B40;
+        font-size: 40rpx;
+        line-height: 40rpx;
+      }
+      .price{
+        text-decoration: line-through;
+        color: #999999;
+        font-size: 24rpx;
+        line-height: 24rpx;
+      }
+    }
+  }
+  .agreement{
+    color: #007AFF;
+    font-size: 30rpx;
+    line-height: 30rpx;
+    text-align: center;
+    text-decoration: underline;
+  }
+  .btn{
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+    width: 100%;
+    height: 90rpx;
+    background:#007aff;
+    color: #ffffff;
+    font-size: 30rpx;
+    line-height: 30rpx;
+  }
+}
+</style>

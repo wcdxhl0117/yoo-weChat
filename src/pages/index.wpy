@@ -1,12 +1,12 @@
 <template>
   <view class="container">
     <!-- banner -->
-    <swiper 
+    <swiper
       indicator-dots="{{indicatorDots}}"
       indicator-color="#0882ff"
       indicator-active-color="#fff"
-      autoplay="{{autoplay}}" 
-      interval="{{interval}}" 
+      autoplay="{{autoplay}}"
+      interval="{{interval}}"
       duration="{{duration}}"
     >
       <repeat for="{{imgUrls}}" key="index" index="index" item="item" style="width:100%; height:100%;">
@@ -19,7 +19,7 @@
     <view class="btm" wx:if="{{!isBind}}">
       <view class="txt1">暂未关联孩子账号</view>
       <view class="txt2">关联孩子账号随时了解孩子的学习情况</view>
-      <button class="btn" bindtap="toLink" open-type="getUserInfo"> 关联孩子的悠数学账号 </button>
+      <button class="btn" bindgetuserinfo="onGotUserInfo" open-type="getUserInfo"> 关联孩子的悠数学账号 </button>
     </view>
     <!-- 已关联展示home结构 -->
     <view class="content" wx:if="{{isBind}}">
@@ -79,6 +79,7 @@
       isVip: true, // 是否是vip
       haveTip: true, // vip是否有报警
       newShow: true, // 学习动态
+      isAuthorize: false, // 用户是否授权
       imgUrls: [
         'http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg',
         'http://img06.tooopen.com/images/20160818/tooopen_sy_175866434296.jpg',
@@ -93,11 +94,18 @@
     computed = {}
 
     methods = {
-      toLink() {
+      onGotUserInfo() {
+        this._getAuthorize()
+        if (this.isAuthorize) {
+          // 授权
+          this._login()
+        } else {
+          // 未授权
+        }
         // 获取信息权限<button open-type="getUserInfo"></button>
-        wepy.redirectTo({
-          url: `/pages/child-input`
-        })
+        // wepy.redirectTo({
+        //   url: `/pages/child-input`
+        // })
       },
       readReport() {
         // 跳转报告页
@@ -117,6 +125,15 @@
       toAnalysis() {
         // 跳转学情分析页面
         console.log('跳转学情分析页面')
+        // wepy.navigateTo({
+        //   url: '/pages/analysis'
+        // })
+        setTimeout(() => {
+          this.$parent.globalData.userCode = '123123123'
+          wepy.navigateTo({
+            url: '/pages/analysis'
+          })
+        }, 2000)
       },
       toMonitor() {
         // 跳转警告页
@@ -127,11 +144,144 @@
       }
     }
 
+    async _login () {
+      let code = await this._getCode()
+      let {encryptedData, iv} = await this._getUserInfo()
+      this._setToken(code, encryptedData, iv)
+    }
+
+    _checkToken () {
+      return new Promise((resolve, reject) => {
+        let token = wx.getStorageSync('token')
+        if (token) {
+          wx.request({
+            url: `${this.$parent.globalData.baseURL}/wx/micro/parent/checkToken`,
+            method: 'POST',
+            header: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'S_T': token
+            },
+            success (res) {
+              console.log('index.wpy --> _checkToken --> success')
+              console.log(res)
+              if (res.data.ret_code === 0) {
+                resolve(true)
+              } else {
+                resolve(false)
+              }
+            },
+            fail (res) {
+              console.log('index.wpy --> _checkToken --> fail')
+              console.log(res)
+              resolve(false)
+            }
+          })
+        } else {
+          resolve(false)
+        }
+      })
+    }
+
+    _setToken (code, encryptedData, iv) {
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/login`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: {
+          code: code,
+          encryptedData: encryptedData,
+          iv: iv
+        },
+        success (res) {
+          console.log('index.wpy --> _setToken --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            wx.setStorageSync('token', res.data.ret.token)
+          } else {
+            // wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          }
+        },
+        fail (res) {
+          console.log('index.wpy --> _setToken --> fail')
+          console.log(res)
+          // wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        }
+      })
+    }
+
+    // 获取code
+    _getCode () {
+      return new Promise((resolve, reject) => {
+        wx.login({
+          success (res) {
+            console.log('index.wpy --> _getCode --> success')
+            console.log(res)
+            if (res.code) {
+              resolve(res.code)
+            } else {
+              wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+            }
+          },
+          fail (res) {
+            console.log('index.wpy --> _getCode --> fail')
+            console.log(res)
+            // wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+          }
+        })
+      })
+    }
+
+    // 获取用户信息
+    _getUserInfo () {
+      return new Promise((resolve, reject) => {
+        wx.getUserInfo({
+          withCredentials: true,
+          success (res) {
+            console.log('index.wpy --> _getUserInfo --> success')
+            console.log(res)
+            resolve({encryptedData: res.encryptedData, iv: res.iv})
+          },
+          fail (res) {
+            console.log('index.wpy --> _getUserInfo --> fail')
+            console.log(res)
+            // wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+          }
+        })
+      })
+    }
+
     events = {}
 
     onLoad() {
+      console.log('index.wpy --> onLoad')
       // 后台查看是否关联过孩子,isBind变为true
       this.isBind = true
+      // let isAuthorize = await this._getAuthorize()
+      // if (isAuthorize) {
+      //   let checkToken = await this._checkToken()
+      //   if (!checkToken) {
+      //     this._login()
+      //   }
+      // }
+    }
+
+    // 判断用户是否授权
+    _getAuthorize () {
+      return new Promise((resolve, reject) => {
+        wx.getSetting({
+          success (res) {
+            console.log('index.wpy --> _getAuthorize --> success')
+            console.log(res)
+            if (!res.authSetting['scope.userInfo']) {
+              resolve(false)
+            } else {
+              resolve(true)
+            }
+          }
+        })
+      })
     }
   }
 </script>

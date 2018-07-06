@@ -1,19 +1,19 @@
 <template>
   <view id="user">
-    <view class="userInfo {{isBinding?'binding':'unbinding'}}" @tap="showToast">
+    <view class="userInfo {{bindStatus?'binding':'unbinding'}}" @tap="showToast">
       <view class="info">
-        <view class="name" wx:if="{{isBinding}}">{{name}}</view>
-        <view class="name" wx:if="{{!isBinding}}">未绑定悠数学账号</view>
-        <view class="account" wx:if="{{isBinding}}">孩子账号：xyzx同学甲</view>
-        <view class="describe" wx:if="{{isBinding && !isJoin}}">未加入VIP培优计划</view>
-        <view class="describe" wx:if="{{isBinding && isJoin}}">已加入VIP培优计划：2018-12-06 到期</view>
+        <view class="name" wx:if="{{bindStatus}}">{{name}}</view>
+        <view class="name" wx:if="{{!bindStatus}}">未绑定悠数学账号</view>
+        <view class="account" wx:if="{{bindStatus}}">孩子账号：xyzx同学甲</view>
+        <view class="describe" wx:if="{{bindStatus && !isJoin}}">未加入VIP培优计划</view>
+        <view class="describe" wx:if="{{bindStatus && isJoin}}">已加入VIP培优计划：2018-12-06 到期</view>
       </view>
       <view class="viaWrap">
         <image class="viaImg {{isVip?'vip':''}}" src="{{baseViaSrc}}"/>
         <image class="vipImg" wx:if="{{isVip}}" src="{{vipSrc}}"/>
       </view>
     </view>
-    <button class="item" open-type="contact">
+    <button class="item" open-type="contact" session-from="user">
       <view class="label">微信客服</view>
       <image class="arrowImg" src="{{baseArrowSrc}}"/>
     </button>
@@ -21,19 +21,57 @@
       <view class="label">电话客服</view>
       <image class="arrowImg" src="{{baseArrowSrc}}"/>
     </view>
-    <view class="item" wx:if="{{!isBinding}}">
+    <view class="item" wx:if="{{!bindStatus}}" @tap="showBindingPage">
       <view class="label">绑定孩子悠数学账号</view>
       <image class="arrowImg" src="{{baseArrowSrc}}"/>
     </view>
-    <view class="item" wx:if="{{isBinding}}" @tap="showUnbindingModal">
+    <view class="item" wx:if="{{bindStatus}}" @tap="showUnbindingModal">
       <view class="label">解除绑定</view>
       <image class="arrowImg" src="{{baseArrowSrc}}"/>
+    </view>
+    <view class="item" @tap='test'>
+      {{parentName}}{{childName}}{{expirationDate}}{{joinStatus}}{{bindStatus}}{{asyncNum}}
     </view>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import { connect } from 'wepy-redux'
+  import { SET_PARENT_NAME, SET_CHILD_NAME, SET_EXPIRATION_DATE, SET_JOIN_STATUS, SET_BIND_STATUS } from '../store/types/user'
+  // import { ASYNC_INCREMENT } from '../store/types/counter'
+  import { asyncInc } from '../store/actions'
+  // import configStore from '../store'
+  // const store = configStore()
+
+  @connect({
+    asyncNum (state) {
+      return state.counter.asyncNum
+    },
+    parentName (state) {
+      return state.user.parentName
+    },
+    childName (state) {
+      return state.user.childName
+    },
+    expirationDate (state) {
+      return state.user.expirationDate
+    },
+    joinStatus (state) {
+      return state.user.joinStatus
+    },
+    bindStatus (state) {
+      return state.user.bindStatus
+    }
+  }, {
+    asyncInc: asyncInc,
+    setParentName: SET_PARENT_NAME,
+    setChildName: SET_CHILD_NAME,
+    setExpiration: SET_EXPIRATION_DATE,
+    setJoinStatus: SET_JOIN_STATUS,
+    setBindStatus: SET_BIND_STATUS
+  })
+
   export default class User extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -46,7 +84,7 @@
     data = {
       title: '确定解除绑定？',
       content: '解除绑定后公众号中将不再接收作业提醒推送',
-      isBinding: true,
+      // bindStatus: true,
       isJoin: true,
       isVip: false,
       name: '同学甲的家长',
@@ -58,6 +96,10 @@
     computed = {}
 
     methods = {
+      test () {
+        this.methods.asyncInc()
+        console.log(this.methods.asyncInc)
+      },
       showUnbindingModal () {
         wx.showModal({
           title: '确定解除绑定？',
@@ -70,6 +112,11 @@
               console.log('用户点击取消')
             }
           }
+        })
+      },
+      showBindingPage () {
+        wx.navigateTo({
+          url: '/pages/child-input'
         })
       },
       showToast () {
@@ -99,9 +146,37 @@
       })
     }
 
+    _getBindStatus () {
+      let that = this
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/login`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          console.log('user.wpy --> _getBindStatus --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.methods.setBindStatus(res.data.ret.hasBind)
+          }
+        }
+      })
+    }
+
     events = {}
 
-    onLoad () {}
+    onLoad () {
+      console.log('user.wpy --> onLoad')
+      this.methods.setParentName('你爸爸')
+      // store.dispatch({type: SET_JOIN_STATUS, payload: true})
+      // console.log(store.getState())
+    }
+
+    onShow () {
+      console.log('user.wpy --> onShow')
+    }
   }
 </script>
 <style lang="scss" scoped>

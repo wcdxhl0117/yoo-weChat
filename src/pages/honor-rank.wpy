@@ -12,12 +12,61 @@
     <!-- 列表 -->
     <view class="rankWrap">
       <!-- 我的孩子 -->
-      <view class="theLis">
-        
+      <view class="myChild rankLis">
+        <!-- 排名没出 -->
+        <view wx:if="{{1>2}}" class="pm">--</view>
+        <!-- 有排名 -->
+        <view wx:if="{{1>0}}" class="pm myPm">1</view>
+        <view class="tx">
+          <!-- vip有边框 -->
+          <image class="img1 {{1>0?'vipBor':''}}" src="../static/icon-vip.png" />
+          <!-- 如果是vip -->
+          <image class="vipIcon" src="../static/vip.png" />
+        </view>
+        <view class="mz">
+          <view class="theName">名字名字（孩子）</view>
+          <view class="theTime">{{1>3?'--':'10.223'}}</view>
+        </view>
+        <view class="js"><image wx:if="{{1>0}}" src="../static/jspg.png" /></view>
+        <view class="zql">
+          <!-- 还未出结果 -->
+          <view wx:if="{{1>1}}" class="notR">批改中</view>
+          <!-- 出结果 -->
+          <view wx:if="{{1>0}}" class="rWrap">
+            <view class="t">优秀</view>
+            <view class="rate {{50<60?'pre_60':''}} {{(65>=60&&65<70)?'pre_70':''}} {{(80>=70&&65<85)?'pre_85':''}} {{(90>=85&&65<=100)?'pre_100':''}}">97%</view>
+          </view>
+        </view>
       </view>
+
+      <!-- 排名循环结构 -->
+      <repeat for="{{charts}}" key="index" index="index" item="item">
+        <view class="rankLis forS">
+          <!-- 前三排名为红色，后面为灰 -->
+          <view style="color:{{index>2?'#999':'#F14B40'}}" class="pm myPm">{{index+1}}</view>
+          <view class="tx">
+            <!-- vip有边框 -->
+            <image class="img1 {{1>0?'vipBor':''}}" src="../static/icon-vip.png" />
+            <!-- 如果是vip -->
+            <image class="vipIcon" src="../static/vip.png" />
+          </view>
+          <view class="mz">
+            <view class="theName">名字名字</view>
+            <view class="theTime">22'22"</view>
+          </view>
+          <view class="js"><image wx:if="{{1>0}}" src="../static/jspg.png" /></view>
+          <view class="zql">
+            <view class="rWrap">
+              <view class="t">{{1>5?'优秀':''}} {{1>0?'良好':''}} {{1>2?'及格':''}} {{1>2?'不及格':''}} {{1>2?'未提交':''}}</view>
+              <view class="rate {{50<60?'pre_60':''}} {{(65>=60&&65<70)?'pre_70':''}} {{(80>=70&&65<85)?'pre_85':''}} {{(90>=85&&65<=100)?'pre_100':''}}">97%</view>
+            </view>
+          </view>
+        </view>
+      </repeat>
+      <!-- 循环结构结束 -->
+      
     </view>
   </view>
-
   <view class=""></view>
 </template>
 
@@ -115,8 +164,107 @@
     }
   }
   .rankWrap{
-    width: 690rpx;
-    padding: 0 30rpx;
+    width: 100%;
     background: #ffffff;
+    font-size: 30rpx;
+    .myChild{
+      border-bottom: 1rpx solid #e5e5e5;
+    }
+    .rankLis{
+      width: 690rpx;
+      padding: 0 30rpx;
+      height: 180rpx;
+      display: flex;
+      justify-content: space-between;
+      line-height: 180rpx;
+      .pm{
+        width: 70rpx;
+        color: #999;
+      }
+      .myPm{
+        color: #F14B40;
+      }
+      .tx{
+        width: 128rpx;
+        position: relative;
+        .img1{
+          width: 100rpx;
+          height: 100rpx;
+          vertical-align: middle;
+          margin-top: -5rpx;
+          border-radius: 50%;
+        }
+        .vipBor{
+          border: 4rpx solid #FDBB2C;
+        }
+        .vipIcon{
+          position: absolute;
+          bottom: 32rpx;
+          left: 25rpx;
+          width: 60rpx;
+          height: 24rpx;
+        }
+      }
+      .mz{
+        width: 245rpx;
+        line-height: 40rpx;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        .theName{
+          margin-top: 58rpx;
+          color: #000;
+          font-weight: 900;
+          font-size: 30rpx;
+        }
+        .theTime{
+          color: #999;
+          font-size: 24rpx;
+        }
+      }
+      .js{
+        width: 124rpx;
+        image{
+          width: 120rpx;
+          height: 30rpx;
+          vertical-align: middle;
+          margin-top: -5rpx;
+        }
+      }
+      .zql{
+        width: 128rpx;
+        text-align: center;
+        line-height: 40rpx;
+        .notR{
+          line-height: 180rpx;
+        }
+        .t{
+          margin-top: 50rpx;
+          color: #999;
+          font-size: 24rpx;
+        }
+        .rate{
+          font-size: 32rpx;
+          font-weight: 900;
+        }
+        .pre_60{
+          color: #F14B40;
+        }
+        .pre_70{
+          color: #F8C438;
+        }
+        .pre_85{
+          color: #7DCA60;
+        }
+        .pre_100{
+          color: #00BB9D;
+        }
+      }
+    }
+    .forS{
+      .mz, .js, .zql{
+        border-bottom: 1rpx solid #e5e5e5;
+      }
+    }
   }
 </style>

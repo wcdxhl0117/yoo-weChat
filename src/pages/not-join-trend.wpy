@@ -4,12 +4,12 @@
     <view class="subTitle">随时掌握孩子学习过程，不再担心孩子沉溺玩手机</view>
     <view class="button" @tap="showJoinVip">加入VIP培优计划</view>
     <view class="header">
-      <image class="lineImg rotate" src="{{lineSrc}}"/>
+      <image class="lineImg rotate" src="../static/line.png"/>
       <view class="title">示例动态</view>
-      <image class="lineImg" src="{{lineSrc}}"/>
+      <image class="lineImg" src="../static/line.png"/>
     </view>
     <!-- <detail :date="date" :hourTime="hourTime" :list="list"></detail> -->
-    <detail :scroll="scroll" :date="date" :hourTime="hourTime" :list="list"></detail>
+    <detail :unfold="unfold" :date="date" :hourTime="hourTime" :list="list"></detail>
   </view>
 </template>
 
@@ -28,7 +28,7 @@
     mixins = []
 
     data = {
-      scroll: true,
+      unfold: true,
       date: '06-30（星期三）',
       hourTime: '21:00',
       active: true,

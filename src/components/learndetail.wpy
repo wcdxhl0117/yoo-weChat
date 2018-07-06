@@ -1,11 +1,12 @@
 <template>
   <view class="learndetail {{active?'active':''}}">
-    <view class="detailContainer {{scroll?'scroll':''}}">
+    <view class="detailContainer {{unfold?'unfold':''}}">
       <view class="headerWrap">
         <view class="title">{{date}}</view>
-        <image class="scrollImg {{scroll?'scroll':''}}" src="../static/black-arrow.png" @tap="click" wx:if="{{active}}"/>
+        <image class="unfoldImg {{unfold?'unfold':''}}" src="../static/black-arrow.png" @tap="click" wx:if="{{active}}"/>
       </view>
-      <view class="listWrap" wx:if="{{scroll}}">
+      <!-- <view class="listWrap {{unfold?'unfold':''}}"> -->
+      <view class="listWrap" style="height:{{setHeight}}" wx:if="{{unfold}}">
         <view class="list" wx:for="{{list}}" wx:key="listIdx" wx:for-index="listIdx" wx:for-item="listItem">
           <view class="hourTimeHeader">
             <image class="hourTimeImg" src="../static/baseClock.png" wx:if="{{!active}}"/>
@@ -40,12 +41,13 @@
     mixins = []
 
     data = {
-
+      setHeight: 'auto',
+      getHeight: ''
     }
 
     props = {
       index: String,
-      scroll: {
+      unfold: {
         type: Boolean,
         default: false
       },
@@ -61,24 +63,43 @@
       }
     }
 
-    // watch = {
-    //   scroll (val) {
-    //     console.log(val)
-    //   }
-    // }
+    watch = {}
 
     computed = {}
 
     methods = {
       click () {
+        // let listWrap = await this._getlistWrap()
+        // if (listWrap) {
+        //   this.setHeight = `${listWrap.height}px`
+        // } else {
+        //   this.setHeight = 0
+        // }
+        // console.log(await this._getlistWrap())
         this.$emit('on-click', this.index)
       }
+    }
+
+    _getlistWrap () {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().select('.listWrap').boundingClientRect((rect) => {
+          resolve(rect)
+        }).exec()
+      })
+    }
+
+    _setlistWrap () {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().select('.listWrap').boundingClientRect((rect) => {
+          resolve(rect)
+        }).exec()
+      })
     }
 
     events = {}
 
     onLoad () {
-
+      // console.log(this)
     }
   }
 // date: '06-30（星期三）',
@@ -142,13 +163,22 @@
     .detailContainer{
       // padding: 0 0 0 30rpx;
       border-bottom: 2rpx solid #CCCCCC;
-      &.scroll{
+      &.unfold{
         padding-bottom: 40rpx;
       }
-      .headerWrap + .list{
-        .hourTimeHeader{
-          margin: 0;
+      .listWrap{
+        // transition: max-height 0.2s;
+        // max-height: 0;
+        // overflow: hidden;
+        .list:first-child {
+          .hourTimeHeader{
+            margin: 0;
+          }
         }
+        // &.unfold{
+        //   // max-height: 800vh;
+        //   overflow: auto;
+        // }
       }
       // .list{
       //   &:last-child{
@@ -196,13 +226,13 @@
       font-size: 40rpx;
       color: #AAAAAA;
     }
-    .scrollImg{
+    .unfoldImg{
       display: inline-block;
       width: 37rpx;
       height: 21rpx;
       padding: 31.5rpx 28rpx;
       transition:  transform 0.2s;
-      &.scroll{
+      &.unfold{
         transform: rotate(180deg);
       }
       // margin-right: 28rpx;

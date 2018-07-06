@@ -22,15 +22,21 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/honor-rank',
-      'pages/report-detail',
       'pages/index',
+      'pages/authorize',
+      'pages/pay',
+      'pages/protocol',
+      'pages/analysis',
+      'pages/join-trend',
+      'pages/vip-learn-club',
+      'pages/pay-success',
+      'pages/pay-ios',
+      'pages/report-detail',
+      'pages/honor-rank',
       'pages/not-join-trend',
       'pages/work-report',
-      'pages/join-trend',
       'pages/warn',
       'pages/child-input',
-      'pages/vip-learn-club',
       'pages/user',
       'pages/down-app'
     ],
@@ -62,6 +68,9 @@ export default class extends wepy.app {
   }
 
   globalData = {
+    userCode: 'userCode',
+    baseURL: 'http://gw2310102019.xicp.net',
+    isAuthorize: false,
     userInfo: null
   }
 
@@ -70,21 +79,145 @@ export default class extends wepy.app {
     this.use('requestfix')
   }
 
-  onLaunch() {
-    // 在这获取状态
+  async onLaunch() {
+    console.log('app.wpy --> onLaunch')
+    // 在这获取状态,个人信息
     this.testAsync()
-    wepy.login({
-      success: function(res) {
-        if (res.code) {
-          // 传后台要token,存本地
-          // console.log(res.code)
-          // wepy.setStorage({
-          //   key: 'code',
-          //   data: res.code
-          // })
-        } else {
-          console.log('登录失败！' + res.errMsg)
+    let isAuthorize = await this._getAuthorize()
+    if (isAuthorize) {
+      let checkToken = await this._checkToken()
+      if (!checkToken) {
+        this._login()
+      }
+    } else {
+      wx.redirectTo({
+        url: `/pages/authorize?from=/pages/app&to=/pages/index&id=123435&abc=1`
+      })
+    }
+  }
+
+  _login () {
+    Promise.all([this._getCode(), this._getUserInfo()]).then((result) => {
+      let code = result[0]
+      let encryptedData = result[1].encryptedData
+      let iv = result[1].iv
+      this._setToken(code, encryptedData, iv)
+    })
+  }
+
+  // 判断用户是否授权
+  _getAuthorize () {
+    return new Promise((resolve, reject) => {
+      wx.getSetting({
+        success (res) {
+          console.log('app.wpy --> _getAuthorize --> success')
+          console.log(res)
+          if (res.authSetting['scope.userInfo']) {
+            resolve(true)
+          } else {
+            resolve(false)
+          }
         }
+      })
+    })
+  }
+
+  _getCode () {
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success (res) {
+          console.log('app.wpy --> _getCode --> success')
+          console.log(res)
+          if (res.code) {
+            resolve(res.code)
+          } else {
+            wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+          }
+        },
+        fail (res) {
+          console.log('app.wpy --> _getCode --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+        }
+      })
+    })
+  }
+
+  _getUserInfo () {
+    return new Promise((resolve, reject) => {
+      wx.getUserInfo({
+        withCredentials: true,
+        success (res) {
+          console.log('app.wpy --> _getUserInfo --> success')
+          console.log(res)
+          resolve({encryptedData: res.encryptedData, iv: res.iv})
+        },
+        fail (res) {
+          console.log('app.wpy --> _getUserInfo --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+        }
+      })
+    })
+  }
+
+  _checkToken () {
+    return new Promise((resolve, reject) => {
+      let token = wx.getStorageSync('token')
+      if (token) {
+        wx.request({
+          url: `${this.globalData.baseURL}/wx/micro/parent/checkToken`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': token
+          },
+          success (res) {
+            console.log('app.wpy --> _checkToken --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          },
+          fail (res) {
+            console.log('app.wpy --> _checkToken --> fail')
+            console.log(res)
+            resolve(false)
+          }
+        })
+      } else {
+        resolve(false)
+      }
+    })
+  }
+
+  _setToken (code, encryptedData, iv) {
+    wx.request({
+      url: `${this.globalData.baseURL}/wx/micro/parent/login`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: {
+        code: code,
+        encryptedData: encryptedData,
+        iv: iv
+      },
+      success (res) {
+        console.log('app.wpy --> _setToken --> success')
+        console.log(res)
+        if (res.data.ret_code === 0) {
+          wx.setStorageSync('token', res.data.ret.token)
+        } else {
+          wx.showToast({icon: 'none', title: '登陆失败', duration: 1400})
+        }
+      },
+      fail (res) {
+        console.log('app.wpy --> _setToken --> fail')
+        console.log(res)
+        wx.showToast({icon: 'none', title: '登陆失败', duration: 1400})
       }
     })
   }
@@ -107,7 +240,7 @@ export default class extends wepy.app {
     if (this.globalData.userInfo) {
       return this.globalData.userInfo
     }
-    wepy.getUserInfo({
+    wx.getUserInfo({
       success (res) {
         that.globalData.userInfo = res.userInfo
         cb && cb(res.userInfo)

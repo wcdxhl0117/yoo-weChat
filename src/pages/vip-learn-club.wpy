@@ -1,10 +1,148 @@
-<style lang="less">
-  
-</style>
 <template>
-  <view class="container">
-    vip优配
+<view id="vipLearnClub">
+  <scroll-view scroll-y class="scrollView">
+    <view class="header">
+      <image class="img" src="../static/P0@2x.png"/>
+      <view class="textButtonWrap">
+        <view class="button {{toIdentify=='student'?'active':''}}">对于学生</view>
+        <view class="button scrollBtn {{toIdentify=='patriarch'?'active':''}}" @tap="scrollToSection4">对于家长</view>
+      </view>
+    </view>
+    <view class="section1">
+      <image class="img" src="../static/P1@2x.png"/>
+      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+    </view>
+    <view class="section2">
+      <image class="img" src="../static/P2@2x.png"/>
+      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+    </view>
+    <view class="section3">
+      <image class="img" src="../static/P3@2x.png"/>
+      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+    </view>
+    <view class="section4">
+      <image class="img" src="../static/P4@2x.png"/>
+      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+    </view>
+    <view class="section5">
+      <image class="img" src="../static/P5@2x.png"/>
+      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+    </view>
+    <view class="section6">
+      <image class="img" src="../static/school.png"/>
+    </view>
+    <view class="section7">
+      <view class="section7Header">
+        <view class="textButtonWrap">
+          <view class="button {{swiperCurrentTab==0?'active':''}}" data-tab="0" @tap="changeSwiperCurrentTab">学生评价</view>
+          <view class="button {{swiperCurrentTab==1?'active':''}}" data-tab="1" @tap="changeSwiperCurrentTab">老师评价</view>
+          <view class="button {{swiperCurrentTab==2?'active':''}}" data-tab="2" @tap="changeSwiperCurrentTab">专家评价</view>
+        </view>
+      </view>
+      <swiper class="section7Swiper" current="{{swiperCurrentTab}}" duration="300" bindchange="_swiperChange">
+        <swiper-item class="section7SwiperItem">
+          <view class="item">
+            <view class="infoWrap">
+              <image class="img" src="../static/via-lin.png"/>
+              <view class="info">
+                <view class="name">林同学</view>
+                <view class="district">江苏－南京</view>
+              </view>
+            </view>
+            <view class="title">自动批改题目，像随时有个家教老师一样</view>
+            <view class="subTitle">自从有了悠数学，周末假期自己在上面做题后，能够自动批改出结果。不用自己再对照答案了，非常方便 &#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;</view>
+          </view>
+          <view class="line"></view>
+          <view class="item">
+            <view class="infoWrap">
+              <image class="img" src="../static/via-zhang.png"/>
+              <view class="info">
+                <view class="name">张同学</view>
+                <view class="district">山西－太原</view>
+              </view>
+            </view>
+            <view class="title">错题自动进入错题本进行保存</view>
+            <view class="subTitle">悠数学让做错的题目可以通过错题本的功能保存起来，也可以自己打印成纸质错题本，这样便于查看。还会定期推送一些题目，对我的考试有很大的帮助。</view>
+          </view>
+        </swiper-item>
+        <swiper-item class="section7SwiperItem">
+          <view class="item">
+            <view class="infoWrap">
+              <image class="img" src="../static/via-wu.png"/>
+              <view class="info">
+                <view class="name">吴老师</view>
+                <view class="district">江苏－徐州</view>
+              </view>
+            </view>
+            <view class="title">人工智能时代的教学新选择</view>
+            <view class="subTitle">借助大数据和人工智能，教学由课堂延伸到了课后，拓展了教学时空，提高了教学效率，减轻了学生负担，学习从此变得快乐起来。</view>
+          </view>
+          <view class="line"></view>
+          <view class="item">
+            <view class="infoWrap">
+              <image class="img" src="../static/via-yu.png"/>
+              <view class="info">
+                <view class="name">余老师</view>
+                <view class="district">江苏－南京</view>
+              </view>
+            </view>
+            <view class="title">以信息化手段推动数学学科教学发展进步</view>
+            <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
+          </view>
+        </swiper-item>
+        <swiper-item class="section7SwiperItem">
+          <view class="item">
+            <view class="infoWrap">
+              <image class="img" src="../static/via-dong.png"/>
+              <view class="info">
+                <view class="name">董教授</view>
+                <view class="district">江苏省教研室</view>
+              </view>
+            </view>
+            <view class="title">智能教学，学生能够实时自主学习</view>
+            <view class="subTitle">现代化教学的根本还是人才，网络时代背景下，要放大视野，智能教学更应辐射到全部教室，要突破时空的限制，让学生能够实时自主学习</view>
+          </view>
+          <view class="line"></view>
+          <view class="item">
+            <view class="infoWrap">
+              <image class="img" src="../static/via-li.png"/>
+              <view class="info">
+                <view class="name">李教授</view>
+                <view class="district">北京市教研室</view>
+              </view>
+            </view>
+            <view class="title">弥补传统教学的弊端，促进教学高效化</view>
+            <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
+          </view>
+        </swiper-item>
+      </swiper>
+      <view class="itemWrap">
+        <view class="item {{swiperCurrentTab==0?'active':''}}" data-tab="0" @tap="changeSwiperCurrentTab"></view>
+        <view class="item {{swiperCurrentTab==1?'active':''}}" data-tab="1" @tap="changeSwiperCurrentTab"></view>
+        <view class="item {{swiperCurrentTab==2?'active':''}}" data-tab="2" @tap="changeSwiperCurrentTab"></view>
+      </view>
+    </view>
+    <view class="section8">
+      <image class="img" src="../static/VIP@2x.png"/>
+      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+    </view>
+    <view class="supernatant">
+      <view class="wrap">
+        <view class="text">本月已有{{joinNumber}}位同学加入VIP培优计划</view>
+        <view class="btn" @touchstart="toPayPage">立即加入</view>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="iosPayMask" wx:if="{{isShowIosPayMask}}">
+    <view class="wrap {{iosPayMask?'active':''}}">
+      <view class="title">在客服会话中，继续后续操作</view>
+      <image class="img" src="../static/19@2x.png"/>
+      <view class="subTitle">由于苹果手机平台限制，请在客服会话中点击“悠数学-VIP培优计划”，继续后续操作</view>
+      <button class="btn" open-type="contact" session-from="iso">继续操作</button>
+    </view>
+    <view class="mask {{iosPayMask?'active':''}}" @touchstart="_closeIosPayMask"></view>
   </view>
+</view>
 </template>
 
 <script>
@@ -17,14 +155,411 @@
 
     mixins = []
 
-    data = {}
+    data = {
+      isShowIosPayMask: false,
+      iosPayMask: false,
+      toIdentify: 'student',
+      swiperCurrentTab: 0,
+      joinNumber: 0
+    }
 
     computed = {}
 
-    methods = {}
+    methods = {
+      toPayPage () {
+        this._showIosPayMask()
+        // wepy.navigateTo({
+        //   url: '/pages/pay-ios'
+        // })
+      },
+      async scrollToSection4 () {
+        let scrollTop = await this._getScrollTop()
+        let viewTop = await this._getViewTop('.section4')
+        wx.pageScrollTo({
+          scrollTop: viewTop + scrollTop,
+          duration: 600
+        })
+      },
+      changeSwiperCurrentTab (event) {
+        this.swiperCurrentTab = event.target.dataset.tab
+      }
+    }
+
+    _getScrollTop () {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().selectViewport().scrollOffset((rect) => {
+          resolve(rect.scrollTop)
+        }).exec()
+      })
+    }
+
+    _getViewTop (view) {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().select(view).boundingClientRect((rect) => {
+          resolve(rect.top)
+        }).exec()
+      })
+    }
+
+    _swiperChange (event) {
+      this.swiperCurrentTab = event.detail.current
+    }
+
+    _closeIosPayMask () {
+      this.iosPayMask = false
+      setTimeout(() => {
+        this.iosPayMask = false
+        this.isShowIosPayMask = false
+        this.$apply()
+      }, 200)
+    }
+
+    _showIosPayMask () {
+      // this.iosPayMask = true
+      this.isShowIosPayMask = true
+      setTimeout(() => {
+        this.iosPayMask = true
+        this.isShowIosPayMask = true
+        this.$apply()
+      }, 10)
+    }
 
     events = {}
 
-    onLoad() {}
+    onLoad() {
+      console.log(this)
+    }
   }
 </script>
+<style lang="scss" scoped>
+#vipLearnClub{
+  .scrollView{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .header{
+      position: relative;
+      height: 400rpx;
+      .img{
+        display: block;
+        width: 100%;
+        height: 400rpx;
+      }
+      .textButtonWrap{
+        position:absolute;
+        bottom:46rpx;
+        padding:0 140rpx;
+      }
+    }
+    .section1, .section2, .section3, .section4, .section5, .section6, .section8{
+      position: relative;
+      .img{
+        display: block;
+        width: 100%;
+      }
+      .button{
+        position: absolute;
+        bottom: 70rpx;
+        left: 50%;
+        margin-left: -250rpx; 
+        display: flex;
+        z-index: 1;
+        justify-content: center;
+        align-items: center;
+        font-size: 30rpx;
+        color: #ffffff;
+        font-weight: bold;
+        width: 500rpx;
+        height: 80rpx;
+        border-radius: 40rpx;
+      }
+    }
+    .section1{
+      height: 793rpx;
+      .img{
+        height: 793rpx;
+      }
+      .button{
+         background :#f14b40;
+      }
+    }
+    .section2{
+      height: 1399rpx;
+      .img{
+        height: 1399rpx;
+      }
+      .button{
+         background :#ED5A87;
+      }
+    }
+    .section3{
+      height: 944rpx;
+      .img{
+        height: 944rpx;
+      }
+      .button{
+         background :#4464CA;
+      }
+    }
+    .section4{
+      height: 1000rpx;
+      .img{
+        height: 1000rpx;
+      }
+      .button{
+         background :#833AFD;
+      }
+    }
+    .section5{
+      height: 889rpx;
+      .img{
+        height: 889rpx;
+      }
+      .button{
+         background :#F14B40;
+      }
+    }
+    .section6{
+      height: 700rpx;
+      .img{
+        height: 700rpx;
+      }
+    }
+    
+    .section7{
+      box-sizing: border-box;
+      background: #1A88E6;
+      padding: 60rpx 30rpx;
+      .section7Header{
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        .textButtonWrap {
+          padding: 0 40rpx 70rpx;
+          .button{
+            color: #7ED2FD;
+            &.active{
+              color: #ffffff;
+            }
+          }
+        }
+      }
+      .section7Swiper{
+        height: 560rpx;
+        background: #ffffff;
+        border-radius: 10rpx;
+        .section7SwiperItem{
+          display: flex;
+          flex-direction: column;
+          .item{
+            display: flex;
+            flex-direction: column;
+            padding: 30rpx;
+            flex-shrink: 1;
+            box-sizing: border-box;
+            .infoWrap{
+              display: flex;
+              align-items: center;
+              .img{
+                display: block;
+                margin-right: 10rpx;
+                flex-shrink: 1;
+                height: 60rpx;
+                width: 60rpx;
+                border-radius: 50%;
+              }
+              .info{
+                display: flex;
+                flex-direction: column;
+                .name{
+                  font-weight: bolder;
+                  color: #007AFF;
+                  font-size: 24rpx;
+                  line-height: 30rpx;
+                }
+                .district{
+                  color: #999999;
+                  font-size: 20rpx;
+                }
+              }
+            }
+            .title{
+              margin-top: 24rpx;
+              font-weight: bolder;
+              color: #000000;
+              font-size: 30rpx;
+              line-height: 30rpx;
+            }
+            .subTitle{
+              margin-top: 16rpx;
+              color: #666666;
+              font-size: 24rpx;
+              line-height: 30rpx;
+            }
+          }
+          .line{
+            height: 1rpx;
+            margin: 0 20rpx;
+            flex-shrink: 1;
+            background: #CCCCCC;
+          }
+        }
+      }
+      .itemWrap{
+        display: flex;
+        justify-content: space-between;
+        width: 130rpx;
+        margin: 30rpx auto 0;
+        .item{
+          display: block;
+          width: 30rpx;
+          height: 6rpx;
+          background: #65adeb;
+          border-radius: 3rpx;
+          &.active{
+            background: #ffffff;
+          }
+        }
+      }
+    }
+    
+    .section8{
+      height: 855rpx;
+      .img{
+        height: 855rpx;
+      }
+      .button{
+         background :#F14B40;
+      }
+    }
+
+    .textButtonWrap{
+      box-sizing: border-box;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .button{
+        display: flex;
+        position: relative;
+        font-weight: bold;
+        color: #5068D1;
+        font-size: 36rpx;
+        line-height: 40rpx;
+        &.active{
+          color: #ffffff;
+          &::after{
+            content: '';
+            display: block;
+            position: absolute;
+            margin-top: 20rpx;
+            background: #fff;
+            height: 6rpx;
+            width: 48rpx;
+            left: 50%;
+            margin-left: -24rpx;
+          }
+        }
+      }
+    }
+  }
+  .supernatant{
+    position: fixed;
+    bottom: 30rpx;
+    width: 100%;
+    z-index: 1;
+    .wrap{
+      display: flex;
+      justify-content: space-between;
+      background: #000000;
+      border-radius:10rpx;
+      height: 80rpx;
+      align-items: center;
+      margin: 0 30rpx;
+      padding: 0 30rpx;
+      .text{
+        color: #ffffff;
+        font-size: 28rpx;
+      }
+      .btn{
+        color: #0076FF;
+        font-size: 28rpx;
+      }
+    }
+  }
+  .iosPayMask{
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    .mask{
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      // opacity: 0.5;
+      transition: opacity 0.2s;
+      opacity: 0;
+      &.active{
+        opacity: 0.5;
+      }
+    }
+    .wrap{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 560rpx;
+      z-index: 1;
+      background:#ffffff;
+      border-radius: 10rpx;
+      transition: opacity 0.2s;
+      opacity: 0;
+      &.active{
+        opacity: 1;
+      }
+      .title{
+        font-weight: bold;
+        color: #000000;
+        font-size: 36rpx;
+        margin: 60rpx 0 30rpx;
+      }
+      .img{
+        display: block;
+        width: 490rpx;
+        height: 330rpx;
+      }
+      .subTitle{
+        color: #999999;
+        font-size: 30rpx;
+        line-height: 42rpx;
+        margin: 25rpx 30rpx;
+      }
+      .btn{
+        display: flex;
+        font-weight: bold;
+        align-items: center;
+        justify-content: center;
+        width:100%;
+        height: 100rpx;
+        outline: none;
+        line-height: 30rpx;
+        border-top: 1rpx solid #D2D3D5;
+        color: #007AFF;
+        border-radius: 0;
+        border-bottom-right-radius: 10rpx;
+        border-bottom-left-radius: 10rpx;
+        background: #fff;
+      }
+    }
+  }
+  button::after{
+    border:none;
+  }
+}
+</style>

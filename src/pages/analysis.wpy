@@ -1,0 +1,37 @@
+<template>
+  <view id="analysis">
+    <web-view src="{{src}}"></web-view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class analysis extends wepy.page {
+    config = {
+      navigationBarTitleText: '悠数学-家长'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {
+      src: ''
+    }
+
+    computed = {}
+
+    methods = {}
+
+    events = {}
+
+    onLoad () {
+      this.src = `https://mp.weixin.qq.com/?usercode=${this.$parent.globalData.userCode}`
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#analysis{
+
+}
+</style>

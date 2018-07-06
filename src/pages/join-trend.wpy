@@ -5,9 +5,9 @@
       <view class="paragraph">去鼓励孩子进行在线练习吧</view>
     </view>
     <view class="content" wx:else>
-      <!-- <detail :index="index" :scroll.sync="scroll" :active="active" :date="date" :hourTime="hourTime" :list="list" @on-click.user="click"></detail> -->
+      <!-- <detail :index="index" :unfold.sync="unfold" :active="active" :date="date" :hourTime="hourTime" :list="list" @on-click.user="click"></detail> -->
       <repeat for="{{list}}" key="index" index="index" item="item">
-        <detail :index="index" :scroll.sync="item.scroll" :active="item.active" :date="item.date" :hourTime="item.hourTime" :list="item.list" @on-click.user="click"></detail>
+        <detail :index="index" :unfold.sync="item.unfold" :active="item.active" :date="item.date" :hourTime="item.hourTime" :list="item.list" @on-click.user="click"></detail>
       </repeat>
       <view class="footer">到底了，支持查看近15天的学习动态</view>
     </view>
@@ -31,11 +31,130 @@
     data = {
       noTrend: false,
       list: [{
-        scroll: true,
+        unfold: true,
         date: '06-30（星期三）',
         hourTime: '21:00',
         active: true,
         list: [
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
+          {
+            hourTime: '21:00',
+            list: [
+              [{
+                time: '21:30',
+                type: 'exercise', // exercise homework complete revisal exit
+                title: '开始自主练习「智能出卷」',
+                subTitle: ''
+              },
+              {
+                time: '21:33',
+                type: 'exit',
+                title: '退出自主练习',
+                subTitle: '用时8分3秒；完成5道题目练习'
+              }]
+            ]
+          },
           {
             hourTime: '21:00',
             list: [
@@ -85,7 +204,7 @@
         ]
       },
       {
-        scroll: false,
+        unfold: false,
         date: '06-30（星期三）',
         hourTime: '21:00',
         active: true,
@@ -144,7 +263,7 @@
     methods = {
       click () {
         if (this.list[arguments[0]]) {
-          this.list[arguments[0]].scroll = !this.list[arguments[0]].scroll
+          this.list[arguments[0]].unfold = !this.list[arguments[0]].unfold
         }
       },
       showJoinVip () {
