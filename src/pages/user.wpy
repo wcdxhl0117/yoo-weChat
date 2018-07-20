@@ -117,8 +117,10 @@
         })
       },
       showBindingPage () {
-        wx.navigateTo({
-          url: '/pages/child-input'
+        this._judgeAuthorize(() => {
+          wx.navigateTo({
+            url: '/pages/child-input'
+          })
         })
       },
       showToast () {
@@ -258,6 +260,7 @@
           console.log(res)
           if (res.data.ret_code === 0) {
             that.tel = res.data.ret.customerTel1
+            that.isGetData = true
           }
         }
       })
@@ -334,6 +337,16 @@
       })
     }
 
+    _judgeAuthorize (cb) {
+      if (!this.$parent.globalData.authorize) {
+        wx.navigateTo({
+          url: `/pages/authorize?to=/pages/user`
+        })
+      } else {
+        cb()
+      }
+    }
+
     events = {}
 
     onLoad () {
@@ -344,10 +357,11 @@
     }
 
     onShow () {
+      console.log('user.wpy --> onShow')
       this._getTel()
+      if (!this.$parent.globalData.authorize) return
       // this._getUserInfo()
       this._getBindStatus()
-      console.log('user.wpy --> onShow')
     }
   }
 </script>
@@ -430,7 +444,7 @@
       }
       .vipImg{
         display: block;
-        width: 60rpx;
+        width: 45rpx;
         height: 24rpx;
         margin-top: -14rpx; 
       }

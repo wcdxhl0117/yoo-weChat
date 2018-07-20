@@ -200,23 +200,25 @@
         this.isShowIosPay = false
       },
       toPayPage () {
-        if (!this.isBind) {
-          wx.navigateTo({
-            url: '/pages/child-input'
-          })
-          // return wx.showToast({icon: 'none', title: '请先绑定孩子账号', duration: 1400})
-          return
-        }
-        if (!this.hasGetSystemInfo) {
-          return wx.showToast({icon: 'none', title: '等待接口返回数据，请稍等', duration: 1400})
-        }
-        if (this.isIOS) {
-          this._showIosPayModal()
-        } else {
-          wx.navigateTo({
-            url: '/pages/pay'
-          })
-        }
+        this._judgeAuthorize(() => {
+          if (!this.isBind) {
+            wx.navigateTo({
+              url: '/pages/child-input'
+            })
+            // return wx.showToast({icon: 'none', title: '请先绑定孩子账号', duration: 1400})
+            return
+          }
+          if (!this.hasGetSystemInfo) {
+            return wx.showToast({icon: 'none', title: '等待接口返回数据，请稍等', duration: 1400})
+          }
+          if (this.isIOS) {
+            this._showIosPayModal()
+          } else {
+            wx.navigateTo({
+              url: '/pages/pay'
+            })
+          }
+        })
       },
       scrollToTop () {
         wx.pageScrollTo({
@@ -318,6 +320,7 @@
             console.log(res)
             if (res.data.ret_code === 0) {
               that.joinNumber = res.data.ret.vipNumber
+              that.isGetData = true
               that.$apply()
               resolve(true)
             } else {
@@ -378,22 +381,6 @@
       })
     }
 
-    _getAuthorize () {
-      return new Promise((resolve, reject) => {
-        wx.getSetting({
-          success (res) {
-            console.log('app.wpy --> _getAuthorize --> success')
-            console.log(res)
-            if (res.authSetting['scope.userInfo']) {
-              resolve(true)
-            } else {
-              resolve(false)
-            }
-          }
-        })
-      })
-    }
-
     events = {}
 
     onLoad () {
@@ -404,15 +391,20 @@
       // }, 0)
     }
 
-    async onShow () {
-      console.log('vip-learn-club.wpy --> onShow')
-      let authorize = await this._getAuthorize()
-      if (!authorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/vip-learn-club`
+    _judgeAuthorize (cb) {
+      if (!this.$parent.globalData.authorize) {
+        wx.navigateTo({
+          url: `/pages/authorize?to=/pages/vip-learn-club`
         })
-        return
+      } else {
+        cb()
       }
+    }
+
+    onShow () {
+      console.log('vip-learn-club.wpy --> onShow')
+      this._getVipNumber()
+      if (!this.$parent.globalData.authorize) return
       this._getInfo()
       // this._setScrollViewHeight()
       // this._getVipNumber()
@@ -427,7 +419,7 @@
       return {
         title: '悠数学VIP培优计划',
         path: '/pages/vip-learn-club',
-        imageUrl: '../static/shareVIP.png'
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/VIP.png'
       }
     }
 

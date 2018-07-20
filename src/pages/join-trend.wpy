@@ -410,12 +410,6 @@
 
     onShow () {
       console.log('join-trend.wpy --> onShow')
-      if (!this.$parent.globalData.authorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/join-trend`
-        })
-        return
-      }
       this._getTrend()
     }
 

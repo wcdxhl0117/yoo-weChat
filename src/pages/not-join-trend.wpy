@@ -144,6 +144,7 @@
     events = {}
 
     onLoad () {
+      console.log('not-join-trend.wpy --> onLoad')
       this._getSystemInfo()
     }
   }

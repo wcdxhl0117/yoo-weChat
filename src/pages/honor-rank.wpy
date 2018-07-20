@@ -20,9 +20,9 @@
         <view wx:if="{{myChild.rank}}" class="pm myPm">{{myChild.rank}}</view>
         <view class="tx">
           <!-- vip有边框 -->
-          <image class="img1 {{(myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{myChild.user.avatarUrl?(baseUrl+myChild.user.avatarUrl):'../static/baseVia.png'}}" />
+          <image class="img1 {{(myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{myChild.user.avatarUrl?myChild.user.avatarUrl:'../static/baseVia.png'}}" />
           <!-- 如果是vip -->
-          <image wx:if="{{myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip-radius.png" />
+          <image wx:if="{{myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip.png" />
         </view>
         <view class="mz">
           <view class="theName">
@@ -69,9 +69,9 @@
             <view style="color:{{index>2?'#999':'#F14B40'}}" class="pm myPm">{{item.rank}}</view>
             <view class="tx">
               <!-- vip有边框 -->
-            <image class="img1 {{(item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{item.user.avatarUrl?(baseUrl+item.user.avatarUrl):'../static/baseVia.png'}}" />
+            <image class="img1 {{(item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{item.user.avatarUrl?item.user.avatarUrl:'../static/baseVia.png'}}" />
             <!-- 如果是vip -->
-            <image wx:if="{{item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip-radius.png" />
+            <image wx:if="{{item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip.png" />
           </view>
             <view class="mz">
               <view class="theName">{{item.user.name}}</view>
@@ -127,7 +127,6 @@
       allData: [],
       rankData: [],
       myChild: {},
-      baseUrl: '',
       // 算各个分数段的柱形图高度（240*（分数段人数 / 人数最分数段人数））eg:优秀：10，良好：5，及格：20，不及格：5，未提交：5--->[10, 5, 20, 5, 5]
       yx: {h: 240 * (1 / 20), num: 10},
       lh: {h: 240 * (1 / 20), num: 5},
@@ -173,8 +172,6 @@
     events = {}
 
     onLoad(options) {
-      // 获取基础链接
-      this.baseUrl = this.$parent.globalData.baseURL
       let _this = this
       // 获取数据  865349521188593664  options.studentHomeworkId
       wx.showLoading({

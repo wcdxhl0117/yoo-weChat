@@ -30,6 +30,7 @@
       async onGotUserInfo (res) {
         let isAuthorize = await this._getAuthorize()
         this.$parent.globalData.authorize = isAuthorize
+        this.$parent.globalData.isAuthorize = isAuthorize
         if (isAuthorize) {
           let checkToken = await this._checkToken()
           if (checkToken) {
