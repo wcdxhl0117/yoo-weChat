@@ -9,65 +9,105 @@
         </view>
        </repeat>
     </view>
+    
     <!-- 列表 -->
     <view class="rankWrap">
       <!-- 我的孩子 -->
       <view class="myChild rankLis">
         <!-- 排名没出 -->
-        <view wx:if="{{1>2}}" class="pm">--</view>
+        <view wx:if="{{!myChild.rank}}" class="pm">--</view>
         <!-- 有排名 -->
-        <view wx:if="{{1>0}}" class="pm myPm">1</view>
+        <view wx:if="{{myChild.rank}}" class="pm myPm">{{myChild.rank}}</view>
         <view class="tx">
           <!-- vip有边框 -->
-          <image class="img1 {{1>0?'vipBor':''}}" src="../static/icon-vip.png" />
+          <image class="img1 {{(myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{myChild.user.avatarUrl?myChild.user.avatarUrl:'../static/baseVia.png'}}" />
           <!-- 如果是vip -->
-          <image class="vipIcon" src="../static/vip.png" />
+          <image wx:if="{{myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip.png" />
         </view>
         <view class="mz">
-          <view class="theName">名字名字（孩子）</view>
-          <view class="theTime">{{1>3?'--':'10.223'}}</view>
+          <view class="theName">
+            <view class="myCname">{{myChild.user.name}}</view>
+            <view class="tt">(孩子)</view>
+          </view>
+          <view class="theTime">{{myChild.homeworkTime?myChild.homeworkTime:'--'}}
+            <image wx:if="{{myChild.timeout}}" src="../static/chaoshi.png" />
+          </view>
         </view>
-        <view class="js"><image wx:if="{{1>0}}" src="../static/jspg.png" /></view>
+        <view class="js"><image wx:if="{{myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP'}}" src="../static/jspg.png" /></view>
         <view class="zql">
-          <!-- 还未出结果 -->
-          <view wx:if="{{1>1}}" class="notR">批改中</view>
+          <!-- 还未出结果(必须是提交过，但正确率还没出来) -->
+          <view 
+            wx:if="{{myChild.stuSubmitAt&&myChild.shieldRightRateTime=='0'&&(!myChild.rightRate&&myChild.rightRate!=0)&&(myChild.correctStatus=='CORRECTING'||myChild.correctStatus=='AUTO_CORRECTING'||myChild.correctStatus=='TOBE_CORRECTED')}}" 
+            class="notR"
+          >批改中</view>
           <!-- 出结果 -->
-          <view wx:if="{{1>0}}" class="rWrap">
-            <view class="t">优秀</view>
-            <view class="rate {{50<60?'pre_60':''}} {{(65>=60&&65<70)?'pre_70':''}} {{(80>=70&&65<85)?'pre_85':''}} {{(90>=85&&65<=100)?'pre_100':''}}">97%</view>
+          <view wx:if="{{myChild.stuSubmitAt&&myChild.shieldRightRateTime=='0'&&(myChild.rightRate||myChild.rightRate==0)}}" class="rWrap">
+            <view wx:if="{{myChild.rightRate<60}}" class="t">不及格</view>
+            <view wx:if="{{myChild.rightRate<70&&myChild.rightRate>=60}}" class="t">及格</view>
+            <view wx:if="{{myChild.rightRate>=70&&myChild.rightRate<85}}" class="t">良好</view>
+            <view wx:if="{{myChild.rightRate>=85}}" class="t">优秀</view>
+            <view 
+              class="rate {{myChild.rightRate<60?'pre_60':''}} {{(myChild.rightRate>=60&&myChild.rightRate<70)?'pre_70':''}} {{(myChild.rightRate>=70&&myChild.rightRate<85)?'pre_85':''}} {{(myChild.rightRate>=85)?'pre_100':''}}"
+            >{{myChild.rightRate}}%</view>
           </view>
         </view>
       </view>
 
+      <!-- 光荣榜标题 -->
+      <view class="titleBig">作业光荣榜</view>
+
+      <view class="rankTitle" wx:if="{{rankData.length>0}}">
+        <view class="num">排名</view>
+        <view class="name">姓名</view>
+        <view class="rate">正确率</view>
+      </view>
       <!-- 排名循环结构 -->
-      <repeat for="{{charts}}" key="index" index="index" item="item">
-        <view class="rankLis forS">
-          <!-- 前三排名为红色，后面为灰 -->
-          <view style="color:{{index>2?'#999':'#F14B40'}}" class="pm myPm">{{index+1}}</view>
-          <view class="tx">
-            <!-- vip有边框 -->
-            <image class="img1 {{1>0?'vipBor':''}}" src="../static/icon-vip.png" />
+      <view wx:if="{{rankData.length>0}}">
+        <repeat for="{{rankData}}" key="index" index="index" item="item">
+          <view class="rankLis forS">
+            <!-- 前三排名为红色，后面为灰 -->
+            <view style="color:{{index>2?'#999':'#F14B40'}}" class="pm myPm">{{item.rank}}</view>
+            <view class="tx">
+              <!-- vip有边框 -->
+            <image class="img1 {{(item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{item.user.avatarUrl?item.user.avatarUrl:'../static/baseVia.png'}}" />
             <!-- 如果是vip -->
-            <image class="vipIcon" src="../static/vip.png" />
+            <image wx:if="{{item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip.png" />
           </view>
-          <view class="mz">
-            <view class="theName">名字名字</view>
-            <view class="theTime">22'22"</view>
-          </view>
-          <view class="js"><image wx:if="{{1>0}}" src="../static/jspg.png" /></view>
-          <view class="zql">
-            <view class="rWrap">
-              <view class="t">{{1>5?'优秀':''}} {{1>0?'良好':''}} {{1>2?'及格':''}} {{1>2?'不及格':''}} {{1>2?'未提交':''}}</view>
-              <view class="rate {{50<60?'pre_60':''}} {{(65>=60&&65<70)?'pre_70':''}} {{(80>=70&&65<85)?'pre_85':''}} {{(90>=85&&65<=100)?'pre_100':''}}">97%</view>
+            <view class="mz">
+              <view class="theName">{{item.user.name}}</view>
+              <view class="theTime">{{item.homeworkTime?item.homeworkTime:'--'}}
+                <image wx:if="{{item.timeout}}" src="../static/chaoshi.png" />
+              </view>
+            </view>
+            <view class="js"><image wx:if="{{item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP'}}" src="../static/jspg.png" /></view>
+            <view class="zql">
+              <view 
+              wx:if="{{item.stuSubmitAt&&item.shieldRightRateTime=='0'&&(!item.rightRate&&item.rightRate!=0)&&(item.correctStatus=='CORRECTING'||item.correctStatus=='AUTO_CORRECTING'||item.correctStatus=='TOBE_CORRECTED')}}" 
+              class="notR"
+            >批改中</view>
+            <!-- 出结果 -->
+            <view wx:if="{{item.stuSubmitAt&&item.shieldRightRateTime=='0'&&(item.rightRate||item.rightRate==0)}}" class="rWrap">
+              <view wx:if="{{item.rightRate<60}}" class="t">不及格</view>
+              <view wx:if="{{item.rightRate<70&&item.rightRate>=60}}" class="t">及格</view>
+              <view wx:if="{{item.rightRate>=70&&item.rightRate<85}}" class="t">良好</view>
+              <view wx:if="{{item.rightRate>=85}}" class="t">优秀</view>
+              <view 
+                class="rate {{item.rightRate<60?'pre_60':''}} {{(item.rightRate>=60&&item.rightRate<70)?'pre_70':''}} {{(item.rightRate>=70&&item.rightRate<85)?'pre_85':''}} {{(item.rightRate>=85)?'pre_100':''}}"
+              >{{item.rightRate}}%</view>
+            </view>
             </view>
           </view>
-        </view>
-      </repeat>
+        </repeat>
+      </view>
       <!-- 循环结构结束 -->
       
+      <!-- 排名为空时的状态 -->
+      <view class="notRank" wx:if="{{rankData.length==0}}">
+        <view>暂无上榜的同学</view>
+        <view>光荣榜仅展示成绩为“优秀和良好”的同学</view>
+      </view>
     </view>
   </view>
-  <view class=""></view>
 </template>
 
 <script>
@@ -77,19 +117,22 @@
   // console.log(n)
   export default class honorRank extends wepy.page {
     config = {
-      navigationBarTitleText: '光荣榜'
+      navigationBarTitleText: '班级作业情况'
     }
     components = {}
 
     mixins = []
 
     data = {
+      allData: [],
+      rankData: [],
+      myChild: {},
       // 算各个分数段的柱形图高度（240*（分数段人数 / 人数最分数段人数））eg:优秀：10，良好：5，及格：20，不及格：5，未提交：5--->[10, 5, 20, 5, 5]
-      yx: {h: 240 * (10 / 20), num: 10},
-      lh: {h: 240 * (5 / 20), num: 5},
-      jg: {h: 240 * (20 / 20), num: 20},
-      bjg: {h: 240 * (5 / 20), num: 8},
-      wtj: {h: 240 * (5 / 20), num: 7}
+      yx: {h: 240 * (1 / 20), num: 10},
+      lh: {h: 240 * (1 / 20), num: 5},
+      jg: {h: 240 * (1 / 20), num: 20},
+      bjg: {h: 240 * (1 / 20), num: 8},
+      wtj: {h: 240 * (1 / 20), num: 7}
     }
 
     computed = {
@@ -128,16 +171,127 @@
 
     events = {}
 
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
+    onLoad(options) {
+      let _this = this
+      // 获取数据  865349521188593664  options.studentHomeworkId
+      wx.showLoading({
+        title: '加载中'
+      })
+      console.log(options)
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/view`,
+        method: 'POST',
+        data: {
+          stuHkId: options.studentHomeworkId
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            _this.allData = res.data.ret.allStudentHomeworks
+            _this.rankData = res.data.ret.studentHomeworks
+            _this.myChild = res.data.ret.studentHomework
+            // 柱状图数据处理(最大做分母)
+            let yxNum = 0
+            let lhNum = 0
+            let jgNum = 0
+            let bjgNum = 0
+            let wtjNum = 0
+            for (let i = 0; i < _this.allData.length; i++) {
+              if ((_this.allData[i].rightRate || _this.allData[i].rightRate === 0) && _this.allData[i].shieldRightRateTime === '0') {
+                if (_this.allData[i].rightRate < 60) {
+                  bjgNum++
+                } else if (_this.allData[i].rightRate >= 60 && _this.allData[i].rightRate < 70) {
+                  jgNum++
+                } else if (_this.allData[i].rightRate >= 70 && _this.allData[i].rightRate < 85) {
+                  lhNum++
+                } else if (_this.allData[i].rightRate >= 85) {
+                  yxNum++
+                }
+              } else if (_this.allData[i].shieldRightRateTime !== '0' && (_this.allData[i].rightRate || _this.allData[i].rightRate === 0)) {
+                // 提交了并且已经批改了，但是不是会员的傻逼不能剔除已提交
+              } else if (!_this.allData[i].stuSubmitAt) {
+                // 未提交
+                wtjNum++
+              }
+            }
+            let maxNum = Math.max.apply(null, [yxNum, lhNum, jgNum, bjgNum, wtjNum]) + 1
+            if (yxNum === 0) {
+              _this.yx = {h: 10, num: yxNum}
+            } else {
+              _this.yx = {h: 240 * ((yxNum + 1) / maxNum), num: yxNum}
+            }
+
+            if (lhNum === 0) {
+              _this.lh = {h: 10, num: lhNum}
+            } else {
+              _this.lh = {h: 240 * ((lhNum + 1) / maxNum), num: lhNum}
+            }
+
+            if (jgNum === 0) {
+              _this.jg = {h: 10, num: jgNum}
+            } else {
+              _this.jg = {h: 240 * ((jgNum + 1) / maxNum), num: jgNum}
+            }
+
+            if (bjgNum === 0) {
+              _this.bjg = {h: 10, num: bjgNum}
+            } else {
+              _this.bjg = {h: 240 * ((bjgNum + 1) / maxNum), num: bjgNum}
+            }
+
+            if (wtjNum === 0) {
+              _this.wtj = {h: 10, num: wtjNum}
+            } else {
+              _this.wtj = {h: 240 * ((wtjNum + 1) / maxNum), num: wtjNum}
+            }
+            // 排名数据处理
+            // 用时格式
+            _this.myChild.homeworkTime = _this.fm(_this.myChild.homeworkTime)
+            for (let i = 0; i < _this.rankData.length; i++) {
+              _this.rankData[i].homeworkTime = _this.fm(_this.rankData[i].homeworkTime)
+            }
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+          wx.hideLoading()
+        },
+        fail (res) {
+          wx.hideLoading()
+          console.log('/wx/micro/parent/homework/view ---> fail')
         }
       })
+    }
+    fm(t) {
+      let a = t
+      if (t >= 60) {
+        t = Math.floor(t / 60) + '\'' + ''
+      } else {
+        t = '00' + '\''
+      }
+      if (a % 60 !== 0) {
+        t += a % 60 + ''
+        t += "\""
+      } else {
+        t += t + '00'
+      }
+      return t
     }
   }
 </script>
 <style lang="less">
+  .notRank{
+    text-align: center;
+    margin-top: 120rpx;
+    font-size: 36rpx;
+    font-weight: 900;
+    color: #999999;
+    line-height: 60rpx;
+  }
   .container{
     height: 100%;
     background: #f0f0f0;
@@ -158,9 +312,40 @@
       text-align: center;
       display: flex;
       flex-direction: column-reverse;
+      .rs{
+        margin-top: 6rpx;
+      }
       .zhu{
         margin: 0 auto;
       }
+    }
+  }
+  .titleBig{
+    font-size: 40rpx;
+    font-weight: 900;
+    width: 690rpx;
+    margin: 0 30rpx;
+    background: #ffffff;
+    height: 140rpx;
+    line-height: 130rpx;
+    border-bottom: 2rpx solid #f0f0f0;
+    color: #333333;
+  }
+  .rankTitle{
+    width: 690rpx;
+    margin: 0 auto;
+    margin-top: 30rpx;
+    font-size: 24rpx;
+    display: flex;
+    .num{
+      width: 100rpx;
+    }
+    .name{
+      width: 90rpx;
+    }
+    .rate{
+      width: 470rpx;
+      text-align: right;
     }
   }
   .rankWrap{
@@ -168,7 +353,7 @@
     background: #ffffff;
     font-size: 30rpx;
     .myChild{
-      border-bottom: 1rpx solid #e5e5e5;
+      border-bottom: 15rpx solid #f0f0f0;
     }
     .rankLis{
       width: 690rpx;
@@ -208,18 +393,36 @@
       .mz{
         width: 245rpx;
         line-height: 40rpx;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         .theName{
+          width: 245rpx;
+          overflow: hidden;
+          height: 40rpx;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           margin-top: 58rpx;
           color: #000;
           font-weight: 900;
           font-size: 30rpx;
+          // display: flex;
+          .tt{
+            float: left;
+          }
+          .myCname{
+            float: left;
+            max-width: 160rpx;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
         }
         .theTime{
           color: #999;
           font-size: 24rpx;
+          image{
+            width: 50rpx;
+            height: 22rpx;
+            vertical-align: middle;
+          }
         }
       }
       .js{

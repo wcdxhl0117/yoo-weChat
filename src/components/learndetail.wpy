@@ -14,8 +14,12 @@
             <view class="hourTime">{{listItem.hourTime}}</view>
           </view>
           <view class="hourTimeContent" wx:for="{{listItem.list}}" wx:key="contentIdx" wx:for-index="contentIdx" wx:for-item="contentItem">
+            <view class="detailLineWrap" wx:if="{{contentItem.length == 2}}">
+              <view class="detailLine"></view>
+            </view>
             <view class="detailTimeWrap" wx:for="{{contentItem}}" wx:key="detailIdx" wx:for-index="detailIdx" wx:for-item="detailItem">
               <view class="detailTime">{{detailItem.time}}</view>
+              <view class="detailAfterDay" wx:if="{{detailItem.afterDay}}">{{detailItem.afterDay}}</view>
               <image class="detailTimeImg" src="../static/exercise.png" wx:if="{{detailItem.type=='exercise'}}"/>
               <image class="detailTimeImg" src="../static/homework.png" wx:if="{{detailItem.type=='homework'}}"/>
               <image class="detailTimeImg" src="../static/complete.png" wx:if="{{detailItem.type=='complete'}}"/>
@@ -56,7 +60,6 @@
         default: false
       },
       date: String,
-      hourTime: String,
       list: {
         type: Array,
         default: []
@@ -147,6 +150,7 @@
 //         time: '20:45',
 //         type: 'complete',
 //         title: '提交作业',
+//         afterDay: '',
 //         subTitle: '用时8分3秒；完成5道题目练习'
 //       }]
 //     ]
@@ -209,6 +213,7 @@
             color: #000000;
           }
           .titleWrap{
+            padding-right: 12rpx;
             .title{
               color: #333333;
             }
@@ -269,37 +274,85 @@
     flex-direction: column;
     background: #f6f6f6;
     border-radius: 10rpx;
+
+    flex-grow: 1;
+    position: relative;
+    // &::after{
+    //   align-self: flex-start;
+    //   content: "";
+    //   position: absolute;
+    //   box-sizing: border-box;
+    //   display: flex;
+    //   flex-grow: 1;
+    //   flex-direction: column;
+    //   width: 4rpx;
+    //   height: 100%;
+    //   left: 176rpx;
+    //   // left: 184rpx;
+    //   top: 0rpx;
+    //   background: red;
+    // }
+    .detailLineWrap{
+      position: absolute;
+      top: 0rpx;
+      height: 100%;
+      left: 172rpx;
+      top: 0rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .detailLine{
+        box-sizing: border-box;
+        width: 4rpx;
+        height: 50%;
+        margin: 40rpx 0;
+        background: #CCCCCC;
+      }
+    }
     .detailTimeWrap{
       margin: 40rpx 0 24rpx;
       display: flex;
       align-items: center;
       position: relative;
       &:nth-child(n+2){
-        margin: 24rpx 0 24rpx;
-        &::after{
-          align-self: flex-start;
-          content: "";
-          position: absolute;
-          width: 4rpx;
-          height: 52rpx;
-          left: 176rpx;
-          top: -50rpx;
-          background: #cccccc;
-        }
+        margin: 24rpx 0 40rpx;
+        // &::after{
+        //   align-self: flex-start;
+        //   content: "";
+        //   position: absolute;
+        //   width: 4rpx;
+        //   height: 100%;
+        //   left: 176rpx;
+        //   // left: 184rpx;
+        //   top: 0rpx;
+        //   background: red;
+        // }
       }
-      .detailTime{
-        margin: 0 0 0 30rpx;
+      .detailAfterDay{
+        position: absolute;
         color: #AAAAAA;
         font-weight: bold;
         font-size: 30rpx;
+        margin: -32rpx 0 0 30rpx;
+      }
+      .detailTime{
+        margin: 0 0 0 30rpx;
+        width: 100rpx;
+        color: #AAAAAA;
+        font-weight: bold;
+        font-size: 30rpx;
+        flex-shrink:0;
+        flex-grow:0;
       }
       .detailTimeImg{
-        margin: 0 0 0 30rpx;
-        flex-shrink: 0;
+        // margin: 0 0 0 30rpx;
+        flex-shrink:0;
+        flex-grow:0;
         display: inline-block;
         width: 90rpx;
         height: 90rpx;
         border-radius: 50%;
+        z-index: 1;
       }
       .titleWrap{
         margin: 0 0 0 30rpx;

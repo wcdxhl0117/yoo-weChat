@@ -12,19 +12,28 @@
           <image wx:if="{{showPsd}}" src="../static/password2.png" />
         </view>
       </view>
-      <view class="btn-area" wx-if="{{isSub}}">
+      <view class="btn-area">
         <button formType="submit">关联账号</button>
       </view>
-      <view class="btn-area notSub" wx-if="{{!isSub}}">
-        <button>关联账号</button>
-      </view>
+
+      <!-- <view class="btn-area notSub" wx-if="{{!isSub}}">
+        <button formType="submit">关联账号</button>
+      </view> -->
     </form>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-
+  import { connect } from 'wepy-redux'
+  import { SET_BIND_STATUS } from '../store/types/user'
+  @connect({
+    bindStatus (state) {
+      return state.user.bindStatus
+    }
+  }, {
+    setBindStatus: SET_BIND_STATUS
+  })
   export default class ChildInput extends wepy.page {
     config = {
       navigationBarTitleText: '关联孩子账号'
@@ -41,6 +50,7 @@
       formSubmit (e) {
         // 后台交互
         console.log('form发生了submit事件，携带数据为：', e.detail.value)
+        this._bindAccount(e.detail.value.account, e.detail.value.password)
         // 弹窗
         // wepy.showToast({
         //   title: '成功',
@@ -53,9 +63,55 @@
       },
       countValChange(e) {
         this.count = e.detail.value
+        console.log(e.detail.value)
       },
       psdValChange(e) {
         this.psd = e.detail.value
+        console.log(e.detail.value)
+      }
+    }
+
+    _bindAccount (account, password) {
+      console.log(account, password)
+      // let that = this
+      if (this.count && this.psd) {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/bindStu`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          data: {
+            userName: account,
+            password: password
+          },
+          success (res) {
+            console.log('child-input.wpy --> _bindAccount --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              wx.showToast({
+                title: '关联成功',
+                icon: 'success',
+                duration: 1400,
+                success () {
+                  setTimeout(() => {
+                    wx.navigateBack({delta: 1})
+                  }, 1400)
+                }
+              })
+            } else {
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            }
+          },
+          fail (res) {
+            console.log('child-input.wpy --> _bindAccount --> success')
+            console.log(res)
+            wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+          }
+        })
+      } else {
+        wx.showToast({icon: 'none', title: '账号和密码不能为空', duration: 1400})
       }
     }
 

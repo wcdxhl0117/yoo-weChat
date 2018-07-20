@@ -8,7 +8,7 @@
   import wepy from 'wepy'
   export default class analysis extends wepy.page {
     config = {
-      navigationBarTitleText: '悠数学-家长'
+      navigationBarTitleText: '学情分析'
     }
 
     components = {}
@@ -26,8 +26,21 @@
     events = {}
 
     onLoad () {
-      this.src = `https://mp.weixin.qq.com/?usercode=${this.$parent.globalData.userCode}`
+      console.log('analysis.wpy --> onLoad')
+      this.src = `${this.$parent.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
     }
+
+    // onShareAppMessage (res) {
+    //   // if (res.from === 'button') {
+    //   //   // 来自页面内转发按钮
+    //   //   console.log(res.target)
+    //   // }
+    //   return {
+    //     title: '孩子近期学情报告',
+    //     path: '/pages/analysis',
+    //     imageUrl: '../static/achieve.png'
+    //   }
+    // }
   }
 </script>
 <style lang="scss" scoped>

@@ -1,15 +1,12 @@
-<style lang="less">
-  
-</style>
 <template>
   <view class="container">
-    123456
+    <web-view src="{{src}}"></web-view>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  export default class Index extends wepy.page {
+  export default class webView extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
@@ -17,7 +14,9 @@
 
     mixins = []
 
-    data = {}
+    data = {
+      src: ''
+    }
 
     computed = {}
 
@@ -25,12 +24,13 @@
 
     events = {}
 
-    onLoad() {
-      wepy.login({
-        success: function(res) {
-          console.log(res.code)
-        }
-      })
+    onLoad(options) {
+      if (options.url) {
+        this.src = options.url
+      }
     }
   }
 </script>
+<style lang="less">
+  
+</style>

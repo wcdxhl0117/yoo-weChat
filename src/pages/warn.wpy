@@ -1,19 +1,19 @@
 <template>
-  <view class="container">
+  <view class="container" wx:if="{{hasGet}}">
     <!-- 不是vip -->
-    <view class="notVip" wx:if="{{!vip}}">
+    <view class="notVip" wx:if="{{!isVip}}">
       <view class="imgWrap">
-        <image src="http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg" />
+        <image src="../static/warm-vip.png" />
       </view>
       <view class="list">
         <view class="lis"><image src="../static/tipVip.png" />未按时写作业，立即提醒</view>
         <view class="lis"><image src="../static/tipVip.png" />作业正确率太低，立即提醒</view>
         <view class="lis"><image src="../static/tipVip.png" />错题未及时订正，立即提醒</view>
       </view>
-      <view class="btn" bindtap="toBuyVip">加入VIP培优计划</view>
+      <view class="btn" bindtap="toPayPage">加入VIP培优计划</view>
     </view>
     <!-- 是vip -->
-    <view wx:if="{{vip}}" class="contentWrap">
+    <view wx:if="{{isVip}}" class="contentWrap">
       <!-- top -->
       <view class="topBar">
         <view class="left">提醒设置</view>
@@ -24,34 +24,36 @@
         暂无异常提醒
       </view>
       <!--非空 -->
-      <view class="lisWrap">
-        <view class="time"><text>{{timeSet()}}</text></view>
-        <!-- 作业成绩报警提醒 -->
-        <!-- <view class="lisCon">
-          <view class="topHead">作业成绩报警提醒</view>
-          <view class="p1">作业名称：05月06日作业</view>
-          <view class="p2">正确率：68%</view>
-          <view class="p3">答错：2题</view>
-          <view class="p4">请及时督促孩子进行错题订正与归因</view>
-          <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
-        </view> -->
-         <!-- 按时完成作业报警提醒 -->
-        <!-- <view class="lisCon">
-          <view class="topHead">按时完成作业报警提醒</view>
-          <view class="p1">作业名称：05月06日作业</view>
-          <view class="p2">距截止时间：剩余20分钟</view>
-          <view class="p4">请及时督促孩子按时完成作业</view>
-          <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
-        </view> -->
-         <!-- 即时订正报警提醒 -->
-        <view class="lisCon">
-          <view class="topHead">即时订正报警提醒</view>
-          <view class="p1">作业名称：05月06日作业</view>
-          <view class="p2">答错：2题</view>
-          <view class="p3">已订正：0题</view>
-          <view class="p4">请及时督促孩子进行错题订正与归因</view>
-          <view bindtap="toReport(12)" class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
-        </view>
+      <view class="lisWrap" wx:if="{{havePro}}">
+        <repeat for="{{lisData}}" key="index" index="index" item="item">
+          <view class="time"><text>{{item.createAt}}</text></view>
+          <!-- 作业成绩报警提醒 -->
+          <view bindtap="toReport" data-id='{{item.studentHomeworkId}}' wx:if="{{item.type == 'LOW_RIGHT'}}" class="lisCon">
+            <view class="topHead">作业成绩报警提醒</view>
+            <view class="p1">作业名称：{{item.homeworkName}}</view>
+            <view class="p2">正确率：{{item.rightRate}}%</view>
+            <view class="p3">答错：{{item.wrongCount}}题</view>
+            <view class="p4">请及时督促孩子进行错题订正与归因</view>
+            <view class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
+          </view>
+          <!-- 按时完成作业报警提醒 -->
+          <view bindtap="toReport" data-id='{{item.studentHomeworkId}}' wx:if="{{item.type == 'SUBMIT'}}" class="lisCon">
+            <view class="topHead">按时完成作业报警提醒</view>
+            <view class="p1">作业名称：{{item.homeworkName}}</view>
+            <view class="p2">距截止时间：剩余{{item.remainingTime}}分钟</view>
+            <view class="p4">请及时督促孩子按时完成作业</view>
+            <view class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
+          </view>
+          <!-- 即时订正报警提醒 -->
+          <view bindtap="toReport" data-id='{{item.studentHomeworkId}}' wx:if="{{item.type == 'CORRECT'}}" class="lisCon">
+            <view class="topHead">即时订正报警提醒</view>
+            <view class="p1">作业名称：{{item.homeworkName}}</view>
+            <view class="p2">答错：{{item.wrongCount}}题</view>
+            <view class="p3">已订正：{{item.revisaledCount}}题</view>
+            <view class="p4">请及时督促孩子进行错题订正与归因</view>
+            <view class="detail">查看详情 <image src="../static/right-arrow-hui.png" /></view>
+          </view>
+        </repeat>
       </view>
       <!-- 设置弹窗 -->
       <view class="setPop" wx:if="{{setPop}}">
@@ -59,17 +61,17 @@
           <view class="tophead">提醒设置</view>
           <view class="con con1">
             <view class="p1">1.当作业正确率低于</view>
-            <view class="p2"><input class="{{red1?'active':''}}" bindinput="setVal(1)" type="number" placeholder="点击设置" /><view>%</view></view>
+            <view class="p2"><input class="{{red1?'active':''}}" bindinput="setVal(1)" type="number" value="{{rightRate}}" placeholder="点击设置" /><view>%</view></view>
             <view class="p3">进行报警提醒<br/></view>
           </view>
           <view class="con con2">
             <view class="p1">2.作业截止时间剩余</view>
-            <view class="p2"><input class="{{red2?'active':''}}" bindinput="setVal(2)" type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p2"><input class="{{red2?'active':''}}" bindinput="setVal(2)" type="number" value="{{timeOver}}" placeholder="点击设置" /><view>分钟</view></view>
             <view class="p3">还未提交作业，进行报警提醒</view>
           </view>
           <view class="con con3">
             <view class="p1">3.作业批改完成后</view>
-            <view class="p2"><input class="{{red3?'active':''}}" bindinput="setVal(3)" type="number" placeholder="点击设置" /><view>分钟</view></view>
+            <view class="p2"><input class="{{red3?'active':''}}" bindinput="setVal(3)" type="number" value="{{haveCorrect}}" placeholder="点击设置" /><view>分钟</view></view>
             <view class="p3">错题未全部订正，进行报警提醒</view>
           </view>
           <view class="btnWrap">
@@ -79,18 +81,26 @@
         </view>
       </view>
     </view>
+    <!-- ios支付弹窗 -->
+    <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import moment from 'moment'
+  import iosPayModal from '../components/iosPayModal'
   export default class warn extends wepy.page {
     config = {
       navigationBarTitleText: '智能提醒'
     }
+    components = {
+      iosPayModal: iosPayModal
+    }
     data = {
-      vip: true,
+      hasGet: false,
+      lisData: [],
+      isVip: true,
       havePro: true,
       setPop: false,
       rightRate: 0,
@@ -98,7 +108,9 @@
       haveCorrect: 0,
       red1: false,
       red2: false,
-      red3: false
+      red3: false,
+      isIOS: false,
+      isShowIosPay: false
     }
 
     methods = {
@@ -108,10 +120,10 @@
           url: `/pages/vip-learn-club`
         })
       },
-      toReport(id) {
-        console.log(id)
+      toReport(e) {
+        console.log(e.currentTarget.dataset.id)
         wepy.navigateTo({
-          url: `/pages/work-report?id=` + id
+          url: `/pages/report-detail?studentHomeworkId=` + e.currentTarget.dataset.id
         })
       },
       setVal(num, e) {
@@ -124,12 +136,17 @@
         }
       },
       setUp() {
+        this.red1 = false
+        this.red2 = false
+        this.red3 = false
+        this.lookSet()
         this.setPop = true
       },
       closePop() {
         this.setPop = false
       },
       sureSet() {
+        console.log(this.rightRate, this.timeOver, this.haveCorrect)
         this.red1 = false
         this.red2 = false
         this.red3 = false
@@ -140,10 +157,10 @@
             icon: 'none',
             duration: 1500
           })
-        } else if (this.timeOver >= 160 || this.timeOver < 1) {
+        } else if (this.timeOver >= 60 || this.timeOver < 1) {
           this.red2 = true
           wepy.showToast({
-            title: '请输入1~160之间的数字',
+            title: '请输入1~60之间的数字',
             icon: 'none',
             duration: 1500
           })
@@ -154,9 +171,63 @@
             icon: 'none',
             duration: 1500
           })
+        } else {
+          // 点击设置
+          let _this = this
+          wx.request({
+            url: `${this.$parent.globalData.baseURL}/wx/micro/parent/setRemindConfig`,
+            method: 'POST',
+            data: {
+              rightRate: this.rightRate,
+              deadline: this.timeOver,
+              afterStuSubmit: this.haveCorrect
+            },
+            header: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'S_T': wx.getStorageSync('token')
+            },
+            success (res) {
+              if (res.data.ret_code === 0) {
+                wepy.showToast({
+                  title: '设置成功',
+                  icon: 'none',
+                  duration: 1500
+                })
+                _this.setPop = false
+                _this.$apply()
+              } else {
+                wepy.showToast({
+                  title: '设置失败',
+                  icon: 'none',
+                  duration: 1500
+                })
+              }
+            },
+            fail (res) {
+              wepy.showToast({
+                title: '设置失败',
+                icon: 'none',
+                duration: 1500
+              })
+              console.log('/wx/micro/parent/getRemindConfig ---> fail')
+            }
+          })
         }
+      },
+      toPayPage () {
+        if (this.isIOS) {
+          this._showIosPayModal()
+        } else {
+          wx.navigateTo({
+            url: '/pages/pay'
+          })
+        }
+      },
+      closeIosPayModal () {
+        this.isShowIosPay = false
       }
     }
+
     timeSet(t) {
       // 1529928850000 //26号
       let timeTep = t
@@ -172,8 +243,117 @@
       }
     }
 
+    // 查看智能提醒设置
+    lookSet() {
+      let _this = this
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/getRemindConfig`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          if (res.data.ret_code === 0) {
+            if (res.data.ret.remindConfig.rightRate && res.data.ret.remindConfig.deadline && res.data.ret.remindConfig.afterStuSubmit) {
+              _this.rightRate = res.data.ret.remindConfig.rightRate
+              _this.timeOver = res.data.ret.remindConfig.deadline
+              _this.haveCorrect = res.data.ret.remindConfig.afterStuSubmit
+            }
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('/wx/micro/parent/getRemindConfig ---> fail')
+        }
+      })
+    }
+    // 获取操作系统信息
+    _getSystemInfo () {
+      let that = this
+      wx.getSystemInfo({
+        success (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+          console.log(res)
+          that.hasGetSystemInfo = true
+          if (res.system.toLowerCase().includes('ios')) {
+            that.isIOS = true
+          }
+          that.$apply()
+        },
+        fail (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+        }
+      })
+    }
+    // 显示ios支付弹窗
+    _showIosPayModal () {
+      this.isShowIosPay = true
+    }
     // 后台获取数据后，先循环改变时间格式
-    onLoad() {}
+    onLoad() {
+      this._getSystemInfo()
+      let _this = this
+      // 查看用户是否是vip
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          if (res.data.ret_code === 0) {
+            _this.hasGet = true
+            if (res.data.ret.userMember.memberType === 'VIP' || res.data.ret.userMember.memberType === 'SCHOOL_VIP') {
+              _this.isVip = true
+            } else {
+              _this.isVip = false
+            }
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('/wx/parent/getUserInfo ---> fail')
+        }
+      })
+
+      // 获取数据
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/listRemind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          if (res.data.ret_code === 0) {
+            if (res.data.ret.remindList.length === 0) {
+              _this.havePro = false
+            } else {
+              let lin = res.data.ret.remindList
+              // 处理时间
+              for (let i = 0; i < lin.length; i++) {
+                lin[i].createAt = _this.timeSet(lin[i].createAt)
+              }
+              _this.lisData = lin
+            }
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('/wx/micro/parent/listRemind ---> fail')
+        }
+      })
+    }
   }
 </script>
 <style lang="less">
@@ -201,7 +381,8 @@
     }
   }
   .list{
-    width: 100%;
+    width: 690rpx;
+    margin: 0 auto;
     line-height: 60rpx;
     font-size: 30rpx;
     margin-top: 60rpx;
@@ -212,8 +393,9 @@
     }
   }
   .btn{
+    margin: 0 auto;
     margin-top: 30rpx;
-    width: 100%;
+    width: 690rpx;
     height: 90rpx;
     line-height: 90rpx;
     text-align: center;
@@ -253,6 +435,7 @@
       font-weight: 900;
     }
     .lisWrap{
+      margin-bottom: 50rpx;
       .time{
         width: auto;
         height: 36rpx;
@@ -260,7 +443,7 @@
         line-height: 36rpx;
         margin: 30rpx auto;
         margin-bottom: 20rpx;
-        border-radius: 4rpx;
+        border-radius: 6rpx;
         text-align: center;
         text{
           padding: 0 20rpx;
@@ -291,7 +474,7 @@
           image{
             width: 12rpx;
             height: 22rpx;
-            margin-left: 490rpx;
+            margin-left: 480rpx;
           }
         }
       }
@@ -390,4 +573,76 @@
       }
     }
   }
+    .iosPayMask{
+      position: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      .mask{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        // opacity: 0.5;
+        transition: opacity 0.2s;
+        opacity: 0;
+        &.active{
+          opacity: 0.5;
+        }
+      }
+      .wrap{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 560rpx;
+        z-index: 1;
+        background:#ffffff;
+        border-radius: 10rpx;
+        transition: opacity 0.2s;
+        opacity: 0;
+        &.active{
+          opacity: 1;
+        }
+        .title{
+          font-weight: bold;
+          color: #000000;
+          font-size: 36rpx;
+          margin: 60rpx 0 30rpx;
+        }
+        .img{
+          display: block;
+          width: 490rpx;
+          height: 330rpx;
+        }
+        .subTitle{
+          color: #999999;
+          font-size: 30rpx;
+          line-height: 42rpx;
+          margin: 25rpx 30rpx;
+        }
+        .btn{
+          display: flex;
+          font-weight: bold;
+          align-items: center;
+          justify-content: center;
+          width:100%;
+          height: 100rpx;
+          outline: none;
+          font-size: 34rpx;
+          border-top: 1rpx solid #D2D3D5;
+          color: #007AFF;
+          border-radius: 0;
+          border-bottom-right-radius: 10rpx;
+          border-bottom-left-radius: 10rpx;
+          background: #fff;
+        }
+      }
+    }
 </style>

@@ -2,7 +2,7 @@
   <view id="authorize">
     <image class="img" src="../static/symbol.png"/>
     <view class="p">需要您的授权才能继续使用</view>
-    <button class="btn" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">获取用户信息</button>
+    <button class="btn" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">同意获取授权</button>
   </view>
 </template>
 
@@ -29,6 +29,7 @@
     methods = {
       async onGotUserInfo (res) {
         let isAuthorize = await this._getAuthorize()
+        this.$parent.globalData.authorize = isAuthorize
         if (isAuthorize) {
           let checkToken = await this._checkToken()
           if (checkToken) {
@@ -59,38 +60,28 @@
 
     events = {}
 
-    onLoad (options) {
-      this.options = options
-      let extra = ''
-      let isFirst = true
-      for (const key in options) {
-        if (key === 'from') {
-          this.from = options['from']
-        } else if (key === 'to') {
-          this.to = options['to']
-        } else {
-          if (isFirst) {
-            extra = `?${key}=${options[key]}`
-            isFirst = false
-          } else {
-            extra = `${extra}&${key}=${options[key]}`
-          }
-        }
+    async _login () {
+      wx.showLoading({title: '正在获取数据'})
+      let code = await this._getCode()
+      let {encryptedData, iv} = await this._getUserInfo()
+      let setTokoen = await this._setToken(code, encryptedData, iv)
+      wx.hideLoading()
+      if (setTokoen) {
+        this._reLaunch()
       }
-      this.extra = extra
     }
 
-    _login () {
-      Promise.all([this._getCode(), this._getUserInfo()]).then((result) => {
-        let code = result[0]
-        let encryptedData = result[1].encryptedData
-        let iv = result[1].iv
-        let isSetToken = this._isSetToken(code, encryptedData, iv)
-        if (isSetToken) {
-          this._reLaunch()
-        }
-      })
-    }
+    // _login () {
+    //   Promise.all([this._getCode(), this._getUserInfo()]).then((result) => {
+    //     let code = result[0]
+    //     let encryptedData = result[1].encryptedData
+    //     let iv = result[1].iv
+    //     let isSetToken = this._isSetToken(code, encryptedData, iv)
+    //     if (isSetToken) {
+    //       this._reLaunch()
+    //     }
+    //   })
+    // }
 
     _reLaunch () {
       console.log(`url = ${this.to || '/pages/index'}${this.extra}`)
@@ -108,13 +99,13 @@
             if (res.code) {
               resolve(res.code)
             } else {
-              wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
             }
           },
           fail (res) {
             console.log('authorize.wpy --> _getCode --> fail')
             console.log(res)
-            wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+            wx.showToast({icon: 'none', title: '获取用户code失败', duration: 1400})
           }
         })
       })
@@ -141,6 +132,8 @@
     _checkToken () {
       return new Promise((resolve, reject) => {
         let token = wx.getStorageSync('token')
+        console.log('_checkToken')
+        console.log(token)
         if (token) {
           wx.request({
             url: `${this.$parent.globalData.baseURL}/wx/micro/parent/checkToken`,
@@ -152,7 +145,7 @@
             success (res) {
               console.log('authorize.wpy --> _checkToken --> success')
               console.log(res)
-              if (res.data.ret_code !== 0) {
+              if (res.data.ret_code === 0) {
                 resolve(true)
               } else {
                 resolve(false)
@@ -199,18 +192,40 @@
               wx.setStorageSync('token', res.data.ret.token)
               resolve(true)
             } else {
-              wx.showToast({icon: 'none', title: '登陆失败', duration: 1400})
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
               resolve(false)
             }
           },
           fail (res) {
             console.log('authorize.wpy --> _setToken --> fail')
             console.log(res)
-            wx.showToast({icon: 'none', title: '登陆失败', duration: 1400})
+            wx.showToast({icon: 'none', title: '设置token失败', duration: 1400})
             resolve(false)
           }
         })
       })
+    }
+
+    onLoad (options) {
+      console.log('authorize.wpy --> onLoad')
+      this.options = options
+      let extra = ''
+      let isFirst = true
+      for (const key in options) {
+        if (key === 'from') {
+          this.from = options['from']
+        } else if (key === 'to') {
+          this.to = options['to']
+        } else {
+          if (isFirst) {
+            extra = `?${key}=${options[key]}`
+            isFirst = false
+          } else {
+            extra = `${extra}&${key}=${options[key]}`
+          }
+        }
+      }
+      this.extra = extra
     }
   }
 </script>

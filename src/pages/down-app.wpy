@@ -3,7 +3,7 @@
 </style>
 <template>
   <view class="container">
-    <web-view src="https://h5.yoomath.com/stureport"></web-view>
+    <web-view src="http://m.yoomath.com/app/"></web-view>
   </view>
 </template>
 

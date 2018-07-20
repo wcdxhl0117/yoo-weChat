@@ -3,11 +3,14 @@
     <view class="zyInfo">作业信息</view>
     <!-- 作业信息 -->
     <view class="Tinfo">
-      <view class="tg">1206作业-函数的基本性质函数的基本 性质函数的基本性质</view>
+      <view class="tg">{{homework.homework.name}}</view>
       <view class="tDetail">
-        <view>共1题</view>
-        <view>限时5分钟</view>
-        <view>难度简单</view>
+        <view>共{{homework.homework.questionCount}}题</view>
+        <view wx:if="{{homework.homework.timeLimit}}">限时{{homework.homework.timeLimit}}分钟</view>
+        <view wx:if="{{!homework.homework.timeLimit}}">不限时</view>
+        <view wx:if="{{homework.homework.difficulty>=0.8}}">难度简单</view>
+        <view wx:if="{{homework.homework.difficulty>=0.4&&homework.homework.difficulty<0.8}}">难度中等</view>
+        <view wx:if="{{homework.homework.difficulty>=0&&homework.homework.difficulty<0.4}}">难度困难</view>
       </view>
       <!-- pressBar -->
       <view class="pressBar">
@@ -17,55 +20,64 @@
         </view>
         <view class="right base">
           <!-- 已提交 -->
-          <!-- <view class="line"></view>
-          <view class="circle"></view> -->
+          <view wx:if="{{homework.stuSubmitAt}}" class="line"></view>
+          <view wx:if="{{homework.stuSubmitAt}}" class="circle"></view>
           <!-- 未提交，线和圆为灰色 -->
-          <view class="line grey"></view>
-          <view class="circle grey"></view>
+          <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}" class="line grey"></view>
+          <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}" class="circle grey"></view>
           <!-- 未做答，圆为红色 -->
-          <!-- <view class="line"></view>
-          <view class="circle red"></view> -->
+          <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}" class="line"></view>
+          <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}" class="circle red"></view>
         </view>
       </view>
       <view class="barTitle">
         <view>已布置</view>
         <!-- 未提交 -->
-        <view class="status">暂未</view>
+        <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}" class="status">暂未</view>
         <!-- 未做答 -->
-        <!-- <view class="noDa">未做答</view> -->
+        <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}" class="noDa">未做答</view>
         <!-- 已提交 -->
-        <!-- <view>已提交</view> -->
+        <view wx:if="{{homework.stuSubmitAt}}">已提交</view>
       </view>
       <view class="timeWrap">
-        <view>07-06 14:30</view>
-        <!-- <view>07-06 14:30</view> -->
+        <view>{{homework.homework.startTime}}</view>
         <!-- 未提交 -->
-        <view>提交作业</view>
+        <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}">提交作业</view>
+        <!-- 已提交 -->
+        <view wx:if="{{homework.stuSubmitAt}}">{{homework.stuSubmitAt}}</view>
+        <!-- 未作答 -->
+        <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}">{{homework.homework.deadline}}</view>
       </view>
     </view>
 
     <!-- 作业状态提示 -->
     <view class="prossTip">
       <!-- 批改结果没出来展示tip -->
-      <view wx:if="{{1>0}}" class="tip">
+      <view class="tip" wx:if="{{!homework.stuSubmitAt||homework.shieldRightRateTime!='0'||(!homework.rightRate&&homework.rightRate!=0)}}">
         <!-- 未提交 -->
-        <!-- <text>孩子暂未提交作业\n请家长及时督促孩子尽快完成</text> -->
+        <text wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}">孩子暂未提交作业\n请家长及时督促孩子尽快完成</text>
         <!-- 未做答 -->
-        <!-- <text>此份作业孩子没有做\n可在学生端通过错题订正的方式进行补交</text> -->
+        <text wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}">此份作业孩子没有做\n可在学生端通过错题订正的方式进行补交</text>
         <!-- 已提交，等待批改 -->
-        <!-- <view>
-          <text>作业正在排队批改中预计15:40批改完成</text>
-          <view @tap="toBuyVip" class="btn">加入VIP培优计划，专享极速批改通道</view>
-          <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text>点击关注公众号</text></view>
-        </view> -->
+        <view 
+          wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime!='0'}}"
+        >
+          <text>作业正在排队批改中\n预计{{dateYj}}分钟后批改完成</text>
+          <view @tap="toPayPage" class="btn">加入VIP培优计划，专享极速批改通道</view>
+          <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text></text></view>
+        </view>
         <!-- 已提交，正在批改 -->
-        <view>
-          <text>作业正在优先批改中</text>
-           <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text>点击关注公众号</text></view>
+        <view 
+          wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime=='0'&&(!homework.rightRate&&homework.rightRate!=0)&&(homework.correctStatus=='CORRECTING'||homework.correctStatus=='AUTO_CORRECTING'||homework.correctStatus=='TOBE_CORRECTED')}}"
+        >
+          <text wx:if="{{isVip}}">作业正在优先批改中</text>
+          <text wx:if="{{!isVip}}">作业正在批改中</text>
+          <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text></text></view>
         </view>
       </view>
-      <!-- 批改结果出来就展示批改结果 （作业情况）-->
-      <view class="result">
+      <!-- 批改结果出来就展示批改结果 shieldRightRateTime （作业情况）-->
+      <!-- -->
+      <view class="result" wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime=='0'&&(homework.rightRate||homework.rightRate==0)}}">
         <view class="topT">作业情况</view>
         <view class="rightRate">
           <view class="left base">
@@ -73,98 +85,138 @@
             'pre_70':(correctRate<70&&correctRate>=60),
             'pre_85':(correctRate>=70&&correctRate<85),
             'pre_100':(correctRate<100&&correctRate>=85)}" -->
-            <view wx:if="{{1>0}}" class="rate pre_60">56%</view>
-            <view wx:if="{{1>2}}" class="rate pre_70">56%</view>
-            <view wx:if="{{1>2}}" class="rate pre_85">56%</view>
-            <view wx:if="{{1>2}}" class="rate pre_100">56%</view>
+            <view wx:if="{{homework.rightRate<60}}" class="rate pre_60">{{homework.rightRate}}%</view>
+            <view wx:if="{{homework.rightRate<70&&homework.rightRate>=60}}" class="rate pre_70">{{homework.rightRate}}%</view>
+            <view wx:if="{{homework.rightRate>=70&&homework.rightRate<85}}" class="rate pre_85">{{homework.rightRate}}%</view>
+            <view wx:if="{{homework.rightRate>=85}}" class="rate pre_100">{{homework.rightRate}}%</view>
             <view class="Title">正确率</view>
           </view>
           <view class="right base">
-            <view class="useTime">18'26''</view>
+            <view class="useTime">{{useTime}}</view>
             <view class="Title">用时</view>
           </view>
         </view>
         <!-- 半对为0不展示 -->
-        <view class="detailJ"><text space="emsp">答对：4题 答错：1题 <text wx:if="{{1>0}}">半对：0题</text></text></view>
+        <view class="detailJ"><text space="emsp">答对：{{homework.rightCount}}题 答错：{{homework.wrongCount}}题 <text wx:if="{{homework.halfWrongCount>0}}">半对：{{homework.halfWrongCount}}题</text></text></view>
         <!-- 有错题展示 -->
-        <view class="btmTip">
-          <view class="left">错题订正：0/1</view>
+        <view class="btmTip" wx:if="{{homework.revisalQuestionTotal&&homework.revisalQuestionTotal>0}}">
+          <view class="left">错题订正：{{homework.revisaledQuestionCount}}/{{homework.revisalQuestionTotal}}</view>
           <!-- 有题需要订正 -->
-          <!-- <view class="right">请及时督促孩子进行错题订正</view> -->
+          <view wx:if="{{homework.revisalQuestionTotal - homework.revisaledQuestionCount > 0}}" class="right">请及时督促孩子进行错题订正</view>
           <!-- 全部订正后 -->
-          <view class="coplate">订正后,
-            <text wx:if="{{1>2}}" class="pre_60">正确率100%</text>
-            <text wx:if="{{1>0}}" class="pre_70">正确率100%</text>
-            <text wx:if="{{1>2}}" class="pre_85">正确率100%</text>
-            <text wx:if="{{1>2}}" class="pre_100">正确率100%</text>
+          <view wx:if="{{(homework.revisalQuestionTotal - homework.revisaledQuestionCount == 0)&&(homework.rightRateCorrect||homework.rightRateCorrect==0)&&homework.revisalAnswerCorrectStatus}}" class="coplate">
+            订正后:
+            <view wx:if="{{homework.rightRateCorrect<60}}" class="rate pre_60">正确率{{homework.rightRateCorrect}}%</view>
+            <view wx:if="{{homework.rightRateCorrect<70&&homework.rightRateCorrect>=60}}" class="rate pre_70">正确率{{homework.rightRateCorrect}}%</view>
+            <view wx:if="{{homework.rightRateCorrect>=70&&homework.rightRateCorrect<85}}" class="rate pre_85">正确率{{homework.rightRateCorrect}}%</view>
+            <view wx:if="{{homework.rightRateCorrect>=85}}" class="rate pre_100">正确率{{homework.rightRateCorrect}}%</view>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 班级整体情况对比 -->
-    <view class="contrast">
-      <view class="topTitle">班级整体情况对比</view>
+    <view class="contrast" wx:if="{{homework.status=='SUBMITED' || homework.status=='ISSUED'}}">
+      <view class="topTitle">
+        <view class="left">班级整体情况对比</view>
+        <view class="right">
+          <text wx:if="{{showTipBan}}">作业时间未截止前 数据会发生变化</text>
+          <image bindtap="showBanTip" src="../static/wenhao.png">
+        </view>
+      </view>
       <view class="lis">
-        <view class="left"><text space="ensp">作业排名：第 8 名</text></view>
+        <view class="left">
+          <text space="ensp" wx:if="{{homework.rank&&homework.shieldRightRateTime=='0'}}">作业排名：第 {{homework.rank}} 名</text>
+          <text space="ensp" wx:if="{{!homework.rank||homework.shieldRightRateTime!='0'}}">作业排名：--</text>
+        </view>
         <view class="right"><text space="ensp" class="grb" bindtap="toBillboard">查看光荣榜</text></view>
       </view>
       <view class="lis">
-        <view class="left"><text space="ensp">平均正确率：95%</text></view>
-        <view class="right"><text space="ensp">最高正确率：100%</text></view>
+        <view class="left">
+          <text space="ensp" wx:if="{{homework.homework.rightRate||homework.homework.rightRate==0}}">平均正确率：{{homework.homework.rightRate}}%</text>
+          <text space="ensp" wx:if="{{!homework.homework.rightRate&&homework.homework.rightRate!=0}}">平均正确率：--</text>
+        </view>
+        <view class="right"><text space="ensp">最高正确率：{{maxRight}}</text></view>
       </view>
       <view class="lis">
-        <view class="left"><text space="ensp">平均用时：01'58''</text></view>
-        <view class="right"><text space="ensp">最短用时：00'32''</text></view>
+        <view class="left">
+          <text wx:if="{{homework.homework.homeworkTime||homework.homework.homeworkTime==0}}" space="ensp">平均用时：{{homework.homework.homeworkTime}}</text>
+          <text wx:if="{{!homework.homework.homeworkTime&&homework.homework.homeworkTime!=0}}" space="ensp">平均用时：--</text>
+        </view>
+        <view class="right"><text space="ensp">最短用时：{{minTime}}</text></view>
       </view>
     </view>
 
     <!-- 作业学情分析(批改完才会有应该) -->
-    <view class="analysis">
+    <view class="analysis" wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime=='0'&&(homework.rightRate||homework.rightRate==0)}}">
       <view class="topTitle">作业学情分析</view>
       <view class="topList">
         <!-- 没有错题不展示 -->
-        <view class="theLis"><image src="../static/wrong.png" /> 本次作业共 5 道错题</view>
-        <view class="theLis"><image src="../static/up.png" /> 与上次作业相比进步了 3 名</view>
-        <view class="theLis"><image src="../static/arm.png" /> 待提升知识点 3 个</view>
+        <view class="theLis" wx:if="{{homework.revisalQuestionTotal}}"><image src="../static/wrong.png" /> 本次作业共 {{homework.revisalQuestionTotal}} 道错题</view>
+        <!-- <view class="theLis"><image src="../static/up.png" /> 与上次作业相比进步了 3 名</view> -->
+        <view wx:if="{{weakKnowpoints.length>0}}" class="theLis"><image src="../static/arm.png" /> 待提升知识点 {{weakKnowpoints.length}} 个</view>
+        <!-- 两者都没有 -->
+        <view wx:if="{{weakKnowpoints.length=='0'&&!homework.revisalQuestionTotal}}" class="theLis">作业中的题目全都答对了</view>
+        <view wx:if="{{weakKnowpoints.length=='0'&&!homework.revisalQuestionTotal}}" class="theLis">本次作业的知识点掌握的很牢固，建议练习一些较难的题目，以进行能力拓展和拔高</view>
       </view>
-      <view class="weak">
+      <view class="weak" wx:if="{{weakKnowpoints.length>0}}">
         <!-- for -->
-        <view class="weakLis">
-          <view class="left">全等三角形的性质</view>
-          <view class="right">
-            <view class="ico">薄弱</view>
-            <view class="arrow"><image src="../static/right-arrow.png" /></view>
+        <repeat for="{{weakKnowpoints}}" key="index" index="index" item="item">
+          <view class="weakLis">
+            <view class="left">{{item.name}}</view>
+            <view class="right">
+              <view class="ico">薄弱</view>
+              <!-- <view class="arrow"><image src="../static/right-arrow.png" /></view> -->
+            </view>
           </view>
-        </view>
+        </repeat>
         <view class="advice">建议家长督促孩子通过学生端错题针对性练习加强 对错题和薄弱知识点的巩固认识</view>
       </view>
     </view>
 
     <!-- 下载客户端 -->
-    <view class="down" bindtap="toDownApp">
-      <view class="left">下载悠数学-学生端 查看作业题目</view>
-      <view class="right">下载</view>
+    <view class="down">
+      可在悠数学-学生端 查看作业题目
     </view>
+    <!-- ios支付弹窗 -->
+    <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
   </view>
-  <view class=""></view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import moment from 'moment'
+  import iosPayModal from '../components/iosPayModal'
   export default class reportDetail extends wepy.page {
     config = {
       navigationBarTitleText: '作业详情'
     }
-    components = {}
+    components = {
+      iosPayModal: iosPayModal
+    }
 
     data = {
-      status: 'defaut' // 判断此份作业当前状态（未提交，未做答，（已提交-待批改-批改中-已批改）=>已提交，待批改，批改中，已批改）
+      isVip: false,
+      showTipBan: false, // 时候显示班级勤快提示
+      homework: {}, // 作业对象
+      classHomework: {},  // 班级作业
+      weakKnowpoints: [], // 薄弱知识点
+      status: 'defaut',  // 判断此份作业当前状态（未提交，未做答，（已提交-待批改-批改中-已批改）=>已提交，待批改，批改中，已批改
+      options: {},
+      useTime: '',
+      dateYj: 0,
+      maxRight: '',  // 最高正确率
+      minTime: '',  // 最短用时
+      isIOS: false,
+      isShowIosPay: false
     }
 
     computed = {}
 
     methods = {
+      showBanTip() {
+        this.showTipBan = !this.showTipBan
+      },
       toBuyVip() {
         console.log('购买vip')
         wepy.switchTab({
@@ -172,19 +224,190 @@
         })
       },
       toBillboard() {
-        console.log(123)
-      },
-      toDownApp() {
-        // https://m.yoomath.com/app/
         wepy.navigateTo({
-          url: `/pages/down-app`
+          url: `/pages/honor-rank?studentHomeworkId=` + this.options.studentHomeworkId
         })
+      },
+      toPayPage () {
+        if (this.isIOS) {
+          this._showIosPayModal()
+        } else {
+          wx.navigateTo({
+            url: '/pages/pay'
+          })
+        }
+      },
+      closeIosPayModal () {
+        this.isShowIosPay = false
       }
+    }
+    // 显示ios支付弹窗
+    _showIosPayModal () {
+      this.isShowIosPay = true
+    }
+  
+    // 获取操作系统信息
+    _getSystemInfo () {
+      let that = this
+      wx.getSystemInfo({
+        success (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+          console.log(res)
+          that.hasGetSystemInfo = true
+          if (res.system.toLowerCase().includes('ios')) {
+            that.isIOS = true
+          }
+          that.$apply()
+        },
+        fail (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+        }
+      })
     }
 
     events = {}
 
-    onLoad() {}
+    onLoad(options) {
+      this._getSystemInfo()
+      let _this = this
+      // studentHomeworkId  eg: studentHomeworkId = 996514346697760768,,,1028276705740980224
+      this.options = options
+      console.log(this.options)
+      // 查看用户是否是vip(写完发现不用写，就放着吧，你大爷的)
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          if (res.data.ret_code === 0) {
+            if (res.data.ret.userMember.memberType === 'VIP' || res.data.ret.userMember.memberType === 'SCHOOL_VIP') {
+              _this.isVip = true
+            } else {
+              _this.isVip = false
+            }
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('/wx/micro/parent/hasBind ---> isvip')
+        }
+      })
+      // 请求作业详情数据
+      wx.showLoading({
+        title: '加载中'
+      })
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/view`,
+        method: 'POST',
+        data: {
+          stuHkId: options.studentHomeworkId
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          if (res.data.ret_code === 0) {
+            _this.homework = res.data.ret.studentHomework
+            _this.classHomework = res.data.ret.allStudentHomeworks
+            _this.weakKnowpoints = res.data.ret.weakKnowpoints
+            _this.homework.homework.startTime = _this.timeSet(_this.homework.homework.startTime)
+            if (_this.homework.stuSubmitAt) {
+              _this.homework.stuSubmitAt = _this.timeSet(_this.homework.stuSubmitAt)
+            }
+            _this.homework.homework.deadline = _this.timeSet(_this.homework.homework.deadline)
+            _this.dateYj = _this.fenChu(_this.homework.shieldRightRateTime)
+            _this.useTime = _this.fm(_this.homework.homeworkTime)
+            _this.useTime = _this.fm(_this.homework.homeworkTime)
+            if (_this.homework.homework.homeworkTime) {
+              _this.homework.homework.homeworkTime = _this.fm(_this.homework.homework.homeworkTime)
+            } else {
+              _this.homework.homework.homeworkTime = '--'
+            }
+            // 处理最短用时和最高正确率
+            let maxR = []
+            let minT = []
+            for (let i = 0; i < _this.classHomework.length; i++) {
+              if (_this.classHomework[i].rightRate || _this.classHomework[i].rightRate === 0) {
+                maxR.push(Math.floor(_this.classHomework[i].rightRate))
+              }
+              if (_this.classHomework[i].homeworkTime) {
+                minT.push(Math.floor(_this.classHomework[i].homeworkTime))
+              }
+            }
+            console.log(maxR, minT)
+            if (maxR.length > 0) {
+              _this.maxRight = Math.max.apply(null, maxR) + '%'
+            } else {
+              _this.maxRight = '--'
+            }
+            if (minT.length > 0) {
+              _this.minTime = _this.fm(Math.min.apply(null, minT))
+            } else {
+              _this.minTime = '--'
+            }
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+          wx.hideLoading()
+        },
+        fail (res) {
+          wx.hideLoading()
+          console.log('/wx/micro/parent/homework/view ---> fail')
+        }
+      })
+    }
+
+    timeSet(t) {
+      // 1529928850000 //26号
+      let timeTep = t
+      let timeGet = moment(timeTep).format('YYYY-MM-DD-HH:mm').split('-')
+      let timeNow = moment(moment()).format('YYYY-MM-DD-HH:mm').split('-')
+      // 年月日时同一天，就只展示时间
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] === timeNow[2])) {
+        return '今天' + moment(timeTep).format('HH:mm')
+      }
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeNow[2] - timeGet[2] === 1)) {
+        return '昨天' + moment(timeTep).format('HH:mm')
+      }
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] - timeNow[2] === 1)) {
+        return '明天' + moment(timeTep).format('HH:mm')
+      }
+      if (timeGet[0] === timeNow[0]) {
+        return moment(timeTep).format('MM/DD HH:mm')
+      }
+      if (timeGet[0] !== timeNow[0]) {
+        return moment(timeTep).format('YYYY/MM/DD HH:mm')
+      }
+    }
+
+    fenChu(t) {
+      t = Math.floor(t / 60000)
+      return t
+    }
+    fm(t) {
+      let a = t
+      if (t >= 60) {
+        t = Math.floor(t / 60) + '\'' + ''
+      } else {
+        t = '00' + '\''
+      }
+      if (a % 60 !== 0) {
+        t += a % 60 + ''
+        t += "\""
+      } else {
+        t += t + '00'
+      }
+      return t
+    }
   }
 </script>
 <style lang="less">
@@ -197,6 +420,7 @@
     line-height: 120rpx;
     margin: 0 auto;
     font-size:40rpx;
+    font-weight: 900;
     color:rgba(51,51,51,1);
   }
   .Tinfo{
@@ -285,7 +509,6 @@
     .tip{
       font-size: 36rpx;
       padding: 50rpx 0;
-      padding-top: 80rpx;
       color: #999999;
       text-align: center;
       .btn{
@@ -320,10 +543,17 @@
       .rightRate{
         width: 100%;
         display: flex;
+        margin: 0 auto;
         justify-content: space-between;
         margin-bottom: 50rpx;
+        .left{
+          border-right: 4rpx solid #EEEEEE;
+        }
         .base{
           color: #999999;
+          width: 49%;
+          text-align: center;
+          padding: 20rpx 0;
           .rate{
             font-size: 40rpx;
           }
@@ -361,6 +591,11 @@
         .right{
           color: #999;
         }
+        .coplate{
+          view{
+            display: inline;
+          }
+        }
         .pre_60{
           color: #F14B40;
         }
@@ -382,11 +617,33 @@
     margin: 0 auto;
     height: auto;
     padding: 40rpx 0;
-    border-bottom: 1rpx solid #f0f0f0; 
+    border-top: 1rpx solid #f0f0f0;
     .topTitle{
+      position: relative;
       font-size:40rpx;
       color: #333333;
-      font-weight: 600;
+      font-weight: 900;
+      display: flex;
+      .right{
+        font-size: 22rpx;
+        color: #999999;
+        image{
+          width: 48rpx;
+          height: 48rpx;
+          position: absolute;
+          right: 0;
+          top: 20rpx;
+        }
+        text{
+          position: absolute;
+          top: -50rpx;
+          right: 0;
+          padding: 15rpx;
+          color: #ffffff;
+          background: rgba(0, 0, 0, 0.6);
+          border-radius: 8rpx;
+        }
+      }
     }
     .lis{
       width: 100%;
@@ -404,6 +661,7 @@
     margin: 0 auto;
     height: auto;
     padding: 40rpx 0;
+    border-top: 1rpx solid #f0f0f0;
     .topTitle{
       font-size: 40rpx;
       color: #333333;
@@ -433,10 +691,16 @@
         justify-content: space-between;
         height: 120rpx;
         line-height: 120rpx;
-        padding-left: 20rpx;
+        margin-left: 40rpx;
         border-bottom: 1rpx solid #f0f0f0;
         .left{
-          color: #007AFF;
+          width: 90%;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          color: #000000;
+          font-size: 30rpx;
+          font-weight: 600;
         }
         .right{
           display: flex;
@@ -472,18 +736,86 @@
     }
   }
   .down{
-    display: flex;
-    justify-content: space-between;
     padding: 0 30rpx;
+    text-align: center;text-align: center;
     margin-bottom: 80rpx;
     height: 100rpx;
-    border: 1rpx solid #E5E5E5;
     width: 630rpx;
-    border-radius: 10rpx;
     line-height: 100rpx;
     font-size: 30rpx;
-    .right{
-      color: #007AFF;
+    color: #999999;
+  }
+
+  .iosPayMask{
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    .mask{
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      // opacity: 0.5;
+      transition: opacity 0.2s;
+      opacity: 0;
+      &.active{
+        opacity: 0.5;
+      }
+    }
+    .wrap{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 560rpx;
+      z-index: 1;
+      background:#ffffff;
+      border-radius: 10rpx;
+      transition: opacity 0.2s;
+      opacity: 0;
+      &.active{
+        opacity: 1;
+      }
+      .title{
+        font-weight: bold;
+        color: #000000;
+        font-size: 36rpx;
+        margin: 60rpx 0 30rpx;
+      }
+      .img{
+        display: block;
+        width: 490rpx;
+        height: 330rpx;
+      }
+      .subTitle{
+        color: #999999;
+        font-size: 30rpx;
+        line-height: 42rpx;
+        margin: 25rpx 30rpx;
+      }
+      .btn{
+        display: flex;
+        font-weight: bold;
+        align-items: center;
+        justify-content: center;
+        width:100%;
+        height: 100rpx;
+        outline: none;
+        font-size: 34rpx;
+        border-top: 1rpx solid #D2D3D5;
+        color: #007AFF;
+        border-radius: 0;
+        border-bottom-right-radius: 10rpx;
+        border-bottom-left-radius: 10rpx;
+        background: #fff;
+      }
     }
   }
 </style>

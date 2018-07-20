@@ -9,7 +9,7 @@
   import wepy from 'wepy'
   export default class Index extends wepy.page {
     config = {
-      navigationBarTitleText: '悠数学-家长'
+      navigationBarTitleText: '悠数学'
     }
     components = {}
 

@@ -23,22 +23,24 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/authorizeIdx',
+      'pages/child-input',
+      'pages/honor-rank',
+      'pages/report-detail',
+      'pages/work-report',
+      'pages/protocol',
+      'pages/warn',
       'pages/authorize',
       'pages/pay',
-      'pages/protocol',
       'pages/analysis',
       'pages/join-trend',
       'pages/vip-learn-club',
       'pages/pay-success',
       'pages/pay-ios',
-      'pages/report-detail',
-      'pages/honor-rank',
       'pages/not-join-trend',
-      'pages/work-report',
-      'pages/warn',
-      'pages/child-input',
       'pages/user',
-      'pages/down-app'
+      'pages/down-app',
+      'pages/web-view'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -69,9 +71,20 @@ export default class extends wepy.app {
 
   globalData = {
     userCode: 'userCode',
-    baseURL: 'http://gw2310102019.xicp.net',
+    // baseURL: 'http://wx.preview.yoomath.com', // 龙哥花生壳
+    baseURL: 'http://wx.yoomath.com', 
+    // baseURL: 'http://192.168.66.70:80', // 于鹏程
+    // baseURL: 'http://192.168.66.69:80', // 龙哥
+    // baseURL: 'http://192.168.66.134:8080', // 赵鹏
+    // baseURL: 'http://wx.test2.yoomath.com',
+    // h5URL: `http://localhost:8080`,
+    // h5URL: 'http://192.168.66.73:8080',
+    // h5URL: 'http://h5.yoomath.com',
+    // h5URL: 'http://h5.preview.yoomath.com',
+    h5URL: 'http://h5.yoomath.com',
     isAuthorize: false,
-    userInfo: null
+    userInfo: null,
+    authorize: false
   }
 
   constructor () {
@@ -79,30 +92,19 @@ export default class extends wepy.app {
     this.use('requestfix')
   }
 
-  async onLaunch() {
-    console.log('app.wpy --> onLaunch')
-    // 在这获取状态,个人信息
-    this.testAsync()
-    let isAuthorize = await this._getAuthorize()
-    if (isAuthorize) {
-      let checkToken = await this._checkToken()
-      if (!checkToken) {
-        this._login()
-      }
-    } else {
-      wx.redirectTo({
-        url: `/pages/authorize?from=/pages/app&to=/pages/index&id=123435&abc=1`
-      })
-    }
-  }
-
-  _login () {
-    Promise.all([this._getCode(), this._getUserInfo()]).then((result) => {
-      let code = result[0]
-      let encryptedData = result[1].encryptedData
-      let iv = result[1].iv
-      this._setToken(code, encryptedData, iv)
-    })
+  async _login () {
+    wx.showLoading({title: '正在获取数据'})
+    // Promise.all([this._getCode(), this._getUserInfo()]).then((result) => {
+    //   console.log('app.wpy --> _login')
+    //   console.log(result)
+    //   let code = result[0]
+    //   let encryptedData = result[1].encryptedData
+    //   let iv = result[1].iv
+    //   this._setToken(code, encryptedData, iv)
+    // })
+    let code = await this._getCode()
+    let {encryptedData, iv} = await this._getUserInfo()
+    this._setToken(code, encryptedData, iv)
   }
 
   // 判断用户是否授权
@@ -123,6 +125,7 @@ export default class extends wepy.app {
   }
 
   _getCode () {
+    console.log()
     return new Promise((resolve, reject) => {
       wx.login({
         success (res) {
@@ -131,13 +134,13 @@ export default class extends wepy.app {
           if (res.code) {
             resolve(res.code)
           } else {
-            wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
           }
         },
         fail (res) {
           console.log('app.wpy --> _getCode --> fail')
           console.log(res)
-          wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
+          wx.showToast({icon: 'none', title: '获取用户code失败', duration: 1400})
         }
       })
     })
@@ -211,13 +214,15 @@ export default class extends wepy.app {
         if (res.data.ret_code === 0) {
           wx.setStorageSync('token', res.data.ret.token)
         } else {
-          wx.showToast({icon: 'none', title: '登陆失败', duration: 1400})
+          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
+        wx.hideLoading()
       },
       fail (res) {
         console.log('app.wpy --> _setToken --> fail')
         console.log(res)
-        wx.showToast({icon: 'none', title: '登陆失败', duration: 1400})
+        wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        wx.hideLoading()
       }
     })
   }
@@ -246,6 +251,45 @@ export default class extends wepy.app {
         cb && cb(res.userInfo)
       }
     })
+  }
+
+  async onLaunch(options) {
+    console.log('app.wpy --> onLaunch')
+    console.log(options)
+
+    let extra = ''
+    // let to = `/${options.path}`
+    let isFirst = true
+
+    for (const key in options.query) {
+      if (isFirst) {
+        extra = `&${key}=${options.query[key]}`
+        isFirst = false
+      } else {
+        extra = `${extra}&${key}=${options.query[key]}`
+      }
+    }
+
+    // 在这获取状态,个人信息
+    this.testAsync()
+    let isAuthorize = await this._getAuthorize()
+    if (isAuthorize) {
+      this.globalData.authorize = true
+      this.globalData.isAuthorize = true
+      let checkToken = await this._checkToken()
+      if (!checkToken) {
+        this._login()
+      }
+    } else {
+      this.globalData.authorize = false
+      this.globalData.isAuthorize = false
+      // wx.redirectTo({
+        // url: `/pages/authorize?from=/pages/app&to=${to}${extra}`
+      // })
+      // wx.redirectTo({
+      //   url: `/pages/authorizeIdx?from=/pages/app&to=${to}${extra}`
+      // })
+    }
   }
 }
 </script>

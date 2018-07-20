@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <view wx:if="{{authorize&&isReady}}" class="container">
     <!-- banner -->
     <swiper
       indicator-dots="{{indicatorDots}}"
@@ -11,7 +11,7 @@
     >
       <repeat for="{{imgUrls}}" key="index" index="index" item="item" style="width:100%; height:100%;">
         <swiper-item style="width:100%; height:100%;">
-          <image src="{{item }}" class="slide-image" style="width:100%; height:100%;" />
+          <image src="{{item.imageUrl}}" bindtap="BannerClick" data-path="{{item.url}}" class="slide-image" style="width:100%; height:100%;" />
         </swiper-item>
       </repeat>
     </swiper>
@@ -19,16 +19,16 @@
     <view class="btm" wx:if="{{!isBind}}">
       <view class="txt1">暂未关联孩子账号</view>
       <view class="txt2">关联孩子账号随时了解孩子的学习情况</view>
-      <button class="btn" bindgetuserinfo="onGotUserInfo" open-type="getUserInfo"> 关联孩子的悠数学账号 </button>
+      <view class="btn" @tap="showBindingPage"> 关联孩子的悠数学账号 </view>
     </view>
     <!-- 已关联展示home结构 -->
     <view class="content" wx:if="{{isBind}}">
       <!-- 作业报告部分 -->
-      <view class="report">
+      <view class="report" bindtap="readReport">
         <view class="head">作业报告</view>
-        <view wx:if="{{isHasRep}}" class="near">近期作业：《04月24日作业》</view>
-        <view wx:if="{{!isHasRep}}" class="near">近期作业：暂无作业</view>
-        <view class="read" bindtap="readReport()">查看</view>
+        <view wx:if="{{idxData.homework}}" class="near">近期作业：《{{idxData.homework.name}}》</view>
+        <view wx:if="{{!idxData.homework}}" class="near">近期作业：暂无作业</view>
+        <view class="read">查看</view>
       </view>
       <!-- VIP培优服务 -->
       <view class="vip">
@@ -39,25 +39,78 @@
           <view class="right">了解详情<image src="../static/right-arrow.png" /></view>
         </view>
         <!-- vip没有报警 -->
-        <view class="monitor notHaveTip" bindtap="toMonitor" wx:if="{{isVip&&!haveTip}}">
-          <view class="left"><image src="../static/notHaveTip.png" />正在监控中...学习情况正常</view>
+        <view class="monitor notHaveTip" bindtap="toMonitor" wx:if="{{isVip&&!idxData.smartRemind}}">
+          <view class="left">
+            <image src="../static/notHaveTip.png" />
+            <view>正在监控中...学习情况正常</view>
+          </view>
         </view>
         <!-- vip有报警 -->
-        <view class="monitor HaveTip" bindtap="toMonitor" wx:if="{{isVip&&haveTip}}">
-          <view class="left"><image src="../static/HaveTip.png" />有1条异常警报：作业[05月06</view>
+        <view class="monitor HaveTip" bindtap="toMonitor" wx:if="{{isVip&&idxData.smartRemind}}">
+          <view class="left">
+            <image src="../static/HaveTip.png" />
+            <view>有{{idxData.remindCount}}条异常警报：作业[{{idxData.smartRemind.homeworkName}}]正...</view>
+          </view>
         </view>
 
         <!-- 学习动态  -->
-        <view class="base learnState" bindtap="toState">
-          <view class="topH">学习动态<image wx:if="{{newShow}}" src="../static/new.png" /></view>
-          <view class="txt">05-26 15:30 开始自主练习</view>
-          <!-- <view class="txt">暂无学习动态</view> -->
+        <view wx:if="{{isVip}}" class="base learnState" bindtap="toState">
+          <view class="topH">学习动态<image wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.clickStatus=='ENABLED'}}" src="../static/new.png" /></view>
+          <!-- <view class="txt" wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.status=='START'}}">
+            {{idxData.learnDynamic.startAt}} 开始
+            {{idxData.learnDynamic.type=='SMART_EXAM_PAPER'?'「智能出卷」':''}}
+            {{idxData.learnDynamic.type=='DAILY_PRACTISE'?'「每日练」':''}}
+            {{idxData.learnDynamic.type=='FALLIBLE_PRACTISE'?'「错题练习」':''}}
+            {{idxData.learnDynamic.type=='HOMEWORK'?'「做作业」':''}}
+            {{idxData.learnDynamic.type=='SECTION_PRACTISE'?'「章节练习」':''}}
+            {{idxData.learnDynamic.type=='WEAK_POINT'?'「薄弱知识点」':''}}
+            {{idxData.learnDynamic.type=='HOMEWORK_CORRECT'?'「作业错题订正」':''}}
+            {{idxData.learnDynamic.type=='PRACTISE_CORRECT'?'「练习错题订正」':''}}
+            {{idxData.learnDynamic.type=='TARGET_FALLIBLE_PRACTISE'?'「错题针对性练习」':''}}
+            {{idxData.learnDynamic.type=='TEACH_PRACTISE'?'「教辅练习」':''}}
+            {{idxData.learnDynamic.name}}
+          </view>
+          <view class="txt" wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.status=='EXIT'}}">
+            {{idxData.learnDynamic.endAt}} 退出
+            {{idxData.learnDynamic.type=='SMART_EXAM_PAPER'?'「智能出卷」':''}}
+            {{idxData.learnDynamic.type=='DAILY_PRACTISE'?'「每日练」':''}}
+            {{idxData.learnDynamic.type=='FALLIBLE_PRACTISE'?'「错题练习」':''}}
+            {{idxData.learnDynamic.type=='HOMEWORK'?'「做作业」':''}}
+            {{idxData.learnDynamic.type=='SECTION_PRACTISE'?'「章节练习」':''}}
+            {{idxData.learnDynamic.type=='WEAK_POINT'?'「薄弱知识点」':''}}
+            {{idxData.learnDynamic.type=='HOMEWORK_CORRECT'?'「作业错题订正」':''}}
+            {{idxData.learnDynamic.type=='PRACTISE_CORRECT'?'「练习错题订正」':''}}
+            {{idxData.learnDynamic.type=='TARGET_FALLIBLE_PRACTISE'?'「错题针对性练习」':''}}
+            {{idxData.learnDynamic.type=='TEACH_PRACTISE'?'「教辅练习」':''}}
+            {{idxData.learnDynamic.name}}
+          </view>
+          <view class="txt" wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.status=='COMMIT'}}">
+            {{idxData.learnDynamic.endAt}} 提交
+            {{idxData.learnDynamic.type=='SMART_EXAM_PAPER'?'「智能出卷」':''}}
+            {{idxData.learnDynamic.type=='DAILY_PRACTISE'?'「每日练」':''}}
+            {{idxData.learnDynamic.type=='FALLIBLE_PRACTISE'?'「错题练习」':''}}
+            {{idxData.learnDynamic.type=='HOMEWORK'?'「做作业」':''}}
+            {{idxData.learnDynamic.type=='SECTION_PRACTISE'?'「章节练习」':''}}
+            {{idxData.learnDynamic.type=='WEAK_POINT'?'「薄弱知识点」':''}}
+            {{idxData.learnDynamic.type=='HOMEWORK_CORRECT'?'「作业错题订正」':''}}
+            {{idxData.learnDynamic.type=='PRACTISE_CORRECT'?'「练习错题订正」':''}}
+            {{idxData.learnDynamic.type=='TARGET_FALLIBLE_PRACTISE'?'「错题针对性练习」':''}}
+            {{idxData.learnDynamic.type=='TEACH_PRACTISE'?'「教辅练习」':''}}
+            {{idxData.learnDynamic.name}}
+          </view> -->
+          <view class="txt" wx:if="{{idxData.learnDynamic}}">{{dynamic.time}} {{dynamic.title}}</view>
+          <view class="txt" wx:if="{{!idxData.learnDynamic}}">暂无学习动态</view>
         </view>
-        <!-- 学情分析  -->
+        <!-- 非vip的示例学习动态 -->
+        <view wx:if="{{!isVip}}" class="base learnState" bindtap="toState">
+          <view class="topH eg">学习动态<image src="../static/egMg.png" /></view>
+          <view class="txt">5-26 15:30 开始自主练习</view>
+        </view>
+        <!-- 学情分析 -->
         <view class="base learnAnalysis" bindtap="toAnalysis">
           <view class="topH">学情分析<image src="" /></view>
-          <view class="txt">03.21 ~ 03.27 周成绩报告</view>
-          <!-- <view class="txt">暂无成绩报告</view> -->
+          <view wx:if="{{idxData.weekReport}}" class="txt">{{idxData.weekReport.startDate}} ~ {{idxData.weekReport.endDate}} 周成绩报告</view>
+          <view wx:if="{{!idxData.weekReport}}" class="txt">暂无成绩报告</view>
         </view>
       </view>
 
@@ -67,6 +120,7 @@
 
 <script>
   import wepy from 'wepy'
+  import moment from 'moment'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -74,66 +128,84 @@
     components = {}
 
     data = {
-      isBind: false, // 是否绑定孩子
-      isHasRep: true, // 是否有作业报告,false为没有
+      isBind: true, // 是否绑定孩子
+      isReady: false,  // 身份时候判断成功
       isVip: true, // 是否是vip
-      haveTip: true, // vip是否有报警
       newShow: true, // 学习动态
-      isAuthorize: false, // 用户是否授权
-      imgUrls: [
-        'http://img02.tooopen.com/images/20150928/tooopen_sy_143912755726.jpg',
-        'http://img06.tooopen.com/images/20160818/tooopen_sy_175866434296.jpg',
-        'http://img06.tooopen.com/images/20160818/tooopen_sy_175833047715.jpg'
-      ],
+      dynamic: {}, // 学习动态对象
+      idxData: {
+        homework: '', // 作业报告
+        remindCount: 0,  // 提醒数量
+        weekReport: '',  // 学情分析
+        smartRemind: '',  // 智能提醒
+        learnDynamic: '',  // 学习动态
+        isVip: false    // 是否是会员
+      },
+      imgUrls: [],
       indicatorDots: true,
       autoplay: true,
-      interval: 3000,
+      interval: 6000,
       duration: 500
     }
 
-    computed = {}
+    computed = {
+      authorize() {
+        if (this.$parent.globalData.authorize) {
+          return true
+        } else {
+          return false
+        }
+      }
+    }
 
     methods = {
-      onGotUserInfo() {
-        this._getAuthorize()
-        if (this.isAuthorize) {
-          // 授权
-          this._login()
-        } else {
-          // 未授权
-        }
-        // 获取信息权限<button open-type="getUserInfo"></button>
-        // wepy.redirectTo({
-        //   url: `/pages/child-input`
-        // })
+      showBindingPage () {
+        wx.navigateTo({
+          url: '/pages/child-input'
+        })
       },
       readReport() {
         // 跳转报告页
-        console.log(123456789)
+        wx.navigateTo({
+          url: '/pages/work-report'
+        })
       },
       toState() {
         // 跳转学习动态页面
-        this.newShow = false
-        console.log('跳转学习动态页面')
-        // wepy.navigateTo({
-        //   url: '/pages/not-join-trend'
-        // })
-        wepy.navigateTo({
-          url: '/pages/join-trend'
-        })
+        if (this.isVip) {
+          wepy.navigateTo({
+            url: '/pages/join-trend'
+          })
+        } else {
+          wepy.navigateTo({
+            url: '/pages/not-join-trend'
+          })
+        }
       },
+      BannerClick(e) {
+        let pathUrl = e.currentTarget.dataset.path
+        if (pathUrl === '/pages/vip-learn-club' || pathUrl === 'pages/index' || pathUrl === '/pages/user') {
+          wepy.switchTab({
+            url: pathUrl
+          })
+        } else if (pathUrl.indexOf('/pages') === -1) {
+          wepy.navigateTo({
+            url: '/pages/web-view?url=' + pathUrl
+          })
+        } else {
+          console.log(0)
+          wepy.navigateTo({
+            url: pathUrl
+          })
+        }
+      },
+
       toAnalysis() {
         // 跳转学情分析页面
         console.log('跳转学情分析页面')
-        // wepy.navigateTo({
-        //   url: '/pages/analysis'
-        // })
-        setTimeout(() => {
-          this.$parent.globalData.userCode = '123123123'
-          wepy.navigateTo({
-            url: '/pages/analysis'
-          })
-        }, 2000)
+        wepy.navigateTo({
+          url: '/pages/analysis'
+        })
       },
       toMonitor() {
         // 跳转警告页
@@ -144,144 +216,455 @@
       }
     }
 
-    async _login () {
-      let code = await this._getCode()
-      let {encryptedData, iv} = await this._getUserInfo()
-      this._setToken(code, encryptedData, iv)
-    }
-
-    _checkToken () {
-      return new Promise((resolve, reject) => {
-        let token = wx.getStorageSync('token')
-        if (token) {
-          wx.request({
-            url: `${this.$parent.globalData.baseURL}/wx/micro/parent/checkToken`,
-            method: 'POST',
-            header: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'S_T': token
-            },
-            success (res) {
-              console.log('index.wpy --> _checkToken --> success')
-              console.log(res)
-              if (res.data.ret_code === 0) {
-                resolve(true)
-              } else {
-                resolve(false)
-              }
-            },
-            fail (res) {
-              console.log('index.wpy --> _checkToken --> fail')
-              console.log(res)
-              resolve(false)
-            }
-          })
-        } else {
-          resolve(false)
-        }
-      })
-    }
-
-    _setToken (code, encryptedData, iv) {
+    getDataIdx() {
+      let _this = this
       wx.request({
-        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/login`,
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/index`,
         method: 'POST',
         header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        data: {
-          code: code,
-          encryptedData: encryptedData,
-          iv: iv
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
         },
         success (res) {
-          console.log('index.wpy --> _setToken --> success')
-          console.log(res)
           if (res.data.ret_code === 0) {
-            wx.setStorageSync('token', res.data.ret.token)
+            // console.log(res.data.ret)
+            _this.idxData = res.data.ret
+            // 学习动态
+            if (_this.idxData.learnDynamic) {
+              _this.dynamic = _this.typeQsc(_this.idxData.learnDynamic)
+            }
+            // 学情报告时间处理
+            if (_this.idxData.weekReport && _this.idxData.weekReport.endDate) {
+              _this.idxData.weekReport.endDate = _this.timestampToTime(_this.idxData.weekReport.endDate, 'date')
+            }
+            if (_this.idxData.weekReport && _this.idxData.weekReport.startDate) {
+              _this.idxData.weekReport.startDate = _this.timestampToTime(_this.idxData.weekReport.startDate, 'date')
+            }
+            // banner数据赋值
+            if (res.data.ret.banners && res.data.ret.banners.length) {
+              _this.imgUrls = res.data.ret.banners
+              for (let i = 0; i < _this.imgUrls.length; i++) {
+                _this.imgUrls[i].imageUrl = _this.$parent.globalData.baseURL + _this.imgUrls[i].imageUrl
+              }
+            }
+            _this.$apply()
           } else {
-            // wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            console.log(res)
           }
         },
         fail (res) {
-          console.log('index.wpy --> _setToken --> fail')
-          console.log(res)
-          // wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          console.log('app.wpy --> _checkToken --> fail')
         }
       })
     }
 
-    // 获取code
-    _getCode () {
-      return new Promise((resolve, reject) => {
-        wx.login({
-          success (res) {
-            console.log('index.wpy --> _getCode --> success')
-            console.log(res)
-            if (res.code) {
-              resolve(res.code)
-            } else {
-              wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
-            }
-          },
-          fail (res) {
-            console.log('index.wpy --> _getCode --> fail')
-            console.log(res)
-            // wx.showToast({icon: 'none', title: '登录失败', duration: 1400})
-          }
-        })
-      })
-    }
-
-    // 获取用户信息
-    _getUserInfo () {
-      return new Promise((resolve, reject) => {
-        wx.getUserInfo({
-          withCredentials: true,
-          success (res) {
-            console.log('index.wpy --> _getUserInfo --> success')
-            console.log(res)
-            resolve({encryptedData: res.encryptedData, iv: res.iv})
-          },
-          fail (res) {
-            console.log('index.wpy --> _getUserInfo --> fail')
-            console.log(res)
-            // wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
-          }
-        })
-      })
+    onShareAppMessage (res) {
+      // if (res.from === 'button') {
+      //   // 来自页面内转发按钮
+      //   console.log(res.target)
+      // }
+      return {
+        title: '悠数学|家长端 随时关注孩子的学习情况',
+        path: '/pages/index',
+        imageUrl: '../static/shareIdx.png'
+      }
     }
 
     events = {}
 
-    onLoad() {
-      console.log('index.wpy --> onLoad')
-      // 后台查看是否关联过孩子,isBind变为true
-      this.isBind = true
-      // let isAuthorize = await this._getAuthorize()
-      // if (isAuthorize) {
-      //   let checkToken = await this._checkToken()
-      //   if (!checkToken) {
-      //     this._login()
-      //   }
-      // }
-    }
-
-    // 判断用户是否授权
     _getAuthorize () {
       return new Promise((resolve, reject) => {
         wx.getSetting({
           success (res) {
-            console.log('index.wpy --> _getAuthorize --> success')
+            console.log('app.wpy --> _getAuthorize --> success')
             console.log(res)
-            if (!res.authSetting['scope.userInfo']) {
-              resolve(false)
-            } else {
+            if (res.authSetting['scope.userInfo']) {
               resolve(true)
+            } else {
+              resolve(false)
             }
           }
         })
       })
+    }
+
+    onLoad() {}
+
+    async onShow() {
+      console.log('vip-learn-club.wpy --> onShow')
+      let authorize = await this._getAuthorize()
+      if (!authorize) {
+        wx.redirectTo({
+          url: `/pages/authorizeIdx?to=/pages/index`
+        })
+        return
+      }
+      let _this = this
+      console.log('index.wpy --> onShow')
+      // 后台查看是否关联过孩子,isBind变为true
+      let token = wx.getStorageSync('token')
+      if (token) {
+        // 查看是否绑定孩子
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': token
+          },
+          success (res) {
+            console.log('index:绑定孩子接口', res)
+            if (res.data.ret_code === 0) {
+              _this.isBind = res.data.ret.hasBind
+              _this.isReady = true
+              _this.$apply()
+              // _this.setData({'isBind': res.data.ret.hasBind})
+              // 获取首页数据
+              // if (_this.isBind) {
+              _this.getDataIdx()
+              // }
+            } else {
+              console.log(res)
+            }
+          },
+          fail (res) {
+            console.log('/wx/micro/parent/hasBind ---> fail')
+          }
+        })
+
+        // 查看用户是否是vip
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': token
+          },
+          success (res) {
+            if (res.data.ret_code === 0) {
+              if (res.data.ret.userMember.memberType === 'VIP' || res.data.ret.userMember.memberType === 'SCHOOL_VIP') {
+                _this.isVip = true
+              } else {
+                _this.isVip = false
+              }
+              _this.$apply()
+            } else {
+              console.log(res)
+            }
+          },
+          fail (res) {
+            console.log('/wx/micro/parent/hasBind ---> fail')
+          }
+        })
+      }
+    }
+
+    // 时间处理函数
+    timestampToTime(timestamp, date) {
+      // 1529928850000 //26号
+      let timeTep = timestamp
+      let timeGet = moment(timeTep).format('YYYY-MM-DD-HH:mm').split('-')
+      let timeNow = moment(moment()).format('YYYY-MM-DD-HH:mm').split('-')
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] === timeNow[2])) {
+        if (date === 'date') {
+          return moment(timeTep).format('MM/DD')
+        } else {
+          return moment(timeTep).format('MM/DD HH:mm')
+        }
+      }
+      if ((timeGet[0] === timeNow[0]) && (timeGet[1] === timeNow[1]) && (timeGet[2] - timeNow[2] === 1)) {
+        if (date === 'date') {
+          return moment(timeTep).format('MM/DD')
+        } else {
+          return moment(timeTep).format('MM/DD HH:mm')
+        }
+      }
+      if (timeGet[0] === timeNow[0]) {
+        if (date === 'date') {
+          return moment(timeTep).format('MM/DD')
+        } else {
+          return moment(timeTep).format('MM/DD HH:mm')
+        }
+      }
+      if (timeGet[0] !== timeNow[0]) {
+        if (date === 'date') {
+          return moment(timeTep).format('YYYY/MM/DD')
+        } else {
+          return moment(timeTep).format('YYYY/MM/DD HH:mm')
+        }
+      }
+    }
+
+    // 类型封装
+    typeQsc(i) {
+      let detail = {}
+      // 智能出卷
+      if (i.type === 'SMART_EXAM_PAPER') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「智能出卷」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「智能出卷」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出自主练习「智能出卷」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「智能出卷」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `complete`
+          detail['title'] = `提交自主练习「智能出卷」`
+          detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+        }
+      // 每日练
+      } else if (i.type === 'DAILY_PRACTISE') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「每日练」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「每日练」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出自主练习「每日练」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「每日练」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `complete`
+          detail['title'] = `提交自主练习「每日练」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        }
+      // 错题练习
+      } else if (i.type === 'FALLIBLE_PRACTISE') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「错题练习」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「错题练习」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出自主练习「错题练习」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「错题练习」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `complete`
+          detail['title'] = `提交自主练习「错题练习」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        }
+      // 章节练习
+      } else if (i.type === 'SECTION_PRACTISE') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「章节练习」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「章节练习」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出自主练习「章节练习」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始自主练习「章节练习」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `complete`
+          detail['title'] = `提交自主练习「章节练习」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        }
+      // 教辅练习
+      } else if (i.type === 'TEACH_PRACTISE') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始教辅练习「${i.name}」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始教辅练习「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出教辅练习「${i.name}」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始教辅练习「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `complete`
+          detail['title'] = `提交教辅练习「${i.name}」`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        }
+      // 做作业
+      } else if (i.type === 'HOMEWORK') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `homework`
+          detail['title'] = `做作业「${i.name}」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `homework`
+          detail['title'] = `做作业「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出作答`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `homework`
+          detail['title'] = `做作业「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `complete`
+          detail['title'] = `提交作业`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒`
+          }
+        }
+      // 作业错题订正
+      } else if (i.type === 'HOMEWORK_CORRECT') {
+        detail['time'] = this.timestampToTime(i.startAt)
+        detail['type'] = `revisal`
+        detail['title'] = `作业错题订正「${i.name}」`
+        detail['subTitle'] = `完成${i.completeQuestionCount}道题目订正`
+      // 练习错题订正
+      } else if (i.type === 'PRACTISE_CORRECT') {
+        detail['time'] = moment(i.startAt).format('HH:mm')
+        detail['type'] = `revisal`
+        detail['title'] = `练习错题订正「${i.name}」`
+        detail['subTitle'] = `完成${i.completeQuestionCount}道题目订正`
+      // 错题针对性练习
+      } else if (i.type === 'TARGET_FALLIBLE_PRACTISE') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始错题针对性练习「${i.name}」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始错题针对性练习「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出错题针对性练习`
+          detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始错题针对性练习「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `提交错题针对性练习`
+          detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+        }
+      // 薄弱知识点针对性练习
+      } else if (i.type === 'WEAK_POINT') {
+        if (i.status === 'START') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始薄弱知识点针对性练习「${i.name}」`
+        } else if (i.status === 'EXIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始薄弱知识点针对性练习「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `退出薄弱知识点针对性练习`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        } else if (i.status === 'COMMIT') {
+          detail['time'] = this.timestampToTime(i.startAt, '1')
+          detail['type'] = `exercise`
+          detail['title'] = `开始薄弱知识点针对性练习「${i.name}」`
+
+          detail['time'] = this.timestampToTime(i.endAt, '1')
+          detail['type'] = `exit`
+          detail['title'] = `提交薄弱知识点针对性练习`
+          if (~~(i.doTime / 60)) {
+            detail['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          } else {
+            detail['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+          }
+        }
+      }
+
+      return detail
     }
   }
 </script>
@@ -295,7 +678,11 @@
     height:230rpx;
     width:690rpx;
     margin: 30rpx auto;
+    image{
+      border-radius: 10rpx;
+    }
   }
+  
   // home相关结构
   .content{
     width: 690rpx;
@@ -314,6 +701,10 @@
         font-weight: 900;
       }
       .near{
+        width:75%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
         font-size: 30rpx;
         color: #999999;
         position: absolute;
@@ -376,12 +767,20 @@
         background: #60CAA1;
         .left{
           color: #ffffff;
+          display: flex;
+          view{
+            width: 600rpx;
+            overflow: hidden;
+            text-overflow:ellipsis;
+            white-space: nowrap;
+          }
           image{
-            width: 32rpx;
+             width: 32rpx;
             height: 32rpx;
-            vertical-align: middle;
+            // vertical-align: middle;
             margin-right: 15rpx;
-            margin-top: -5rpx;
+            margin-top: 24rpx;
+            display: block;
           }
         }
       }
@@ -389,33 +788,51 @@
         background: #F14B40;
         .left{
           color: #ffffff;
+          display: flex;
+          view{
+            width: 600rpx;
+            overflow: hidden;
+            text-overflow:ellipsis;
+            white-space: nowrap;
+          }
           image{
-            width: 32rpx;
+             width: 32rpx;
             height: 32rpx;
-            vertical-align: middle;
+            // vertical-align: middle;
             margin-right: 15rpx;
-            margin-top: -5rpx;
+            margin-top: 24rpx;
+            display: block;
           }
         }
       }
       .base{
         width: 100%;
-        height: 160rpx;
+        min-height: 160rpx;
         margin-top: 30rpx;
         border-radius: 10rpx;
         .topH{
           font-size: 40rpx;
           font-weight: 900;
           padding: 24rpx 30rpx;
+          padding-bottom: 18rpx;
           image{
             width: 80rpx;
             height: 30rpx;
             margin-left: 15rpx;
           }
         }
+        .eg{
+          image{
+            width: 120rpx;
+          }
+        }
         .txt{
           padding: 0 30rpx;
           font-size: 30rpx;
+          width: 600rpx;
+          overflow: hidden;
+          text-overflow:ellipsis;
+          white-space: nowrap;
         }
       }
       .learnState{
@@ -458,7 +875,9 @@
       font-size: 32rpx;
       font-weight: 900;
       height: 90rpx;
+      text-align: center;
       line-height: 90rpx;
+      border-radius: 10rpx;
     }
   }
 </style>

@@ -9,20 +9,32 @@
       <image class="lineImg" src="../static/line.png"/>
     </view>
     <!-- <detail :date="date" :hourTime="hourTime" :list="list"></detail> -->
-    <detail :unfold="unfold" :date="date" :hourTime="hourTime" :list="list"></detail>
+    <learndetail :unfold="unfold" :date="date" :hourTime="hourTime" :list="list"></learndetail>
+    <!-- <view class="iosPayMask" wx:if="{{isShowIosPay}}">
+      <view class="wrap {{iosPayMask?'active':''}}">
+        <view class="title">在客服会话中，继续后续操作</view>
+        <image class="img" src="../static/19@2x.png"/>
+        <view class="subTitle">由于苹果手机平台限制，请在客服会话中回复“VIP”获取购买链接，继续后续操作</view>
+        <button class="btn" open-type="contact" session-from="iso">回复“VIP”获取购买链接</button>
+      </view>
+      <view class="mask {{iosPayMask?'active':''}}" @touchstart="_closeIosPayMask"></view>
+    </view> -->
+    <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import learndetail from '../components/learndetail'
+  import iosPayModal from '../components/iosPayModal'
   export default class notJoinTrend extends wepy.page {
     config = {
       navigationBarTitleText: '学习动态'
     }
 
     components = {
-      detail: learndetail
+      learndetail: learndetail,
+      iosPayModal: iosPayModal
     }
 
     mixins = []
@@ -82,7 +94,9 @@
       ],
       isJoin: false,
       isPractice: false,
-      lineSrc: '../static/line.png'
+      lineSrc: '../static/line.png',
+      isIOS: false,
+      isShowIosPay: false
     }
 
     computed = {}
@@ -90,13 +104,47 @@
     methods = {
       showJoinVip () {
         console.log('加入VIP培优计划')
+        if (this.isIOS) {
+          this._showIosPayModal()
+        } else {
+          wx.navigateTo({
+            url: '/pages/pay'
+          })
+        }
+      },
+      closeIosPayModal () {
+        this.isShowIosPay = false
       }
+    }
+
+    _showIosPayModal () {
+      this.isShowIosPay = true
+    }
+
+    _getSystemInfo () {
+      let that = this
+      wx.getSystemInfo({
+        success (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+          console.log(res)
+          that.hasGetSystemInfo = true
+          if (res.system.toLowerCase().includes('ios')) {
+            that.isIOS = true
+          }
+          that.$apply()
+        },
+        fail (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+        }
+      })
     }
 
     events = {}
 
     onLoad () {
-
+      this._getSystemInfo()
     }
   }
 </script>

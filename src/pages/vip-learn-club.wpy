@@ -1,180 +1,234 @@
 <template>
+<!-- <view id="vipLearnClub" @touchstart="_setHeight"> -->
 <view id="vipLearnClub">
-  <scroll-view scroll-y class="scrollView">
-    <view class="header">
-      <image class="img" src="../static/P0@2x.png"/>
-      <view class="textButtonWrap">
-        <view class="button {{toIdentify=='student'?'active':''}}">对于学生</view>
-        <view class="button scrollBtn {{toIdentify=='patriarch'?'active':''}}" @tap="scrollToSection4">对于家长</view>
-      </view>
+  <block wx:if="{{!isGetData}}">
+    <view class="loading">
+      <image class="rotate" src="../static/loading.png"/>
+      <view class="text">正在加载</view>
     </view>
-    <view class="section1">
-      <image class="img" src="../static/P1@2x.png"/>
-      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
-    </view>
-    <view class="section2">
-      <image class="img" src="../static/P2@2x.png"/>
-      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
-    </view>
-    <view class="section3">
-      <image class="img" src="../static/P3@2x.png"/>
-      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
-    </view>
-    <view class="section4">
-      <image class="img" src="../static/P4@2x.png"/>
-      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
-    </view>
-    <view class="section5">
-      <image class="img" src="../static/P5@2x.png"/>
-      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
-    </view>
-    <view class="section6">
-      <image class="img" src="../static/school.png"/>
-    </view>
-    <view class="section7">
-      <view class="section7Header">
-        <view class="textButtonWrap">
-          <view class="button {{swiperCurrentTab==0?'active':''}}" data-tab="0" @tap="changeSwiperCurrentTab">学生评价</view>
-          <view class="button {{swiperCurrentTab==1?'active':''}}" data-tab="1" @tap="changeSwiperCurrentTab">老师评价</view>
-          <view class="button {{swiperCurrentTab==2?'active':''}}" data-tab="2" @tap="changeSwiperCurrentTab">专家评价</view>
+  </block>
+  <block wx:else>
+    <!-- <scroll-view scroll-y class="scrollView" style="height:{{scrollViewHeight}}" @scroll="scroll" scroll-top="{{scrollTop}}"> -->
+    <scroll-view scroll-y class="scrollView">
+      <view class="wrap">
+      <view class="header">
+        <image class="img" src="../static/P0@2x.png"/>
+        <view class="textButtonWrap {{!isFlexed?'show': ''}}" wx:if="{{!isFlexed}}">
+          <view class="button {{toIdentify=='student'?'active':''}}" @tap="scrollToTop">对于学生</view>
+          <view class="button {{toIdentify=='patriarch'?'active':''}}" @tap="scrollToSection4">对于家长</view>
+        </view>
+        <view class="textButtonWrapflxed {{!isFlexed?'show': ''}}" wx:if="{{isFlexed}}">
+          <view class="button {{toIdentify=='student'?'active':''}}" @tap="scrollToTop">对于学生</view>
+          <view class="button {{toIdentify=='patriarch'?'active':''}}" @tap="scrollToSection4">对于家长</view>
         </view>
       </view>
-      <swiper class="section7Swiper" current="{{swiperCurrentTab}}" duration="300" bindchange="_swiperChange">
-        <swiper-item class="section7SwiperItem">
-          <view class="item">
-            <view class="infoWrap">
-              <image class="img" src="../static/via-lin.png"/>
-              <view class="info">
-                <view class="name">林同学</view>
-                <view class="district">江苏－南京</view>
-              </view>
-            </view>
-            <view class="title">自动批改题目，像随时有个家教老师一样</view>
-            <view class="subTitle">自从有了悠数学，周末假期自己在上面做题后，能够自动批改出结果。不用自己再对照答案了，非常方便 &#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;</view>
-          </view>
-          <view class="line"></view>
-          <view class="item">
-            <view class="infoWrap">
-              <image class="img" src="../static/via-zhang.png"/>
-              <view class="info">
-                <view class="name">张同学</view>
-                <view class="district">山西－太原</view>
-              </view>
-            </view>
-            <view class="title">错题自动进入错题本进行保存</view>
-            <view class="subTitle">悠数学让做错的题目可以通过错题本的功能保存起来，也可以自己打印成纸质错题本，这样便于查看。还会定期推送一些题目，对我的考试有很大的帮助。</view>
-          </view>
-        </swiper-item>
-        <swiper-item class="section7SwiperItem">
-          <view class="item">
-            <view class="infoWrap">
-              <image class="img" src="../static/via-wu.png"/>
-              <view class="info">
-                <view class="name">吴老师</view>
-                <view class="district">江苏－徐州</view>
-              </view>
-            </view>
-            <view class="title">人工智能时代的教学新选择</view>
-            <view class="subTitle">借助大数据和人工智能，教学由课堂延伸到了课后，拓展了教学时空，提高了教学效率，减轻了学生负担，学习从此变得快乐起来。</view>
-          </view>
-          <view class="line"></view>
-          <view class="item">
-            <view class="infoWrap">
-              <image class="img" src="../static/via-yu.png"/>
-              <view class="info">
-                <view class="name">余老师</view>
-                <view class="district">江苏－南京</view>
-              </view>
-            </view>
-            <view class="title">以信息化手段推动数学学科教学发展进步</view>
-            <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
-          </view>
-        </swiper-item>
-        <swiper-item class="section7SwiperItem">
-          <view class="item">
-            <view class="infoWrap">
-              <image class="img" src="../static/via-dong.png"/>
-              <view class="info">
-                <view class="name">董教授</view>
-                <view class="district">江苏省教研室</view>
-              </view>
-            </view>
-            <view class="title">智能教学，学生能够实时自主学习</view>
-            <view class="subTitle">现代化教学的根本还是人才，网络时代背景下，要放大视野，智能教学更应辐射到全部教室，要突破时空的限制，让学生能够实时自主学习</view>
-          </view>
-          <view class="line"></view>
-          <view class="item">
-            <view class="infoWrap">
-              <image class="img" src="../static/via-li.png"/>
-              <view class="info">
-                <view class="name">李教授</view>
-                <view class="district">北京市教研室</view>
-              </view>
-            </view>
-            <view class="title">弥补传统教学的弊端，促进教学高效化</view>
-            <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
-          </view>
-        </swiper-item>
-      </swiper>
-      <view class="itemWrap">
-        <view class="item {{swiperCurrentTab==0?'active':''}}" data-tab="0" @tap="changeSwiperCurrentTab"></view>
-        <view class="item {{swiperCurrentTab==1?'active':''}}" data-tab="1" @tap="changeSwiperCurrentTab"></view>
-        <view class="item {{swiperCurrentTab==2?'active':''}}" data-tab="2" @tap="changeSwiperCurrentTab"></view>
+      <view class="section1">
+        <image class="img" src="../static/P1@2x.png"/>
+        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
       </view>
-    </view>
-    <view class="section8">
-      <image class="img" src="../static/VIP@2x.png"/>
-      <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
-    </view>
-    <view class="supernatant">
-      <view class="wrap">
-        <view class="text">本月已有{{joinNumber}}位同学加入VIP培优计划</view>
-        <view class="btn" @touchstart="toPayPage">立即加入</view>
+      <view class="section2">
+        <image class="img" src="../static/P2@2x.png"/>
+        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
       </view>
-    </view>
-  </scroll-view>
-  <view class="iosPayMask" wx:if="{{isShowIosPayMask}}">
-    <view class="wrap {{iosPayMask?'active':''}}">
-      <view class="title">在客服会话中，继续后续操作</view>
-      <image class="img" src="../static/19@2x.png"/>
-      <view class="subTitle">由于苹果手机平台限制，请在客服会话中点击“悠数学-VIP培优计划”，继续后续操作</view>
-      <button class="btn" open-type="contact" session-from="iso">继续操作</button>
-    </view>
-    <view class="mask {{iosPayMask?'active':''}}" @touchstart="_closeIosPayMask"></view>
-  </view>
+      <view class="section3">
+        <image class="img" src="../static/P3@2x.png"/>
+        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+      </view>
+      <view class="section4">
+        <image class="img" src="../static/P4@2x.png"/>
+        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+      </view>
+      <view class="section5">
+        <image class="img" src="../static/P5@2x.png"/>
+        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+      </view>
+      <view class="section6">
+        <image class="img" src="../static/school.png"/>
+      </view>
+      <view class="section7">
+        <view class="section7Header">
+          <view class="textButtonWrap">
+            <view class="button {{swiperCurrentTab==0?'active':''}}" data-tab="0" @tap="changeSwiperCurrentTab">学生评价</view>
+            <view class="button {{swiperCurrentTab==1?'active':''}}" data-tab="1" @tap="changeSwiperCurrentTab">老师评价</view>
+            <view class="button {{swiperCurrentTab==2?'active':''}}" data-tab="2" @tap="changeSwiperCurrentTab">专家评价</view>
+          </view>
+        </view>
+        <swiper class="section7Swiper" current="{{swiperCurrentTab}}" duration="300" bindchange="_swiperChange">
+          <swiper-item class="section7SwiperItem">
+            <view class="item">
+              <view class="infoWrap">
+                <image class="img" src="../static/via-lin.png"/>
+                <view class="info">
+                  <view class="name">林同学</view>
+                  <view class="district">江苏－南京</view>
+                </view>
+              </view>
+              <view class="title">自动批改题目，像随时有个家教老师一样</view>
+              <view class="subTitle">自从有了悠数学，周末假期自己在上面做题后，能够自动批改出结果。不用自己再对照答案了，非常方便 &#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;</view>
+            </view>
+            <view class="line"></view>
+            <view class="item">
+              <view class="infoWrap">
+                <image class="img" src="../static/via-zhang.png"/>
+                <view class="info">
+                  <view class="name">张同学</view>
+                  <view class="district">山西－太原</view>
+                </view>
+              </view>
+              <view class="title">错题自动进入错题本进行保存</view>
+              <view class="subTitle">悠数学让做错的题目可以通过错题本的功能保存起来，也可以自己打印成纸质错题本，这样便于查看。还会定期推送一些题目，对我的考试有很大的帮助。</view>
+            </view>
+          </swiper-item>
+          <swiper-item class="section7SwiperItem">
+            <view class="item">
+              <view class="infoWrap">
+                <image class="img" src="../static/via-wu.png"/>
+                <view class="info">
+                  <view class="name">吴老师</view>
+                  <view class="district">江苏－徐州</view>
+                </view>
+              </view>
+              <view class="title">人工智能时代的教学新选择</view>
+              <view class="subTitle">借助大数据和人工智能，教学由课堂延伸到了课后，拓展了教学时空，提高了教学效率，减轻了学生负担，学习从此变得快乐起来。</view>
+            </view>
+            <view class="line"></view>
+            <view class="item">
+              <view class="infoWrap">
+                <image class="img" src="../static/via-yu.png"/>
+                <view class="info">
+                  <view class="name">余老师</view>
+                  <view class="district">江苏－南京</view>
+                </view>
+              </view>
+              <view class="title">以信息化手段推动数学学科教学发展进步</view>
+              <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
+            </view>
+          </swiper-item>
+          <swiper-item class="section7SwiperItem">
+            <view class="item">
+              <view class="infoWrap">
+                <image class="img" src="../static/via-dong.png"/>
+                <view class="info">
+                  <view class="name">董教授</view>
+                  <view class="district">江苏省教研室</view>
+                </view>
+              </view>
+              <view class="title">智能教学，学生能够实时自主学习</view>
+              <view class="subTitle">现代化教学的根本还是人才，网络时代背景下，要放大视野，智能教学更应辐射到全部教室，要突破时空的限制，让学生能够实时自主学习</view>
+            </view>
+            <view class="line"></view>
+            <view class="item">
+              <view class="infoWrap">
+                <image class="img" src="../static/via-li.png"/>
+                <view class="info">
+                  <view class="name">李教授</view>
+                  <view class="district">北京市教研室</view>
+                </view>
+              </view>
+              <view class="title">弥补传统教学的弊端，促进教学高效化</view>
+              <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
+            </view>
+          </swiper-item>
+        </swiper>
+        <view class="itemWrap">
+          <view class="item {{swiperCurrentTab==0?'active':''}}" data-tab="0" @tap="changeSwiperCurrentTab"></view>
+          <view class="item {{swiperCurrentTab==1?'active':''}}" data-tab="1" @tap="changeSwiperCurrentTab"></view>
+          <view class="item {{swiperCurrentTab==2?'active':''}}" data-tab="2" @tap="changeSwiperCurrentTab"></view>
+        </view>
+      </view>
+      <view class="section8">
+        <image class="img" src="../static/VIP@2x.png"/>
+        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+      </view>
+      <view class="supernatant">
+        <view class="wrap">
+          <view class="text">本月已有{{joinNumber}}位同学加入VIP培优计划{{scrollTop}}</view>
+          <view class="btn" @touchstart="toPayPage">立即加入</view>
+        </view>
+      </view>
+      </view>
+    </scroll-view>
+
+    <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
+  </block>
 </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import iosPayModal from '../components/iosPayModal'
   export default class vipLearnClub extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
-    components = {}
+    components = {
+      iosPayModal: iosPayModal
+    }
 
     mixins = []
 
     data = {
-      isShowIosPayMask: false,
+      // scrollTop: 0,
+      // scrollViewHeight: '100vh',
+      oldScroll: 0,
+
+      isFlexed: false,
+
+      isGetData: false,
+      isShowIosPay: false,
       iosPayMask: false,
       toIdentify: 'student',
       swiperCurrentTab: 0,
-      joinNumber: 0
+      joinNumber: 0,
+      isIOS: false,
+      hasGetSystemInfo: false,
+      isBind: false,
+      isGetHeight: false
     }
 
     computed = {}
 
+    scroll (e) {
+      console.log(e)
+    }
+
     methods = {
+      scroll (e) {
+        console.log(e)
+      },
+      closeIosPayModal () {
+        this.isShowIosPay = false
+      },
       toPayPage () {
-        this._showIosPayMask()
-        // wepy.navigateTo({
-        //   url: '/pages/pay-ios'
-        // })
+        if (!this.isBind) {
+          wx.navigateTo({
+            url: '/pages/child-input'
+          })
+          // return wx.showToast({icon: 'none', title: '请先绑定孩子账号', duration: 1400})
+          return
+        }
+        if (!this.hasGetSystemInfo) {
+          return wx.showToast({icon: 'none', title: '等待接口返回数据，请稍等', duration: 1400})
+        }
+        if (this.isIOS) {
+          this._showIosPayModal()
+        } else {
+          wx.navigateTo({
+            url: '/pages/pay'
+          })
+        }
+      },
+      scrollToTop () {
+        wx.pageScrollTo({
+          scrollTop: 0,
+          duration: 600
+        })
       },
       async scrollToSection4 () {
         let scrollTop = await this._getScrollTop()
         let viewTop = await this._getViewTop('.section4')
+        console.log(scrollTop)
+        console.log(viewTop)
         wx.pageScrollTo({
           scrollTop: viewTop + scrollTop,
           duration: 600
@@ -196,38 +250,205 @@
     _getViewTop (view) {
       return new Promise((resolve, reject) => {
         wx.createSelectorQuery().select(view).boundingClientRect((rect) => {
-          resolve(rect.top)
+          resolve(rect ? rect.top : 0)
         }).exec()
       })
+    }
+
+    _getView (view) {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().select(view).boundingClientRect((rect) => {
+          resolve(rect)
+        }).exec()
+      })
+    }
+
+    async _setHeight () {
+      let scrollTop = await this._getScrollTop()
+      let studentHeight = await this._getViewTop('.header .textButtonWrap')
+      let patriarchHeight = await this._getViewTop('.section4')
+      let fixedHeight = await this._getViewTop('.textButtonWrapflxed')
+      this.studentHeight = studentHeight + scrollTop || 0
+      this.patriarchHeight = patriarchHeight + scrollTop || 0
+      this.fixedHeight = fixedHeight + scrollTop || 0
+      this.isGetHeight = true
+      this.$apply()
     }
 
     _swiperChange (event) {
       this.swiperCurrentTab = event.detail.current
     }
 
-    _closeIosPayMask () {
-      this.iosPayMask = false
-      setTimeout(() => {
-        this.iosPayMask = false
-        this.isShowIosPayMask = false
-        this.$apply()
-      }, 200)
+    _showIosPayModal () {
+      this.isShowIosPay = true
     }
 
-    _showIosPayMask () {
-      // this.iosPayMask = true
-      this.isShowIosPayMask = true
-      setTimeout(() => {
-        this.iosPayMask = true
-        this.isShowIosPayMask = true
-        this.$apply()
-      }, 10)
+    _getSystemInfo () {
+      let that = this
+      wx.getSystemInfo({
+        success (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+          console.log(res)
+          that.hasGetSystemInfo = true
+          if (res.system.toLowerCase().includes('ios')) {
+            that.isIOS = true
+          }
+          that.$apply()
+        },
+        fail (res) {
+          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+        }
+      })
+    }
+
+    _getVipNumber () {
+      let that = this
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/user/getVipNumber`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          success (res) {
+            console.log('vip-learn-club.wpy --> _getVipNumber --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              that.joinNumber = res.data.ret.vipNumber
+              that.$apply()
+              resolve(true)
+            } else {
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+              resolve(false)
+            }
+          },
+          fail (res) {
+            console.log('vip-learn-club.wpy --> _getVipNumber --> success')
+            console.log(res)
+            wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            resolve(false)
+          }
+        })
+      })
+    }
+
+    _getBindStatus () {
+      let that = this
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          success (res) {
+            console.log('vip-learn-club.wpy --> _getBindStatus --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              that.isBind = res.data.ret.hasBind
+            } else {
+              that.isBind = false
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            }
+            that.$apply()
+            resolve(true)
+          },
+          fail (res) {
+            console.log('vip-learn-club.wpy --> _getBindStatus --> fail')
+            console.log(res)
+            that.isBind = false
+            that.$apply()
+            wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            resolve(false)
+          }
+        })
+      })
+    }
+
+    _getInfo () {
+      let that = this
+      Promise.all([this._getVipNumber(), this._getBindStatus()]).then((result) => {
+        console.log('pay.wpy --> _getInfo')
+        that.isGetData = true
+        that.$apply()
+      })
+    }
+
+    _getAuthorize () {
+      return new Promise((resolve, reject) => {
+        wx.getSetting({
+          success (res) {
+            console.log('app.wpy --> _getAuthorize --> success')
+            console.log(res)
+            if (res.authSetting['scope.userInfo']) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          }
+        })
+      })
     }
 
     events = {}
 
-    onLoad() {
-      console.log(this)
+    onLoad () {
+      console.log('vip-learn-club.wpy --> onLoad')
+      this._getSystemInfo()
+      // setTimeout(() => {
+      //   this._setScrollViewHeight()
+      // }, 0)
+    }
+
+    async onShow () {
+      console.log('vip-learn-club.wpy --> onShow')
+      let authorize = await this._getAuthorize()
+      if (!authorize) {
+        wx.redirectTo({
+          url: `/pages/authorizeIdx?to=/pages/vip-learn-club`
+        })
+        return
+      }
+      this._getInfo()
+      // this._setScrollViewHeight()
+      // this._getVipNumber()
+      // this._getBindStatus()
+    }
+
+    onShareAppMessage (res) {
+      // if (res.from === 'button') {
+      //   // 来自页面内转发按钮
+      //   console.log(res.target)
+      // }
+      return {
+        title: '悠数学VIP培优计划',
+        path: '/pages/vip-learn-club',
+        imageUrl: '../static/shareVIP.png'
+      }
+    }
+
+    async onPageScroll (e) {
+      let btnScroll = await this._getViewTop('.header .textButtonWrap')
+      let section1Scroll = await this._getViewTop('.section1')
+      let section4Scroll = await this._getViewTop('.section4')
+      if (~~btnScroll <= 0) {
+        this.isFlexed = true
+      } else {
+        this.isFlexed = false
+      }
+      if (~~section4Scroll <= 0) {
+        this.toIdentify = 'patriarch'
+      } else {
+        this.toIdentify = 'student'
+      }
+      if (~~e.scrollTop <= ~~section1Scroll) {
+        this.isFlexed = false
+      }
+      this.$apply()
     }
   }
 </script>
@@ -236,7 +457,8 @@
   .scrollView{
     display: flex;
     flex-direction: column;
-    height: 100%;
+    // height: 7925rpx;
+    // height: 100vh;
     .header{
       position: relative;
       height: 400rpx;
@@ -249,6 +471,15 @@
         position:absolute;
         bottom:46rpx;
         padding:0 140rpx;
+      }
+      .textButtonWrapflxed{
+        position: fixed;
+        padding: 0 130rpx;
+        top: 0;
+        height: 90rpx;
+        background: #fff;
+        border-top: 1rpx solid #f0f0f0;
+        z-index: 2;
       }
     }
     .section1, .section2, .section3, .section4, .section5, .section6, .section8{
@@ -289,7 +520,7 @@
         height: 1399rpx;
       }
       .button{
-         background :#ED5A87;
+        background :#ED5A87;
       }
     }
     .section3{
@@ -330,6 +561,8 @@
       box-sizing: border-box;
       background: #1A88E6;
       padding: 60rpx 30rpx;
+      height: 850rpx;
+      box-sizing: border-box;
       .section7Header{
         display: flex;
         justify-content: space-between;
@@ -424,16 +657,17 @@
     }
     
     .section8{
-      height: 855rpx;
+      height: 950rpx;
       .img{
-        height: 855rpx;
+        height: 950rpx;
       }
       .button{
-         background :#F14B40;
+        bottom: 146rpx;
+        background :#F14B40;
       }
     }
 
-    .textButtonWrap{
+    .textButtonWrap, .textButtonWrapflxed{
       box-sizing: border-box;
       width: 100%;
       display: flex;
@@ -443,7 +677,6 @@
         display: flex;
         position: relative;
         font-weight: bold;
-        color: #5068D1;
         font-size: 36rpx;
         line-height: 40rpx;
         &.active{
@@ -452,12 +685,35 @@
             content: '';
             display: block;
             position: absolute;
-            margin-top: 20rpx;
             background: #fff;
             height: 6rpx;
             width: 48rpx;
             left: 50%;
             margin-left: -24rpx;
+          }
+        }
+      }
+    }
+    .textButtonWrap{
+      .button{
+        color: #5068D1;
+        &.active{
+          color: #ffffff;
+          &::after{
+            background: #fff;
+            margin-top: 20rpx;
+          }
+        }
+      }
+    }
+    .textButtonWrapflxed{
+      .button{
+        color: #666666;
+        &.active{
+          color: #1A88E6;
+          &::after{
+            background: #1A88E6;
+            margin-top: 10rpx;
           }
         }
       }
@@ -500,6 +756,7 @@
     .mask{
       position: absolute;
       top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       background: #000;
@@ -548,7 +805,7 @@
         width:100%;
         height: 100rpx;
         outline: none;
-        line-height: 30rpx;
+        font-size: 34rpx;
         border-top: 1rpx solid #D2D3D5;
         color: #007AFF;
         border-radius: 0;
@@ -560,6 +817,39 @@
   }
   button::after{
     border:none;
+  }
+  .loading{
+    display: flex;
+    height: 100vh;
+    background: #ffffff;
+    flex-direction: column;
+    flex:1 1 auto;
+    align-items: center;
+    justify-content: center;
+    .text{
+      font-weight: bold;
+      font-size: 30rpx;
+      line-height: 40rpx;  
+    }
+  }
+  @keyframes rotate{
+    0%{
+      transform: rotate(0);
+    }
+    50%{
+    	transform:rotate(180deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  .rotate{
+    display: block;
+    width: 60rpx;
+    height: 60rpx;
+    margin-bottom: 4rpx;
+    transition: 0.5s;
+    animation: rotate 0.8s linear infinite;
   }
 }
 </style>

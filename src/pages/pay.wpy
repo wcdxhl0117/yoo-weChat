@@ -1,50 +1,53 @@
 <template>
   <view id="pay">
-    <view class="infoWrap">
-      <image class="viaImg" src="../static/via-lin.png"/>
-      <view class="info">
-        <view class="name">sxjz汪洋</view>
-        <view class="join">您当前未加入VIP学习社</view>
+    <block wx:if="{{!isGetData}}">
+      <view class="loading">
+        <image class="rotate" src="../static/loading.png"/>
+        <view class="text">正在加载</view>
       </view>
-    </view>
-    <view class="titleWrap">
-      <view class="line"></view>
-      <view class="title">VIP培优计划套餐</view>
-      <view class="line"></view>
-    </view>
-    <view class="item {{current==0?'active':''}}" data-tab="0" @tap="click">
-      <view class="goodsWrap" data-tab="0">
-        <view class="goods" data-tab="0">
-          <view class="text" data-tab="0">1年VIP会员</view>
+    </block>
+    <block wx:else>
+      <view class="infoWrap">
+        <view class="viaWrap">
+          <image class="viaImg {{isVip?'vip':''}}" src="{{baseViaSrc}}"/>
+          <image class="vipImg" wx:if="{{isVip}}" src="../static/vip.png"/>
+        </view>
+        <view class="info">
+          <view class="name">{{userName}}</view>
+          <view class="join" wx:if="{{!isVip}}">您当前未加入VIP学习社</view>
+          <view class="join" wx:if="{{isVip}}">已加入VIP培优计划：{{endDate}}到期</view>
         </view>
       </view>
-      <view class="priceWrap" data-tab="0">
-        <view class="discount" data-tab="0">¥488</view>
+      <view class="titleWrap">
+        <view class="line"></view>
+        <view class="title">VIP培优计划套餐</view>
+        <view class="line"></view>
       </view>
-    </view>
-    <view class="item {{current==1?'active':''}}" data-tab="1" @tap="click">
-      <view class="goodsWrap" data-tab="1">
-        <view class="goods" data-tab="1">
-          <view class="text" data-tab="1">2年VIP会员</view>
-          <view class="tag" data-tab="1">超值</view>
+      <view class="item {{current==index?'active':''}}" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-tab="{{index}}" @tap="click">
+        <view class="goodsWrap" data-tab="{{index}}">
+          <view class="goods" data-tab="{{index}}">
+            <view class="text" data-tab="{{index}}">{{item.month}}月VIP会员</view>
+            <view class="tag" data-tab="{{index}}" wx:if="{{item.tagName}}">{{item.tagName}}</view>
+          </view>
+          <view class="extra" data-tab="{{index}}" wx:if="{{item.extraMonth}}">赠送{{item.extraMonth}}月会员</view>
         </view>
-        <view class="extra" data-tab="1">赠送1年会员</view>
+        <view class="priceWrap" data-tab="{{index}}">
+          <view class="discount" data-tab="{{index}}">¥{{item.presentPrice}}</view>
+          <view class="price" data-tab="{{index}}" wx:if="{{item.originalPrice}}">¥{{item.originalPrice}}</view>
+        </view>
       </view>
-      <view class="priceWrap" data-tab="1">
-        <view class="discount" data-tab="1">¥960</view>
-        <view class="price" data-tab="1">¥1440</view>
-      </view>
-    </view>
-    <view class="agreement">悠数学收费服务协议</view>
-    <view class="btn">确认支付</view>
+      <view class="agreement" @tap="showProtocolPage">悠数学收费服务协议</view>
+      <view class="btn" @tap="payOrder">确认支付</view>
+    </block>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import moment from 'moment'
   export default class pay extends wepy.page {
     config = {
-      navigationBarTitleText: '悠数学-家长'
+      navigationBarTitleText: '加入VIP培优计划'
     }
 
     components = {}
@@ -52,7 +55,22 @@
     mixins = []
 
     data = {
-      current: 0
+      isGetData: false,
+      current: 0,
+      userName: '',
+      baseViaSrc: '',
+      isJoin: false,
+      isVip: false,
+      endDate: '',
+      list: [],
+      memberPackageId: '',
+      appId: '',
+      nonceStr: '',
+      orderId: '',
+      package: '',
+      paySign: '',
+      signType: '',
+      timeStamp: ''
     }
 
     computed = {}
@@ -60,29 +78,225 @@
     methods = {
       click (event) {
         this.current = event.target.dataset.tab
+        this.memberPackageId = this.list[this.current].id
+      },
+      payOrder () {
+        wx.showLoading({title: '正在支付'})
+        this._getPayInfo()
+      },
+      showProtocolPage () {
+        wx.navigateTo({
+          url: '/pages/protocol'
+        })
       }
+    }
+
+    _getMemberPackages () {
+      let that = this
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/member/memberPackages`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          success (res) {
+            console.log('pay.wpy --> _getMemberPackages --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              that.endDate = moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD')
+              that.isVip = res.data.ret.userMember.memberType.toLowerCase().includes('vip')
+              that.list = res.data.ret.memberPackages
+              that.memberPackageId = that.list[that.current].id
+              that.$apply()
+              resolve(true)
+            } else {
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+              resolve(false)
+            }
+          },
+          fail (res) {
+            console.log('pay.wpy --> _getMemberPackages --> fail')
+            console.log(res)
+            wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            resolve(false)
+          }
+        })
+      })
+    }
+
+    _setIsGetData () {
+      let that = this
+      Promise.all([this._getUserInfo(), this._getMemberPackages()]).then((result) => {
+        console.log('pay.wpy --> _setIsGetData')
+        that.isGetData = true
+        that.$apply()
+      })
+    }
+
+    _getUserInfo () {
+      let that = this
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          success (res) {
+            console.log('pay.wpy --> _getUserInfo --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              that.userName = res.data.ret.user.name
+              if (res.data.ret.user.minAvatarUrl) {
+                that.baseViaSrc = `${that.$parent.globalData.baseURL}${res.data.ret.user.minAvatarUrl}`
+              } else {
+                that.baseViaSrc = '../static/baseVia.png'
+              }
+              that.$apply()
+              resolve(true)
+            } else {
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+              resolve(false)
+            }
+          },
+          fail (res) {
+            console.log('pay.wpy --> _getUserInfo --> fail')
+            console.log(res)
+            wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            resolve(false)
+          }
+        })
+      })
+    }
+
+    _getPayInfo () {
+      let that = this
+      wx.request({
+        url: `${that.$parent.globalData.baseURL}/wx/micro/parent/member/createWXOrder`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        data: {
+          source: 1,
+          memberPackageId: that.memberPackageId
+        },
+        success (res) {
+          console.log('pay.wpy --> _getPayInfo --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.appId = res.data.ret.appId
+            that.nonceStr = res.data.ret.nonceStr
+            that.orderId = res.data.ret.orderId
+            that.package = res.data.ret.package
+            that.paySign = res.data.ret.paySign
+            that.signType = res.data.ret.signType
+            that.timeStamp = res.data.ret.timeStamp
+            wx.setStorageSync('orderId', res.data.ret.orderId)
+            wx.setStorageSync('sign', res.data.ret.sign)
+            that.$apply()
+            that._wxPay()
+          } else {
+            // that.methods.setBindStatus(false)
+            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+          }
+          wx.hideLoading()
+        },
+        fail (res) {
+          console.log('pay.wpy --> _getPayInfo --> fail')
+          console.log(res)
+          wx.hideLoading()
+          // that.methods.setBindStatus(false)
+          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        }
+      })
+    }
+
+    _wxPay () {
+      let that = this
+      wx.requestPayment({
+        timeStamp: that.timeStamp + '',
+        nonceStr: that.nonceStr + '',
+        package: that.package + '',
+        signType: that.signType + '',
+        paySign: that.paySign + '',
+        success (res) {
+          console.log('pay.wpy --> _wxPay --> success')
+          console.log(res)
+          wx.navigateTo({
+            url: `/pages/pay-success`
+          })
+        },
+        fail (res) {
+          console.log('pay.wpy --> _wxPay --> fail')
+          console.log(res)
+          if (res.err_desc) {
+            wx.showToast({icon: 'none', title: res.err_desc, duration: 1400})
+          }
+          // wx.navigateTo({
+          //   url: `/pages/pay-success`
+          // })
+        }
+      })
     }
 
     events = {}
 
-    onLoad () {}
+    onLoad () {
+      console.log('pay.wpy --> onLoad')
+    }
+
+    onShow () {
+      console.log('pay.wpy --> onShow')
+      this._setIsGetData()
+      // this._getMemberPackages()
+      // this._getUserInfo()
+    }
   }
 </script>
 <style lang="scss" scoped>
 #pay{
   .infoWrap{
     margin: 30rpx;
-    padding: 40rpx;
+    padding: 40rpx 30rpx;
     background: #f6f6f6;
     border-radius: 10rpx;
     display: flex;
     align-items: center;
-    .viaImg{
-      display: block;
-      flex-shrink: 1;
-      width: 100rpx;
-      height: 100rpx;
-      margin-right: 30rpx;
+    // .viaImg{
+    //   display: block;
+    //   flex-shrink: 1;
+    //   width: 100rpx;
+    //   height: 100rpx;
+    //   margin-right: 30rpx;
+    // }
+    .viaWrap{
+      // position: absolute;
+      right: 40rpx;
+      display: flex;
+      flex-direction: column;
+      flex:0 1 auto;
+      align-items: center;
+      margin-right: 8rpx;
+      .viaImg{
+        display: block;
+        width: 100rpx;
+        height: 100rpx;
+        border-radius: 100%;
+        &.vip{
+          border: 1rpx solid #ffbc01;
+        }
+      }
+      .vipImg{
+        display: block;
+        width: 45rpx;
+        height: 24rpx;
+        margin-top: -14rpx; 
+      }
     }
     .info{
       display: flex;
@@ -97,6 +311,7 @@
         color: #999999;
         font-size: 30rpx;
         line-height: 40rpx;
+        white-space: nowrap;
       }
     }
   }
@@ -143,9 +358,9 @@
       }
       .tag{
         position: relative;
-        margin-left: 20rpx;
+        margin-left: 12rpx;
         box-sizing: border-box;
-        padding: 0 14rpx;
+        padding: 2rpx 14rpx;
         background: #00BB9D;
         letter-spacing: 1Px;
         color: #ffffff;
@@ -158,7 +373,7 @@
           width:0;
           height:0;
           margin-top: 5rpx;
-          margin-left: -12rpx;
+          margin-left: -8rpx;
           border-width: 8rpx 14rpx 8rpx 0;
           border-style: solid;
           border-color: transparent #00BB9D transparent transparent;
@@ -194,6 +409,7 @@
     line-height: 30rpx;
     text-align: center;
     text-decoration: underline;
+    margin-bottom: 120rpx;
   }
   .btn{
     position: fixed;
@@ -207,6 +423,39 @@
     color: #ffffff;
     font-size: 30rpx;
     line-height: 30rpx;
+  }
+  .loading{
+    display: flex;
+    height: 100vh;
+    background: #ffffff;
+    flex-direction: column;
+    flex:1 1 auto;
+    align-items: center;
+    justify-content: center;
+    .text{
+      font-weight: bold;
+      font-size: 30rpx;
+      line-height: 40rpx;  
+    }
+  }
+  @keyframes rotate{
+    0%{
+      transform: rotate(0);
+    }
+    50%{
+    	transform:rotate(180deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  .rotate{
+    display: block;
+    width: 60rpx;
+    height: 60rpx;
+    margin-bottom: 4rpx;
+    transition: 0.5s;
+    animation: rotate 0.8s linear infinite;
   }
 }
 </style>

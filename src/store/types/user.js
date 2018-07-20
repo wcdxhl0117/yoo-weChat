@@ -1,4 +1,4 @@
-export const SET_PARENT_NAME = 'SET_PARENT_NAME'
+export const SET_CHILD_NICK_NAME = 'SET_CHILD_NICK_NAME'
 
 export const SET_CHILD_NAME = 'SET_CHILD_NAME'
 
