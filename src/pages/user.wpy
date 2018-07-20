@@ -430,7 +430,7 @@
       }
       .vipImg{
         display: block;
-        width: 45rpx;
+        width: 60rpx;
         height: 24rpx;
         margin-top: -14rpx; 
       }

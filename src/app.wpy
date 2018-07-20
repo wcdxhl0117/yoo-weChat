@@ -23,6 +23,7 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/analysis',
       'pages/authorizeIdx',
       'pages/child-input',
       'pages/honor-rank',
@@ -32,7 +33,6 @@ export default class extends wepy.app {
       'pages/warn',
       'pages/authorize',
       'pages/pay',
-      'pages/analysis',
       'pages/join-trend',
       'pages/vip-learn-club',
       'pages/pay-success',
@@ -72,7 +72,7 @@ export default class extends wepy.app {
   globalData = {
     userCode: 'userCode',
     // baseURL: 'http://wx.preview.yoomath.com', // 龙哥花生壳
-    baseURL: 'http://wx.yoomath.com', 
+    baseURL: 'https://wx.yoomath.com', 
     // baseURL: 'http://192.168.66.70:80', // 于鹏程
     // baseURL: 'http://192.168.66.69:80', // 龙哥
     // baseURL: 'http://192.168.66.134:8080', // 赵鹏
@@ -81,7 +81,7 @@ export default class extends wepy.app {
     // h5URL: 'http://192.168.66.73:8080',
     // h5URL: 'http://h5.yoomath.com',
     // h5URL: 'http://h5.preview.yoomath.com',
-    h5URL: 'http://h5.yoomath.com',
+    h5URL: 'https://h5.yoomath.com',
     isAuthorize: false,
     userInfo: null,
     authorize: false
