@@ -6,6 +6,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class webView extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -25,6 +26,7 @@
     events = {}
 
     onLoad(options) {
+      mta.Page.init()
       if (options.url) {
         this.src = options.url
       }

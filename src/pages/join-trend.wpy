@@ -26,6 +26,7 @@
   import wepy from 'wepy'
   import moment from 'moment'
   import learndetail from '../components/learndetail'
+  import mta from '../utils/mta_analysis.js'
   export default class joinTrend extends wepy.page {
     config = {
       navigationBarTitleText: '学习动态'
@@ -406,6 +407,7 @@
 
     onLoad () {
       console.log('join-trend.wpy --> onLoad')
+      mta.Page.init()
     }
 
     onShow () {

@@ -7,6 +7,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学'
@@ -24,6 +25,7 @@
     events = {}
 
     onLoad() {
+      mta.Page.init()
       wepy.login({
         success: function(res) {
           console.log(res.code)

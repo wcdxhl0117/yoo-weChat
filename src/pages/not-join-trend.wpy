@@ -27,6 +27,7 @@
   import wepy from 'wepy'
   import learndetail from '../components/learndetail'
   import iosPayModal from '../components/iosPayModal'
+  import mta from '../utils/mta_analysis.js'
   export default class notJoinTrend extends wepy.page {
     config = {
       navigationBarTitleText: '学习动态'
@@ -144,6 +145,7 @@
     events = {}
 
     onLoad () {
+      mta.Page.init()
       this._getSystemInfo()
     }
   }

@@ -21,6 +21,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class paySuccess extends wepy.page {
     config = {
       navigationBarTitleText: '加入VIP培优计划'
@@ -91,6 +92,7 @@
 
     onLoad (options) {
       console.log('pay-success.wpy --> onLoad')
+      mta.Page.init()
     }
 
     onShow (options) {

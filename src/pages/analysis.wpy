@@ -6,6 +6,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class analysis extends wepy.page {
     config = {
       navigationBarTitleText: '学情分析'
@@ -43,6 +44,7 @@
 
     onLoad () {
       console.log('analysis.wpy --> onLoad')
+      mta.Page.init()
       this.src = `${this.$parent.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
     }
 
@@ -53,7 +55,6 @@
         wx.redirectTo({
           url: `/pages/authorizeIdx?to=/pages/index`
         })
-        return
       }
     }
 

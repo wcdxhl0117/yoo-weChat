@@ -157,6 +157,7 @@
 <script>
   import wepy from 'wepy'
   import iosPayModal from '../components/iosPayModal'
+  import mta from '../utils/mta_analysis.js'
   export default class vipLearnClub extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -398,10 +399,21 @@
 
     onLoad () {
       console.log('vip-learn-club.wpy --> onLoad')
+      mta.Page.init()
       this._getSystemInfo()
       // setTimeout(() => {
       //   this._setScrollViewHeight()
       // }, 0)
+    }
+
+    _getAllInfo () {
+      setTimeout(() => {
+        if (this.$parent.globalData.isCheck) {
+          this._getInfo()
+        } else {
+          this._getAllInfo()
+        }
+      }, 500)
     }
 
     async onShow () {
@@ -413,7 +425,8 @@
         })
         return
       }
-      this._getInfo()
+      // this._getInfo()
+      this._getAllInfo()
       // this._setScrollViewHeight()
       // this._getVipNumber()
       // this._getBindStatus()
@@ -427,7 +440,7 @@
       return {
         title: '悠数学VIP培优计划',
         path: '/pages/vip-learn-club',
-        imageUrl: '../static/shareVIP.png'
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/VIP.png'
       }
     }
 

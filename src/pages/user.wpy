@@ -47,6 +47,7 @@
   import { SET_CHILD_NICK_NAME, SET_CHILD_NAME, SET_EXPIRATION_DATE, SET_JOIN_STATUS, SET_BIND_STATUS } from '../store/types/user'
   // import { ASYNC_INCREMENT } from '../store/types/counter'
   import { asyncInc } from '../store/actions'
+  import mta from '../utils/mta_analysis.js'
   // import configStore from '../store'
   // const store = configStore()
 
@@ -334,19 +335,31 @@
       })
     }
 
+    _getAllInfo () {
+      setTimeout(() => {
+        if (this.$parent.globalData.isCheck) {
+          this._getTel()
+          this._getBindStatus()
+        } else {
+          this._getAllInfo()
+        }
+      }, 500)
+    }
+
     events = {}
 
     onLoad () {
       console.log('user.wpy --> onLoad')
+      mta.Page.init()
       // this.methods.setParentName('你爸爸')
       // store.dispatch({type: SET_JOIN_STATUS, payload: true})
       // console.log(store.getState())
     }
 
     onShow () {
-      this._getTel()
-      // this._getUserInfo()
-      this._getBindStatus()
+      // this._getTel()
+      this._getAllInfo()
+      // this._getBindStatus()
       console.log('user.wpy --> onShow')
     }
   }

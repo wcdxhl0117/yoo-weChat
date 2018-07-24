@@ -112,6 +112,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   // 返回数组最大值
   // var n = Math.max(10, 5, 20, 5, 5)
   // console.log(n)
@@ -173,6 +174,7 @@
     events = {}
 
     onLoad(options) {
+      mta.Page.init()
       // 获取基础链接
       this.baseUrl = this.$parent.globalData.baseURL
       let _this = this

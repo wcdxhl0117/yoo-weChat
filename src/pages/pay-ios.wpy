@@ -15,6 +15,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class payIOS extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -32,7 +33,9 @@
 
     events = {}
 
-    onLoad () {}
+    onLoad () {
+      mta.Page.init()
+    }
   }
 </script>
 <style lang="scss" scoped>

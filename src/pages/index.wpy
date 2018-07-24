@@ -41,7 +41,7 @@
         <!-- vip没有报警 -->
         <view class="monitor notHaveTip" bindtap="toMonitor" wx:if="{{isVip&&!idxData.smartRemind}}">
           <view class="left">
-            <image src="../static/notHaveTip.png" />
+            <image src="../static/notHaveTip.gif" />
             <view>正在监控中...学习情况正常</view>
           </view>
         </view>
@@ -56,48 +56,6 @@
         <!-- 学习动态  -->
         <view wx:if="{{isVip}}" class="base learnState" bindtap="toState">
           <view class="topH">学习动态<image wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.clickStatus=='ENABLED'}}" src="../static/new.png" /></view>
-          <!-- <view class="txt" wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.status=='START'}}">
-            {{idxData.learnDynamic.startAt}} 开始
-            {{idxData.learnDynamic.type=='SMART_EXAM_PAPER'?'「智能出卷」':''}}
-            {{idxData.learnDynamic.type=='DAILY_PRACTISE'?'「每日练」':''}}
-            {{idxData.learnDynamic.type=='FALLIBLE_PRACTISE'?'「错题练习」':''}}
-            {{idxData.learnDynamic.type=='HOMEWORK'?'「做作业」':''}}
-            {{idxData.learnDynamic.type=='SECTION_PRACTISE'?'「章节练习」':''}}
-            {{idxData.learnDynamic.type=='WEAK_POINT'?'「薄弱知识点」':''}}
-            {{idxData.learnDynamic.type=='HOMEWORK_CORRECT'?'「作业错题订正」':''}}
-            {{idxData.learnDynamic.type=='PRACTISE_CORRECT'?'「练习错题订正」':''}}
-            {{idxData.learnDynamic.type=='TARGET_FALLIBLE_PRACTISE'?'「错题针对性练习」':''}}
-            {{idxData.learnDynamic.type=='TEACH_PRACTISE'?'「教辅练习」':''}}
-            {{idxData.learnDynamic.name}}
-          </view>
-          <view class="txt" wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.status=='EXIT'}}">
-            {{idxData.learnDynamic.endAt}} 退出
-            {{idxData.learnDynamic.type=='SMART_EXAM_PAPER'?'「智能出卷」':''}}
-            {{idxData.learnDynamic.type=='DAILY_PRACTISE'?'「每日练」':''}}
-            {{idxData.learnDynamic.type=='FALLIBLE_PRACTISE'?'「错题练习」':''}}
-            {{idxData.learnDynamic.type=='HOMEWORK'?'「做作业」':''}}
-            {{idxData.learnDynamic.type=='SECTION_PRACTISE'?'「章节练习」':''}}
-            {{idxData.learnDynamic.type=='WEAK_POINT'?'「薄弱知识点」':''}}
-            {{idxData.learnDynamic.type=='HOMEWORK_CORRECT'?'「作业错题订正」':''}}
-            {{idxData.learnDynamic.type=='PRACTISE_CORRECT'?'「练习错题订正」':''}}
-            {{idxData.learnDynamic.type=='TARGET_FALLIBLE_PRACTISE'?'「错题针对性练习」':''}}
-            {{idxData.learnDynamic.type=='TEACH_PRACTISE'?'「教辅练习」':''}}
-            {{idxData.learnDynamic.name}}
-          </view>
-          <view class="txt" wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.status=='COMMIT'}}">
-            {{idxData.learnDynamic.endAt}} 提交
-            {{idxData.learnDynamic.type=='SMART_EXAM_PAPER'?'「智能出卷」':''}}
-            {{idxData.learnDynamic.type=='DAILY_PRACTISE'?'「每日练」':''}}
-            {{idxData.learnDynamic.type=='FALLIBLE_PRACTISE'?'「错题练习」':''}}
-            {{idxData.learnDynamic.type=='HOMEWORK'?'「做作业」':''}}
-            {{idxData.learnDynamic.type=='SECTION_PRACTISE'?'「章节练习」':''}}
-            {{idxData.learnDynamic.type=='WEAK_POINT'?'「薄弱知识点」':''}}
-            {{idxData.learnDynamic.type=='HOMEWORK_CORRECT'?'「作业错题订正」':''}}
-            {{idxData.learnDynamic.type=='PRACTISE_CORRECT'?'「练习错题订正」':''}}
-            {{idxData.learnDynamic.type=='TARGET_FALLIBLE_PRACTISE'?'「错题针对性练习」':''}}
-            {{idxData.learnDynamic.type=='TEACH_PRACTISE'?'「教辅练习」':''}}
-            {{idxData.learnDynamic.name}}
-          </view> -->
           <view class="txt" wx:if="{{idxData.learnDynamic}}">{{dynamic.time}} {{dynamic.title}}</view>
           <view class="txt" wx:if="{{!idxData.learnDynamic}}">暂无学习动态</view>
         </view>
@@ -121,6 +79,7 @@
 <script>
   import wepy from 'wepy'
   import moment from 'moment'
+  import mta from '../utils/mta_analysis.js'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -266,7 +225,7 @@
       return {
         title: '悠数学|家长端 随时关注孩子的学习情况',
         path: '/pages/index',
-        imageUrl: '../static/shareIdx.png'
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/home.png'
       }
     }
 
@@ -288,10 +247,78 @@
       })
     }
 
-    onLoad() {}
+    onLoad() {
+      mta.Page.init()
+    }
+
+    // 应该用redux获取状态，再发起请求，整个项目都不应该这样乱写，可惜他们要求赶时间，完全不看代码质量，
+    _getInfo () {
+      let _this = this
+      setTimeout(() => {
+        if (_this.$parent.globalData.isCheck) {
+          // 后台查看是否关联过孩子,isBind变为true
+          let token = wx.getStorageSync('token')
+          if (token) {
+            // 查看是否绑定孩子
+            wx.request({
+              url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+              method: 'POST',
+              header: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'S_T': token
+              },
+              success (res) {
+                console.log('index.wpy')
+                console.log(res)
+                if (res.data.ret_code === 0) {
+                  _this.isBind = res.data.ret.hasBind
+                  _this.isReady = true
+                  _this.$apply()
+                  _this.getDataIdx()
+                  // }
+                } else {
+                  // console.log(res)
+                }
+              },
+              fail (res) {
+                console.log('/wx/micro/parent/hasBind ---> fail')
+              }
+            })
+            // 查看用户是否是vip
+            wx.request({
+              url: `${_this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+              method: 'POST',
+              header: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'S_T': token
+              },
+              success (res) {
+                console.log('index.wpy')
+                console.log(res)
+                if (res.data.ret_code === 0) {
+                  if (res.data.ret.userMember.memberType === 'VIP' || res.data.ret.userMember.memberType === 'SCHOOL_VIP') {
+                    _this.isVip = true
+                  } else {
+                    _this.isVip = false
+                  }
+                  _this.$apply()
+                } else {
+                  // console.log(res)
+                }
+              },
+              fail (res) {
+                console.log('/wx/micro/parent/hasBind ---> fail')
+              }
+            })
+          }
+        } else {
+          this._getInfo()
+        }
+      }, 500)
+    }
 
     async onShow() {
-      console.log('vip-learn-club.wpy --> onShow')
+      console.log('index.wpy --> onShow')
       let authorize = await this._getAuthorize()
       if (!authorize) {
         wx.redirectTo({
@@ -299,64 +326,74 @@
         })
         return
       }
-      let _this = this
-      console.log('index.wpy --> onShow')
-      // 后台查看是否关联过孩子,isBind变为true
-      let token = wx.getStorageSync('token')
-      if (token) {
-        // 查看是否绑定孩子
-        wx.request({
-          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
-          method: 'POST',
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'S_T': token
-          },
-          success (res) {
-            console.log('index:绑定孩子接口', res)
-            if (res.data.ret_code === 0) {
-              _this.isBind = res.data.ret.hasBind
-              _this.isReady = true
-              _this.$apply()
-              // _this.setData({'isBind': res.data.ret.hasBind})
-              // 获取首页数据
-              // if (_this.isBind) {
-              _this.getDataIdx()
-              // }
-            } else {
-              console.log(res)
-            }
-          },
-          fail (res) {
-            console.log('/wx/micro/parent/hasBind ---> fail')
-          }
-        })
+      // let _this = this
+      this._getInfo()
+      // while (!this.$parent.globalData.isCheck) {
+      //   console.log('**************************')
+      //   await this.sleep(0.1)
+      // }
 
-        // 查看用户是否是vip
-        wx.request({
-          url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
-          method: 'POST',
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'S_T': token
-          },
-          success (res) {
-            if (res.data.ret_code === 0) {
-              if (res.data.ret.userMember.memberType === 'VIP' || res.data.ret.userMember.memberType === 'SCHOOL_VIP') {
-                _this.isVip = true
-              } else {
-                _this.isVip = false
-              }
-              _this.$apply()
-            } else {
-              console.log(res)
-            }
-          },
-          fail (res) {
-            console.log('/wx/micro/parent/hasBind ---> fail')
-          }
-        })
-      }
+      // await this.sleep(5)
+      // setTimeout(() => {
+      // 后台查看是否关联过孩子,isBind变为true
+      // let token = wx.getStorageSync('token')
+      // if (token) {
+      //   // 查看是否绑定孩子
+      //   wx.request({
+      //     url: `${this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+      //     method: 'POST',
+      //     header: {
+      //       'Content-Type': 'application/x-www-form-urlencoded',
+      //       'S_T': token
+      //     },
+      //     success (res) {
+      //       console.log('index.wpy')
+      //       console.log(res)
+      //       if (res.data.ret_code === 0) {
+      //         _this.isBind = res.data.ret.hasBind
+      //         _this.isReady = true
+      //         _this.$apply()
+      //         // _this.setData({'isBind': res.data.ret.hasBind})
+      //         // 获取首页数据
+      //         // if (_this.isBind) {
+      //         _this.getDataIdx()
+      //         // }
+      //       } else {
+      //         // console.log(res)
+      //       }
+      //     },
+      //     fail (res) {
+      //       console.log('/wx/micro/parent/hasBind ---> fail')
+      //     }
+      //   })
+      //   // 查看用户是否是vip
+      //   wx.request({
+      //     url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+      //     method: 'POST',
+      //     header: {
+      //       'Content-Type': 'application/x-www-form-urlencoded',
+      //       'S_T': token
+      //     },
+      //     success (res) {
+      //       console.log('index.wpy')
+      //       console.log(res)
+      //       if (res.data.ret_code === 0) {
+      //         if (res.data.ret.userMember.memberType === 'VIP' || res.data.ret.userMember.memberType === 'SCHOOL_VIP') {
+      //           _this.isVip = true
+      //         } else {
+      //           _this.isVip = false
+      //         }
+      //         _this.$apply()
+      //       } else {
+      //         // console.log(res)
+      //       }
+      //     },
+      //     fail (res) {
+      //       console.log('/wx/micro/parent/hasBind ---> fail')
+      //     }
+      //   })
+      // }
+      // }, 1000)
     }
 
     // 时间处理函数

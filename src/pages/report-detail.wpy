@@ -187,6 +187,7 @@
   import wepy from 'wepy'
   import moment from 'moment'
   import iosPayModal from '../components/iosPayModal'
+  import mta from '../utils/mta_analysis.js'
   export default class reportDetail extends wepy.page {
     config = {
       navigationBarTitleText: '作业详情'
@@ -297,6 +298,7 @@
     }
 
     onLoad(options) {
+      mta.Page.init()
       this._getSystemInfo()
       let _this = this
       // studentHomeworkId  eg: studentHomeworkId = 996514346697760768,,,1028276705740980224

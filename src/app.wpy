@@ -15,6 +15,7 @@ import 'wepy-async-function'
 
 import { setStore } from 'wepy-redux'
 import configStore from './store'
+import mta from './utils/mta_analysis.js'
 
 const store = configStore()
 setStore(store)
@@ -22,6 +23,7 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+
       'pages/index',
       'pages/analysis',
       'pages/authorizeIdx',
@@ -72,7 +74,7 @@ export default class extends wepy.app {
   globalData = {
     userCode: 'userCode',
     // baseURL: 'http://wx.preview.yoomath.com', // 龙哥花生壳
-    baseURL: 'https://wx.yoomath.com', 
+    baseURL: 'https://wx.yoomath.com',
     // baseURL: 'http://192.168.66.70:80', // 于鹏程
     // baseURL: 'http://192.168.66.69:80', // 龙哥
     // baseURL: 'http://192.168.66.134:8080', // 赵鹏
@@ -82,9 +84,11 @@ export default class extends wepy.app {
     // h5URL: 'http://h5.yoomath.com',
     // h5URL: 'http://h5.preview.yoomath.com',
     h5URL: 'https://h5.yoomath.com',
+    isCheck: false,
     isAuthorize: false,
     userInfo: null,
-    authorize: false
+    authorize: false,
+    appID: 'wx8d6cde640cbc39eb'
   }
 
   constructor () {
@@ -94,14 +98,6 @@ export default class extends wepy.app {
 
   async _login () {
     wx.showLoading({title: '正在获取数据'})
-    // Promise.all([this._getCode(), this._getUserInfo()]).then((result) => {
-    //   console.log('app.wpy --> _login')
-    //   console.log(result)
-    //   let code = result[0]
-    //   let encryptedData = result[1].encryptedData
-    //   let iv = result[1].iv
-    //   this._setToken(code, encryptedData, iv)
-    // })
     let code = await this._getCode()
     let {encryptedData, iv} = await this._getUserInfo()
     this._setToken(code, encryptedData, iv)
@@ -197,6 +193,7 @@ export default class extends wepy.app {
   }
 
   _setToken (code, encryptedData, iv) {
+    let that = this
     wx.request({
       url: `${this.globalData.baseURL}/wx/micro/parent/login`,
       method: 'POST',
@@ -217,12 +214,14 @@ export default class extends wepy.app {
           wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
         wx.hideLoading()
+        that.globalData.isCheck = true
       },
       fail (res) {
         console.log('app.wpy --> _setToken --> fail')
         console.log(res)
         wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         wx.hideLoading()
+        that.globalData.isCheck = true
       }
     })
   }
@@ -257,6 +256,14 @@ export default class extends wepy.app {
     console.log('app.wpy --> onLaunch')
     console.log(options)
 
+    mta.App.init({
+      'appID': this.globalData.appID,
+      'lauchOpts': options // 渠道分析,需在onLaunch方法传入options,如onLaunch:function(options){...}
+      // 'statPullDownFresh': true, // 使用分析-下拉刷新次数/人数，必须先开通自定义事件，并配置了合法的eventID
+      // 'statShareApp': true, // 使用分析-分享次数/人数，必须先开通自定义事件，并配置了合法的eventID
+      // 'statReachBottom': true // 使用分析-页面触底次数/人数，必须先开通自定义事件，并配置了合法的eventID
+    })
+
     let extra = ''
     // let to = `/${options.path}`
     let isFirst = true
@@ -279,16 +286,12 @@ export default class extends wepy.app {
       let checkToken = await this._checkToken()
       if (!checkToken) {
         this._login()
+      } else {
+        this.globalData.isCheck = true
       }
     } else {
       this.globalData.authorize = false
       this.globalData.isAuthorize = false
-      // wx.redirectTo({
-        // url: `/pages/authorize?from=/pages/app&to=${to}${extra}`
-      // })
-      // wx.redirectTo({
-      //   url: `/pages/authorizeIdx?from=/pages/app&to=${to}${extra}`
-      // })
     }
   }
 }

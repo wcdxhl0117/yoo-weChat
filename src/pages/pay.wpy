@@ -36,15 +36,24 @@
           <view class="price" data-tab="{{index}}" wx:if="{{item.originalPrice}}">¥{{item.originalPrice}}</view>
         </view>
       </view>
-      <view class="agreement" @tap="showProtocolPage">悠数学收费服务协议</view>
-      <view class="btn" @tap="payOrder">确认支付</view>
+      <view class="agreementWrap">
+        <!-- <view class="checkbox readProtocol" wx:if="{{hasReadProtocol}}" @tap="clickCheckbox"></view> -->
+        <!-- <view class="checkbox noReadProtocol" wx:if="{{!hasReadProtocol}}" @tap="clickCheckbox"></view> -->
+        <image class="readProtocol" src="../static/selected.png" wx:if="{{hasReadProtocol}}" @tap="clickCheckbox(1)"/>
+        <image class="noReadProtocol" src="../static/select.png" wx:if="{{!hasReadProtocol}}" @tap="clickCheckbox(0)"/>
+        <view class="agreement" @tap="showProtocolPage">悠数学收费服务协议</view>
+      </view>
+      <button class="btn {{!hasReadProtocol?'disabled':''}}" disabled="{{!hasReadProtocol}}" @tap="payOrder">同意协议并开通</button>
     </block>
   </view>
 </template>
 
 <script>
+  const TRUE = 1
+  // const FALSE = 0
   import wepy from 'wepy'
   import moment from 'moment'
+  import mta from '../utils/mta_analysis.js'
   export default class pay extends wepy.page {
     config = {
       navigationBarTitleText: '加入VIP培优计划'
@@ -55,6 +64,7 @@
     mixins = []
 
     data = {
+      hasReadProtocol: true,
       isGetData: false,
       current: 0,
       userName: '',
@@ -76,13 +86,24 @@
     computed = {}
 
     methods = {
+      clickCheckbox (flag) {
+        if (~~flag === ~~TRUE) {
+          this.hasReadProtocol = false
+        } else {
+          this.hasReadProtocol = true
+        }
+      },
       click (event) {
         this.current = event.target.dataset.tab
         this.memberPackageId = this.list[this.current].id
       },
       payOrder () {
+        // if (this.hasReadProtocol) {
         wx.showLoading({title: '正在支付'})
         this._getPayInfo()
+        // } else {
+        //   wx.showToast({icon: 'none', title: '请先阅读悠数学收费服务协议', duration: 1400})
+        // }
       },
       showProtocolPage () {
         wx.navigateTo({
@@ -248,6 +269,7 @@
 
     onLoad () {
       console.log('pay.wpy --> onLoad')
+      mta.Page.init()
     }
 
     onShow () {
@@ -403,13 +425,35 @@
       }
     }
   }
-  .agreement{
-    color: #007AFF;
-    font-size: 30rpx;
-    line-height: 30rpx;
-    text-align: center;
-    text-decoration: underline;
+  .agreementWrap{
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 120rpx;
+    .noReadProtocol{
+      display: inline-block;
+      height: 30rpx;
+      width: 30rpx;
+      // border-radius: 50%;
+      // border: 1rpx solid #999;
+    }
+    .readProtocol{
+      display: inline-block;
+      height: 30rpx;
+      width: 30rpx;
+      // background: #007AFF;
+      // border-radius: 50%;
+      // border: 1rpx solid #007AFF;
+    }
+    
+    .agreement{
+      color: #007AFF;
+      font-size: 30rpx;
+      line-height: 30rpx;
+      text-align: center;
+      text-decoration: underline;
+      margin-left: 10rpx;
+    }
   }
   .btn{
     position: fixed;
@@ -423,6 +467,14 @@
     color: #ffffff;
     font-size: 30rpx;
     line-height: 30rpx;
+    border-radius: 0;
+    border:0 solid #fff;
+    outline: none;
+    &.disabled{
+      border:0 solid #ccc;
+      color: #999;
+      background: #ccc;
+    }
   }
   .loading{
     display: flex;
@@ -456,6 +508,10 @@
     margin-bottom: 4rpx;
     transition: 0.5s;
     animation: rotate 0.8s linear infinite;
+  }
+
+  button::after{
+    border:none;
   }
 }
 </style>

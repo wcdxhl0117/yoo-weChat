@@ -90,6 +90,7 @@
   import wepy from 'wepy'
   import moment from 'moment'
   import iosPayModal from '../components/iosPayModal'
+  import mta from '../utils/mta_analysis.js'
   export default class warn extends wepy.page {
     config = {
       navigationBarTitleText: '智能提醒'
@@ -296,6 +297,7 @@
     }
     // 后台获取数据后，先循环改变时间格式
     onLoad() {
+      mta.Page.init()
       this._getSystemInfo()
       let _this = this
       // 查看用户是否是vip

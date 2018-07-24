@@ -70,6 +70,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class protocol extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学收费服务协议'
@@ -89,7 +90,9 @@
 
     events = {}
 
-    onLoad () {}
+    onLoad () {
+        mta.Page.init()
+    }
   }
 </script>
 <style lang="scss" scoped>

@@ -13,7 +13,7 @@
         </view>
       </view>
       <view class="btn-area">
-        <button formType="submit">关联账号</button>
+        <button formType="submit" class="{{isBinding?'disabled':''}}"  disabled="{{isBinding}}">关联账号</button>
       </view>
 
       <!-- <view class="btn-area notSub" wx-if="{{!isSub}}">
@@ -27,6 +27,7 @@
   import wepy from 'wepy'
   import { connect } from 'wepy-redux'
   import { SET_BIND_STATUS } from '../store/types/user'
+  import mta from '../utils/mta_analysis.js'
   @connect({
     bindStatus (state) {
       return state.user.bindStatus
@@ -42,6 +43,7 @@
 
     data = {
       showPsd: false,
+      isBinding: false,
       count: '',
       psd: ''
     }
@@ -73,7 +75,8 @@
 
     _bindAccount (account, password) {
       console.log(account, password)
-      // let that = this
+      this.isBinding = true
+      let that = this
       if (this.count && this.psd) {
         wx.request({
           url: `${this.$parent.globalData.baseURL}/wx/micro/parent/bindStu`,
@@ -102,16 +105,22 @@
               })
             } else {
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+              that.isBinding = false
+              that.$apply()
             }
           },
           fail (res) {
             console.log('child-input.wpy --> _bindAccount --> success')
             console.log(res)
             wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+            that.isBinding = false
+            that.$apply()
           }
         })
       } else {
         wx.showToast({icon: 'none', title: '账号和密码不能为空', duration: 1400})
+        that.isBinding = false
+        that.$apply()
       }
     }
 
@@ -125,7 +134,9 @@
       }
     }
 
-    onLoad() {}
+    onLoad() {
+      mta.Page.init()
+    }
   }
 
 </script>
@@ -180,6 +191,10 @@
       background: #cccccc;
       color: #999999;
     }
+  }
+  .container .btn-area button.disabled{
+    color: #2b2b2b;
+    background: #eeeeee;
   }
   
 </style>
