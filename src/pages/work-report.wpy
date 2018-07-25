@@ -125,6 +125,7 @@
             } else {
               _this.notHave = true
             }
+            console.log(JSON.stringify(_this.didItems).length + JSON.stringify(_this.todo).length)
             _this.$apply()
           } else {
             console.log(res)

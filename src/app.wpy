@@ -87,8 +87,7 @@ export default class extends wepy.app {
     isCheck: false,
     isAuthorize: false,
     userInfo: null,
-    authorize: false,
-    appID: 'wx8d6cde640cbc39eb'
+    authorize: false
   }
 
   constructor () {
@@ -257,11 +256,11 @@ export default class extends wepy.app {
     console.log(options)
 
     mta.App.init({
-      'appID': this.globalData.appID,
-      'lauchOpts': options // 渠道分析,需在onLaunch方法传入options,如onLaunch:function(options){...}
-      // 'statPullDownFresh': true, // 使用分析-下拉刷新次数/人数，必须先开通自定义事件，并配置了合法的eventID
-      // 'statShareApp': true, // 使用分析-分享次数/人数，必须先开通自定义事件，并配置了合法的eventID
-      // 'statReachBottom': true // 使用分析-页面触底次数/人数，必须先开通自定义事件，并配置了合法的eventID
+      'appID': '500627072',
+      'eventID': '500627074',
+      'statPullDownFresh': true,
+      'statShareApp': true,
+      'statReachBottom': true
     })
 
     let extra = ''

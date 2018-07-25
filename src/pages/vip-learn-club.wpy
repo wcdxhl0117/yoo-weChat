@@ -413,7 +413,7 @@
         } else {
           this._getAllInfo()
         }
-      }, 500)
+      }, 100)
     }
 
     async onShow () {

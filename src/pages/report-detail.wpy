@@ -3,14 +3,14 @@
     <view class="zyInfo">作业信息</view>
     <!-- 作业信息 -->
     <view class="Tinfo">
-      <view class="tg">{{homework.homework.name}}</view>
+      <view class="tg">{{pageData.studentHomework.homework.name}}</view>
       <view class="tDetail">
-        <view>共{{homework.homework.questionCount}}题</view>
-        <view wx:if="{{homework.homework.timeLimit}}">限时{{homework.homework.timeLimit}}分钟</view>
-        <view wx:if="{{!homework.homework.timeLimit}}">不限时</view>
-        <view wx:if="{{homework.homework.difficulty>=0.8}}">难度简单</view>
-        <view wx:if="{{homework.homework.difficulty>=0.4&&homework.homework.difficulty<0.8}}">难度中等</view>
-        <view wx:if="{{homework.homework.difficulty>=0&&homework.homework.difficulty<0.4}}">难度困难</view>
+        <view>共{{pageData.studentHomework.homework.questionCount}}题</view>
+        <view wx:if="{{pageData.studentHomework.homework.timeLimit}}">限时{{pageData.studentHomework.homework.timeLimit}}分钟</view>
+        <view wx:if="{{!pageData.studentHomework.homework.timeLimit}}">不限时</view>
+        <view wx:if="{{pageData.studentHomework.homework.difficulty>=0.8}}">难度简单</view>
+        <view wx:if="{{pageData.studentHomework.homework.difficulty>=0.4&&pageData.studentHomework.homework.difficulty<0.8}}">难度中等</view>
+        <view wx:if="{{pageData.studentHomework.homework.difficulty>=0&&pageData.studentHomework.homework.difficulty<0.4}}">难度困难</view>
       </view>
       <!-- pressBar -->
       <view class="pressBar">
@@ -20,55 +20,55 @@
         </view>
         <view class="right base">
           <!-- 已提交 -->
-          <view wx:if="{{homework.stuSubmitAt}}" class="line"></view>
-          <view wx:if="{{homework.stuSubmitAt}}" class="circle"></view>
+          <view wx:if="{{pageData.studentHomework.stuSubmitAt}}" class="line"></view>
+          <view wx:if="{{pageData.studentHomework.stuSubmitAt}}" class="circle"></view>
           <!-- 未提交，线和圆为灰色 -->
-          <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}" class="line grey"></view>
-          <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}" class="circle grey"></view>
+          <view wx:if="{{pageData.studentHomework.status!='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}" class="line grey"></view>
+          <view wx:if="{{pageData.studentHomework.status!='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}" class="circle grey"></view>
           <!-- 未做答，圆为红色 -->
-          <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}" class="line"></view>
-          <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}" class="circle red"></view>
+          <view wx:if="{{pageData.studentHomework.status=='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}" class="line"></view>
+          <view wx:if="{{pageData.studentHomework.status=='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}" class="circle red"></view>
         </view>
       </view>
       <view class="barTitle">
         <view>已布置</view>
         <!-- 未提交 -->
-        <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}" class="status">暂未</view>
+        <view wx:if="{{pageData.studentHomework.status!='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}" class="status">暂未</view>
         <!-- 未做答 -->
-        <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}" class="noDa">未做答</view>
+        <view wx:if="{{pageData.studentHomework.status=='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}" class="noDa">未做答</view>
         <!-- 已提交 -->
-        <view wx:if="{{homework.stuSubmitAt}}">已提交</view>
+        <view wx:if="{{pageData.studentHomework.stuSubmitAt}}">已提交</view>
       </view>
       <view class="timeWrap">
-        <view>{{homework.homework.startTime}}</view>
+        <view>{{pageData.studentHomework.homework.startTime}}</view>
         <!-- 未提交 -->
-        <view wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}">提交作业</view>
+        <view wx:if="{{pageData.studentHomework.status!='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}">提交作业</view>
         <!-- 已提交 -->
-        <view wx:if="{{homework.stuSubmitAt}}">{{homework.stuSubmitAt}}</view>
+        <view wx:if="{{pageData.studentHomework.stuSubmitAt}}">{{pageData.studentHomework.stuSubmitAt}}</view>
         <!-- 未作答 -->
-        <view wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}">{{homework.homework.deadline}}</view>
+        <view wx:if="{{pageData.studentHomework.status=='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}">{{pageData.studentHomework.homework.deadline}}</view>
       </view>
     </view>
 
     <!-- 作业状态提示 -->
     <view class="prossTip">
       <!-- 批改结果没出来展示tip -->
-      <view class="tip" wx:if="{{!homework.stuSubmitAt||homework.shieldRightRateTime!='0'||(!homework.rightRate&&homework.rightRate!=0)}}">
+      <view class="tip" wx:if="{{!pageData.studentHomework.stuSubmitAt||pageData.studentHomework.shieldRightRateTime!='0'||(!pageData.studentHomework.rightRate&&pageData.studentHomework.rightRate!=0)}}">
         <!-- 未提交 -->
-        <text wx:if="{{homework.status!='SUBMITED'&&!homework.stuSubmitAt}}">孩子暂未提交作业\n请家长及时督促孩子尽快完成</text>
+        <text wx:if="{{pageData.studentHomework.status!='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}">孩子暂未提交作业\n请家长及时督促孩子尽快完成</text>
         <!-- 未做答 -->
-        <text wx:if="{{homework.status=='SUBMITED'&&!homework.stuSubmitAt}}">此份作业孩子没有做\n可在学生端通过错题订正的方式进行补交</text>
+        <text wx:if="{{pageData.studentHomework.status=='SUBMITED'&&!pageData.studentHomework.stuSubmitAt}}">此份作业孩子没有做\n可在学生端通过错题订正的方式进行补交</text>
         <!-- 已提交，等待批改 -->
         <view 
-          wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime!='0'}}"
+          wx:if="{{pageData.studentHomework.stuSubmitAt&&pageData.studentHomework.shieldRightRateTime!='0'}}"
         >
-          <text>作业正在排队批改中\n预计{{dateYj}}分钟后批改完成</text>
+          <text>作业正在排队批改中\n预计{{pageData.dateYj}}分钟后批改完成</text>
           <view @tap="toPayPage" class="btn">加入VIP培优计划，专享极速批改通道</view>
           <view class="weChatTip">温馨提示：批改完成后会通过“好家长悠数学”公众号 将结果推送给你 <text></text></view>
         </view>
         <!-- 已提交，正在批改 -->
         <view 
-          wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime=='0'&&(!homework.rightRate&&homework.rightRate!=0)&&(homework.correctStatus=='CORRECTING'||homework.correctStatus=='AUTO_CORRECTING'||homework.correctStatus=='TOBE_CORRECTED')}}"
+          wx:if="{{pageData.studentHomework.stuSubmitAt&&pageData.studentHomework.shieldRightRateTime=='0'&&(!pageData.studentHomework.rightRate&&pageData.studentHomework.rightRate!=0)&&(pageData.studentHomework.correctStatus=='CORRECTING'||pageData.studentHomework.correctStatus=='AUTO_CORRECTING'||pageData.studentHomework.correctStatus=='TOBE_CORRECTED')}}"
         >
           <text wx:if="{{isVip}}">作业正在优先批改中</text>
           <text wx:if="{{!isVip}}">作业正在批改中</text>
@@ -77,7 +77,7 @@
       </view>
       <!-- 批改结果出来就展示批改结果 shieldRightRateTime （作业情况）-->
       <!-- -->
-      <view class="result" wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime=='0'&&(homework.rightRate||homework.rightRate==0)}}">
+      <view class="result" wx:if="{{pageData.studentHomework.stuSubmitAt&&pageData.studentHomework.shieldRightRateTime=='0'&&(pageData.studentHomework.rightRate||pageData.studentHomework.rightRate==0)}}">
         <view class="topT">作业情况</view>
         <view class="rightRate">
           <view class="left base">
@@ -85,38 +85,38 @@
             'pre_70':(correctRate<70&&correctRate>=60),
             'pre_85':(correctRate>=70&&correctRate<85),
             'pre_100':(correctRate<100&&correctRate>=85)}" -->
-            <view wx:if="{{homework.rightRate<60}}" class="rate pre_60">{{homework.rightRate}}%</view>
-            <view wx:if="{{homework.rightRate<70&&homework.rightRate>=60}}" class="rate pre_70">{{homework.rightRate}}%</view>
-            <view wx:if="{{homework.rightRate>=70&&homework.rightRate<85}}" class="rate pre_85">{{homework.rightRate}}%</view>
-            <view wx:if="{{homework.rightRate>=85}}" class="rate pre_100">{{homework.rightRate}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRate<60}}" class="rate pre_60">{{pageData.studentHomework.rightRate}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRate<70&&pageData.studentHomework.rightRate>=60}}" class="rate pre_70">{{pageData.studentHomework.rightRate}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRate>=70&&pageData.studentHomework.rightRate<85}}" class="rate pre_85">{{pageData.studentHomework.rightRate}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRate>=85}}" class="rate pre_100">{{pageData.studentHomework.rightRate}}%</view>
             <view class="Title">正确率</view>
           </view>
           <view class="right base">
-            <view class="useTime">{{useTime}}</view>
+            <view class="useTime">{{pageData.useTime}}</view>
             <view class="Title">用时</view>
           </view>
         </view>
         <!-- 半对为0不展示 -->
-        <view class="detailJ"><text space="emsp">答对：{{homework.rightCount}}题 答错：{{homework.wrongCount}}题 <text wx:if="{{homework.halfWrongCount>0}}">半对：{{homework.halfWrongCount}}题</text></text></view>
+        <view class="detailJ"><text space="emsp">答对：{{pageData.studentHomework.rightCount}}题 答错：{{pageData.studentHomework.wrongCount}}题 <text wx:if="{{pageData.studentHomework.halfWrongCount>0}}">半对：{{pageData.studentHomework.halfWrongCount}}题</text></text></view>
         <!-- 有错题展示 -->
-        <view class="btmTip" wx:if="{{homework.revisalQuestionTotal&&homework.revisalQuestionTotal>0}}">
-          <view class="left">错题订正：{{homework.revisaledQuestionCount}}/{{homework.revisalQuestionTotal}}</view>
+        <view class="btmTip" wx:if="{{pageData.studentHomework.revisalQuestionTotal&&pageData.studentHomework.revisalQuestionTotal>0}}">
+          <view class="left">错题订正：{{pageData.studentHomework.revisaledQuestionCount}}/{{pageData.studentHomework.revisalQuestionTotal}}</view>
           <!-- 有题需要订正 -->
-          <view wx:if="{{homework.revisalQuestionTotal - homework.revisaledQuestionCount > 0}}" class="right">请及时督促孩子进行错题订正</view>
+          <view wx:if="{{pageData.studentHomework.revisalQuestionTotal - pageData.studentHomework.revisaledQuestionCount > 0}}" class="right">请及时督促孩子进行错题订正</view>
           <!-- 全部订正后 -->
-          <view wx:if="{{(homework.revisalQuestionTotal - homework.revisaledQuestionCount == 0)&&(homework.rightRateCorrect||homework.rightRateCorrect==0)&&homework.revisalAnswerCorrectStatus}}" class="coplate">
+          <view wx:if="{{(pageData.studentHomework.revisalQuestionTotal - pageData.studentHomework.revisaledQuestionCount == 0)&&(pageData.studentHomework.rightRateCorrect||pageData.studentHomework.rightRateCorrect==0)&&pageData.studentHomework.revisalAnswerCorrectStatus}}" class="coplate">
             订正后:
-            <view wx:if="{{homework.rightRateCorrect<60}}" class="rate pre_60">正确率{{homework.rightRateCorrect}}%</view>
-            <view wx:if="{{homework.rightRateCorrect<70&&homework.rightRateCorrect>=60}}" class="rate pre_70">正确率{{homework.rightRateCorrect}}%</view>
-            <view wx:if="{{homework.rightRateCorrect>=70&&homework.rightRateCorrect<85}}" class="rate pre_85">正确率{{homework.rightRateCorrect}}%</view>
-            <view wx:if="{{homework.rightRateCorrect>=85}}" class="rate pre_100">正确率{{homework.rightRateCorrect}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRateCorrect<60}}" class="rate pre_60">正确率{{pageData.studentHomework.rightRateCorrect}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRateCorrect<70&&pageData.studentHomework.rightRateCorrect>=60}}" class="rate pre_70">正确率{{pageData.studentHomework.rightRateCorrect}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRateCorrect>=70&&pageData.studentHomework.rightRateCorrect<85}}" class="rate pre_85">正确率{{pageData.studentHomework.rightRateCorrect}}%</view>
+            <view wx:if="{{pageData.studentHomework.rightRateCorrect>=85}}" class="rate pre_100">正确率{{pageData.studentHomework.rightRateCorrect}}%</view>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 班级整体情况对比 -->
-    <view class="contrast" wx:if="{{homework.status=='SUBMITED' || homework.status=='ISSUED'}}">
+    <view class="contrast" wx:if="{{pageData.studentHomework.status=='SUBMITED' || pageData.studentHomework.status=='ISSUED'}}">
       <view class="topTitle">
         <view class="left">班级整体情况对比</view>
         <view class="right">
@@ -126,42 +126,42 @@
       </view>
       <view class="lis">
         <view class="left">
-          <text space="ensp" wx:if="{{homework.rank&&homework.shieldRightRateTime=='0'}}">作业排名：第 {{homework.rank}} 名</text>
-          <text space="ensp" wx:if="{{!homework.rank||homework.shieldRightRateTime!='0'}}">作业排名：--</text>
+          <text space="ensp" wx:if="{{pageData.studentHomework.rank&&pageData.studentHomework.shieldRightRateTime=='0'}}">作业排名：第 {{pageData.studentHomework.rank}} 名</text>
+          <text space="ensp" wx:if="{{!pageData.studentHomework.rank||pageData.studentHomework.shieldRightRateTime!='0'}}">作业排名：--</text>
         </view>
         <view class="right"><text space="ensp" class="grb" bindtap="toBillboard">查看光荣榜</text></view>
       </view>
       <view class="lis">
         <view class="left">
-          <text space="ensp" wx:if="{{homework.homework.rightRate||homework.homework.rightRate==0}}">平均正确率：{{homework.homework.rightRate}}%</text>
-          <text space="ensp" wx:if="{{!homework.homework.rightRate&&homework.homework.rightRate!=0}}">平均正确率：--</text>
+          <text space="ensp" wx:if="{{pageData.studentHomework.homework.rightRate||pageData.studentHomework.homework.rightRate==0}}">平均正确率：{{pageData.studentHomework.homework.rightRate}}%</text>
+          <text space="ensp" wx:if="{{!pageData.studentHomework.homework.rightRate&&pageData.studentHomework.homework.rightRate!=0}}">平均正确率：--</text>
         </view>
-        <view class="right"><text space="ensp">最高正确率：{{maxRight}}</text></view>
+        <view class="right"><text space="ensp">最高正确率：{{pageData.maxRight}}</text></view>
       </view>
       <view class="lis">
         <view class="left">
-          <text wx:if="{{homework.homework.homeworkTime||homework.homework.homeworkTime==0}}" space="ensp">平均用时：{{homework.homework.homeworkTime}}</text>
-          <text wx:if="{{!homework.homework.homeworkTime&&homework.homework.homeworkTime!=0}}" space="ensp">平均用时：--</text>
+          <text wx:if="{{pageData.studentHomework.homework.homeworkTime||pageData.studentHomework.homework.homeworkTime==0}}" space="ensp">平均用时：{{pageData.studentHomework.homework.homeworkTime}}</text>
+          <text wx:if="{{!pageData.studentHomework.homework.homeworkTime&&pageData.studentHomework.homework.homeworkTime!=0}}" space="ensp">平均用时：--</text>
         </view>
-        <view class="right"><text space="ensp">最短用时：{{minTime}}</text></view>
+        <view class="right"><text space="ensp">最短用时：{{pageData.minTime}}</text></view>
       </view>
     </view>
 
     <!-- 作业学情分析(批改完才会有应该) -->
-    <view class="analysis" wx:if="{{homework.stuSubmitAt&&homework.shieldRightRateTime=='0'&&(homework.rightRate||homework.rightRate==0)}}">
+    <view class="analysis" wx:if="{{pageData.studentHomework.stuSubmitAt&&pageData.studentHomework.shieldRightRateTime=='0'&&(pageData.studentHomework.rightRate||pageData.studentHomework.rightRate==0)}}">
       <view class="topTitle">作业学情分析</view>
       <view class="topList">
         <!-- 没有错题不展示 -->
-        <view class="theLis" wx:if="{{homework.revisalQuestionTotal}}"><image src="../static/wrong.png" /> 本次作业共 {{homework.revisalQuestionTotal}} 道错题</view>
+        <view class="theLis" wx:if="{{pageData.studentHomework.revisalQuestionTotal}}"><image src="../static/wrong.png" /> 本次作业共 {{pageData.studentHomework.revisalQuestionTotal}} 道错题</view>
         <!-- <view class="theLis"><image src="../static/up.png" /> 与上次作业相比进步了 3 名</view> -->
-        <view wx:if="{{weakKnowpoints.length>0}}" class="theLis"><image src="../static/arm.png" /> 待提升知识点 {{weakKnowpoints.length}} 个</view>
+        <view wx:if="{{pageData.weakKnowpoints.length>0}}" class="theLis"><image src="../static/arm.png" /> 待提升知识点 {{pageData.weakKnowpoints.length}} 个</view>
         <!-- 两者都没有 -->
-        <view wx:if="{{weakKnowpoints.length=='0'&&!homework.revisalQuestionTotal}}" class="theLis">作业中的题目全都答对了</view>
-        <view wx:if="{{weakKnowpoints.length=='0'&&!homework.revisalQuestionTotal}}" class="theLis">本次作业的知识点掌握的很牢固，建议练习一些较难的题目，以进行能力拓展和拔高</view>
+        <view wx:if="{{pageData.weakKnowpoints.length=='0'&&!pageData.studentHomework.revisalQuestionTotal}}" class="theLis">作业中的题目全都答对了</view>
+        <view wx:if="{{pageData.weakKnowpoints.length=='0'&&!pageData.studentHomework.revisalQuestionTotal}}" class="theLis">本次作业的知识点掌握的很牢固，建议练习一些较难的题目，以进行能力拓展和拔高</view>
       </view>
-      <view class="weak" wx:if="{{weakKnowpoints.length>0}}">
+      <view class="weak" wx:if="{{pageData.weakKnowpoints.length>0}}">
         <!-- for -->
-        <repeat for="{{weakKnowpoints}}" key="index" index="index" item="item">
+        <repeat for="{{pageData.weakKnowpoints}}" key="index" index="index" item="item">
           <view class="weakLis">
             <view class="left">{{item.name}}</view>
             <view class="right">
@@ -199,15 +199,17 @@
     data = {
       isVip: false,
       showTipBan: false, // 时候显示班级勤快提示
-      homework: {}, // 作业对象
-      classHomework: {},  // 班级作业
-      weakKnowpoints: [], // 薄弱知识点
-      status: 'defaut',  // 判断此份作业当前状态（未提交，未做答，（已提交-待批改-批改中-已批改）=>已提交，待批改，批改中，已批改
-      options: {},
-      useTime: '',
-      dateYj: 0,
-      maxRight: '',  // 最高正确率
-      minTime: '',  // 最短用时
+      options: {}, // query
+      // 之前分开写的，后来尝试性能优化合并在一块，时间紧，没分，如果有时间这是可优化的点
+      pageData: {
+        // studentHomework: {}, // 作业对象
+        // allStudentHomeworks: {},  // 班级作业
+        // weakKnowpoints: [], // 薄弱知识点
+        // useTime: '',
+        // dateYj: 0,
+        // maxRight: '',  // 最高正确率
+        // minTime: ''  // 最短用时
+      },
       isIOS: false,
       isShowIosPay: false
     }
@@ -252,7 +254,7 @@
       let that = this
       wx.getSystemInfo({
         success (res) {
-          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+          console.log('report-detail.wpy --> _getSystemInfo --> success')
           console.log(res)
           that.hasGetSystemInfo = true
           if (res.system.toLowerCase().includes('ios')) {
@@ -261,7 +263,7 @@
           that.$apply()
         },
         fail (res) {
-          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+          console.log('report-detail.wpy --> _getSystemInfo --> fail')
           console.log(res)
           wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
         }
@@ -272,7 +274,7 @@
       return new Promise((resolve, reject) => {
         wx.getSetting({
           success (res) {
-            console.log('app.wpy --> _getAuthorize --> success')
+            console.log('report-detail --> _getAuthorize --> success')
             console.log(res)
             if (res.authSetting['scope.userInfo']) {
               resolve(true)
@@ -287,7 +289,7 @@
     events = {}
 
     async onShow () {
-      console.log('analysis.wpy --> onShow')
+      console.log('report-detail.wpy --> onShow')
       let authorize = await this._getAuthorize()
       if (!authorize) {
         wx.redirectTo({
@@ -298,6 +300,9 @@
     }
 
     onLoad(options) {
+      wx.showLoading({
+        title: '加载中'
+      })
       mta.Page.init()
       this._getSystemInfo()
       let _this = this
@@ -329,9 +334,6 @@
         }
       })
       // 请求作业详情数据
-      wx.showLoading({
-        title: '加载中'
-      })
       wx.request({
         url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/view`,
         method: 'POST',
@@ -344,44 +346,48 @@
         },
         success (res) {
           if (res.data.ret_code === 0) {
-            _this.homework = res.data.ret.studentHomework
-            _this.classHomework = res.data.ret.allStudentHomeworks
-            _this.weakKnowpoints = res.data.ret.weakKnowpoints
-            _this.homework.homework.startTime = _this.timeSet(_this.homework.homework.startTime)
-            if (_this.homework.stuSubmitAt) {
-              _this.homework.stuSubmitAt = _this.timeSet(_this.homework.stuSubmitAt)
+            let pageData = res.data.ret
+            pageData.questions = ''
+            pageData.studentHomeworks = ''
+            pageData.studentHomework.homework.startTime = _this.timeSet(pageData.studentHomework.homework.startTime)
+            if (pageData.studentHomework.stuSubmitAt) {
+              pageData.studentHomework.stuSubmitAt = _this.timeSet(pageData.studentHomework.stuSubmitAt)
             }
-            _this.homework.homework.deadline = _this.timeSet(_this.homework.homework.deadline)
-            _this.dateYj = _this.fenChu(_this.homework.shieldRightRateTime)
-            _this.useTime = _this.fm(_this.homework.homeworkTime)
-            _this.useTime = _this.fm(_this.homework.homeworkTime)
-            if (_this.homework.homework.homeworkTime) {
-              _this.homework.homework.homeworkTime = _this.fm(_this.homework.homework.homeworkTime)
+            pageData.studentHomework.homework.deadline = _this.timeSet(pageData.studentHomework.homework.deadline)
+            pageData.dateYj = _this.fenChu(pageData.studentHomework.shieldRightRateTime)
+            pageData.useTime = _this.fm(pageData.studentHomework.homeworkTime)
+            // pageData.useTime = _this.fm(pageData.homework.homeworkTime)
+            if (pageData.studentHomework.homework.homeworkTime) {
+              pageData.studentHomework.homework.homeworkTime = _this.fm(pageData.studentHomework.homework.homeworkTime)
             } else {
-              _this.homework.homework.homeworkTime = '--'
+              pageData.studentHomework.homework.homeworkTime = '--'
             }
             // 处理最短用时和最高正确率
             let maxR = []
             let minT = []
-            for (let i = 0; i < _this.classHomework.length; i++) {
-              if (_this.classHomework[i].rightRate || _this.classHomework[i].rightRate === 0) {
-                maxR.push(Math.floor(_this.classHomework[i].rightRate))
+            for (let i = 0; i < pageData.allStudentHomeworks.length; i++) {
+              // 没用到，去除掉，节约性能
+              pageData.allStudentHomeworks[i].homework = ''
+              if (pageData.allStudentHomeworks[i].rightRate || pageData.allStudentHomeworks[i].rightRate === 0) {
+                maxR.push(Math.floor(pageData.allStudentHomeworks[i].rightRate))
               }
-              if (_this.classHomework[i].homeworkTime) {
-                minT.push(Math.floor(_this.classHomework[i].homeworkTime))
+              if (pageData.allStudentHomeworks[i].homeworkTime) {
+                minT.push(Math.floor(pageData.allStudentHomeworks[i].homeworkTime))
               }
             }
             console.log(maxR, minT)
             if (maxR.length > 0) {
-              _this.maxRight = Math.max.apply(null, maxR) + '%'
+              pageData.maxRight = Math.max.apply(null, maxR) + '%'
             } else {
-              _this.maxRight = '--'
+              pageData.maxRight = '--'
             }
             if (minT.length > 0) {
-              _this.minTime = _this.fm(Math.min.apply(null, minT))
+              pageData.minTime = _this.fm(Math.min.apply(null, minT))
             } else {
-              _this.minTime = '--'
+              pageData.minTime = '--'
             }
+            _this.pageData = pageData
+            console.log(JSON.stringify(pageData).length)
             _this.$apply()
           } else {
             console.log(res)

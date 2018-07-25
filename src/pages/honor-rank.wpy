@@ -194,11 +194,18 @@
           'S_T': wx.getStorageSync('token')
         },
         success (res) {
-          console.log(res)
+          console.log(11111111111111)
           if (res.data.ret_code === 0) {
             _this.allData = res.data.ret.allStudentHomeworks
             _this.rankData = res.data.ret.studentHomeworks
             _this.myChild = res.data.ret.studentHomework
+            // 循环去除对象中没用的homework对象
+            for(let i = 0; i < _this.allData.length; i++) {
+              _this.allData[i].homework = ''
+            }
+            for(let i = 0; i < _this.rankData.length; i++) {
+              _this.rankData[i].homework = ''
+            }
             // 柱状图数据处理(最大做分母)
             let yxNum = 0
             let lhNum = 0
@@ -259,7 +266,9 @@
             for (let i = 0; i < _this.rankData.length; i++) {
               _this.rankData[i].homeworkTime = _this.fm(_this.rankData[i].homeworkTime)
             }
+            console.log()
             _this.$apply()
+            console.log(33333333333333333)
           } else {
             console.log(res)
           }
