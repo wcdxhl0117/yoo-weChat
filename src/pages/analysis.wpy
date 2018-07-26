@@ -23,9 +23,7 @@
     computed = {}
 
     methods = {}
-
-    events = {}
-
+    // 判断获取授权
     _getAuthorize () {
       return new Promise((resolve, reject) => {
         wx.getSetting({
@@ -41,11 +39,25 @@
         })
       })
     }
+    // 检查是否登陆
+    _checkLogin () {
+      console.log('analysis.wpy --> _checkLogin')
+      if (this.$parent.globalData.isCheckLogin) {
+        this.src = `${this.$parent.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
+        this.$apply()
+      } else {
+        setTimeout(() => {
+          this._checkLogin()
+        }, 100)
+      }
+    }
+  
+    events = {}
 
     onLoad () {
       console.log('analysis.wpy --> onLoad')
       mta.Page.init()
-      this.src = `${this.$parent.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
+      // this.src = `${this.$parent.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
     }
 
     async onShow () {
@@ -55,24 +67,9 @@
         wx.redirectTo({
           url: `/pages/authorizeIdx?to=/pages/index`
         })
+        return
       }
+      this._checkLogin()
     }
-
-    // onShareAppMessage (res) {
-    //   // if (res.from === 'button') {
-    //   //   // 来自页面内转发按钮
-    //   //   console.log(res.target)
-    //   // }
-    //   return {
-    //     title: '孩子近期学情报告',
-    //     path: '/pages/analysis',
-    //     imageUrl: '../static/achieve.png'
-    //   }
-    // }
   }
 </script>
-<style lang="scss" scoped>
-#analysis{
-
-}
-</style>

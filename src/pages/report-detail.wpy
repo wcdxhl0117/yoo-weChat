@@ -366,7 +366,6 @@
             let maxR = []
             let minT = []
             for (let i = 0; i < pageData.allStudentHomeworks.length; i++) {
-              // 没用到，去除掉，节约性能
               pageData.allStudentHomeworks[i].homework = ''
               if (pageData.allStudentHomeworks[i].rightRate || pageData.allStudentHomeworks[i].rightRate === 0) {
                 maxR.push(Math.floor(pageData.allStudentHomeworks[i].rightRate))

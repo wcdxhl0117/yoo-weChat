@@ -23,7 +23,6 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-
       'pages/index',
       'pages/analysis',
       'pages/authorizeIdx',
@@ -38,7 +37,6 @@ export default class extends wepy.app {
       'pages/join-trend',
       'pages/vip-learn-club',
       'pages/pay-success',
-      'pages/pay-ios',
       'pages/not-join-trend',
       'pages/user',
       'pages/down-app',
@@ -73,18 +71,17 @@ export default class extends wepy.app {
 
   globalData = {
     userCode: 'userCode',
-    // baseURL: 'http://wx.preview.yoomath.com', // 龙哥花生壳
     baseURL: 'https://wx.yoomath.com',
     // baseURL: 'http://192.168.66.70:80', // 于鹏程
     // baseURL: 'http://192.168.66.69:80', // 龙哥
     // baseURL: 'http://192.168.66.134:8080', // 赵鹏
-    // baseURL: 'http://wx.test2.yoomath.com',
+    // baseURL: 'http://wx.preview.yoomath.com',
     // h5URL: `http://localhost:8080`,
     // h5URL: 'http://192.168.66.73:8080',
-    // h5URL: 'http://h5.yoomath.com',
+    h5URL: 'http://h5.yoomath.com',
     // h5URL: 'http://h5.preview.yoomath.com',
-    h5URL: 'https://h5.yoomath.com',
-    isCheck: false,
+    // h5URL: 'https://h5.preview.yoomath.com',
+    isCheckLogin: false,
     isAuthorize: false,
     userInfo: null,
     authorize: false
@@ -213,14 +210,14 @@ export default class extends wepy.app {
           wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
         wx.hideLoading()
-        that.globalData.isCheck = true
+        that.globalData.isCheckLogin = true
       },
       fail (res) {
         console.log('app.wpy --> _setToken --> fail')
         console.log(res)
         wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         wx.hideLoading()
-        that.globalData.isCheck = true
+        that.globalData.isCheckLogin = true
       }
     })
   }
@@ -286,7 +283,7 @@ export default class extends wepy.app {
       if (!checkToken) {
         this._login()
       } else {
-        this.globalData.isCheck = true
+        this.globalData.isCheckLogin = true
       }
     } else {
       this.globalData.authorize = false

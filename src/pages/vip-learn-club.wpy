@@ -1,5 +1,4 @@
 <template>
-<!-- <view id="vipLearnClub" @touchstart="_setHeight"> -->
 <view id="vipLearnClub">
   <block wx:if="{{!isGetData}}">
     <view class="loading">
@@ -8,7 +7,6 @@
     </view>
   </block>
   <block wx:else>
-    <!-- <scroll-view scroll-y class="scrollView" style="height:{{scrollViewHeight}}" @scroll="scroll" scroll-top="{{scrollTop}}"> -->
     <scroll-view scroll-y class="scrollView">
       <view class="wrap">
       <view class="header">
@@ -162,6 +160,7 @@
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
+  
     components = {
       iosPayModal: iosPayModal
     }
@@ -169,43 +168,32 @@
     mixins = []
 
     data = {
-      // scrollTop: 0,
-      // scrollViewHeight: '100vh',
-      oldScroll: 0,
-
       isFlexed: false,
-
+      // 是否获取到数据
       isGetData: false,
       isShowIosPay: false,
-      iosPayMask: false,
+      // 当前显示区域对应的身份
       toIdentify: 'student',
       swiperCurrentTab: 0,
+      // vip人数
       joinNumber: 0,
       isIOS: false,
       hasGetSystemInfo: false,
-      isBind: false,
-      isGetHeight: false
+      isBind: false
     }
 
     computed = {}
 
-    scroll (e) {
-      console.log(e)
-    }
-
     methods = {
-      scroll (e) {
-        console.log(e)
-      },
       closeIosPayModal () {
         this.isShowIosPay = false
       },
+      // 支付
       toPayPage () {
         if (!this.isBind) {
           wx.navigateTo({
             url: '/pages/child-input'
           })
-          // return wx.showToast({icon: 'none', title: '请先绑定孩子账号', duration: 1400})
           return
         }
         if (!this.hasGetSystemInfo) {
@@ -219,12 +207,14 @@
           })
         }
       },
+      // 滚动到顶部
       scrollToTop () {
         wx.pageScrollTo({
           scrollTop: 0,
           duration: 600
         })
       },
+      // 滚动到section4
       async scrollToSection4 () {
         let scrollTop = await this._getScrollTop()
         let viewTop = await this._getViewTop('.section4')
@@ -239,7 +229,7 @@
         this.swiperCurrentTab = event.target.dataset.tab
       }
     }
-
+    // 获取滚动高度
     _getScrollTop () {
       return new Promise((resolve, reject) => {
         wx.createSelectorQuery().selectViewport().scrollOffset((rect) => {
@@ -247,7 +237,7 @@
         }).exec()
       })
     }
-
+    // 获取view离上视口高度
     _getViewTop (view) {
       return new Promise((resolve, reject) => {
         wx.createSelectorQuery().select(view).boundingClientRect((rect) => {
@@ -255,25 +245,13 @@
         }).exec()
       })
     }
-
+    // 获取view
     _getView (view) {
       return new Promise((resolve, reject) => {
         wx.createSelectorQuery().select(view).boundingClientRect((rect) => {
           resolve(rect)
         }).exec()
       })
-    }
-
-    async _setHeight () {
-      let scrollTop = await this._getScrollTop()
-      let studentHeight = await this._getViewTop('.header .textButtonWrap')
-      let patriarchHeight = await this._getViewTop('.section4')
-      let fixedHeight = await this._getViewTop('.textButtonWrapflxed')
-      this.studentHeight = studentHeight + scrollTop || 0
-      this.patriarchHeight = patriarchHeight + scrollTop || 0
-      this.fixedHeight = fixedHeight + scrollTop || 0
-      this.isGetHeight = true
-      this.$apply()
     }
 
     _swiperChange (event) {
@@ -283,7 +261,7 @@
     _showIosPayModal () {
       this.isShowIosPay = true
     }
-
+    // 获取操作系统
     _getSystemInfo () {
       let that = this
       wx.getSystemInfo({
@@ -303,7 +281,7 @@
         }
       })
     }
-
+    // 获取vip人数
     _getVipNumber () {
       let that = this
       return new Promise((resolve, reject) => {
@@ -335,7 +313,7 @@
         })
       })
     }
-
+    // 获取是否绑定
     _getBindStatus () {
       let that = this
       return new Promise((resolve, reject) => {
@@ -369,21 +347,21 @@
         })
       })
     }
-
+    // 获取vip人数、是否绑定
     _getInfo () {
       let that = this
       Promise.all([this._getVipNumber(), this._getBindStatus()]).then((result) => {
-        console.log('pay.wpy --> _getInfo')
+        console.log('vip-learn-club --> _getInfo')
         that.isGetData = true
         that.$apply()
       })
     }
-
+    // 获取是否授权
     _getAuthorize () {
       return new Promise((resolve, reject) => {
         wx.getSetting({
           success (res) {
-            console.log('app.wpy --> _getAuthorize --> success')
+            console.log('vip-learn-club --> _getAuthorize --> success')
             console.log(res)
             if (res.authSetting['scope.userInfo']) {
               resolve(true)
@@ -394,56 +372,20 @@
         })
       })
     }
+    // 检查是否登陆
+    _checkLogin () {
+      console.log('vip-learn-club.wpy --> _checkLogin')
+      if (this.$parent.globalData.isCheckLogin) {
+        this._getInfo()
+      } else {
+        setTimeout(() => {
+          this._checkLogin()
+        }, 100)
+      }
+    }
 
     events = {}
-
-    onLoad () {
-      console.log('vip-learn-club.wpy --> onLoad')
-      mta.Page.init()
-      this._getSystemInfo()
-      // setTimeout(() => {
-      //   this._setScrollViewHeight()
-      // }, 0)
-    }
-
-    _getAllInfo () {
-      setTimeout(() => {
-        if (this.$parent.globalData.isCheck) {
-          this._getInfo()
-        } else {
-          this._getAllInfo()
-        }
-      }, 100)
-    }
-
-    async onShow () {
-      console.log('vip-learn-club.wpy --> onShow')
-      let authorize = await this._getAuthorize()
-      if (!authorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/vip-learn-club`
-        })
-        return
-      }
-      // this._getInfo()
-      this._getAllInfo()
-      // this._setScrollViewHeight()
-      // this._getVipNumber()
-      // this._getBindStatus()
-    }
-
-    onShareAppMessage (res) {
-      // if (res.from === 'button') {
-      //   // 来自页面内转发按钮
-      //   console.log(res.target)
-      // }
-      return {
-        title: '悠数学VIP培优计划',
-        path: '/pages/vip-learn-club',
-        imageUrl: 'http://qnstatic.file.yoomath.com/parent/VIP.png'
-      }
-    }
-
+    // 页面滚动监听
     async onPageScroll (e) {
       let btnScroll = await this._getViewTop('.header .textButtonWrap')
       let section1Scroll = await this._getViewTop('.section1')
@@ -462,6 +404,33 @@
         this.isFlexed = false
       }
       this.$apply()
+    }
+
+    onShareAppMessage (res) {
+      return {
+        title: '悠数学VIP培优计划',
+        path: '/pages/vip-learn-club',
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/VIP.png'
+      }
+    }
+
+    onLoad () {
+      console.log('vip-learn-club.wpy --> onLoad')
+      mta.Page.init()
+      this._getSystemInfo()
+    }
+
+    async onShow () {
+      console.log('vip-learn-club.wpy --> onShow')
+      // 判断授权
+      let authorize = await this._getAuthorize()
+      if (!authorize) {
+        wx.redirectTo({
+          url: `/pages/authorizeIdx?to=/pages/vip-learn-club`
+        })
+        return
+      }
+      this._checkLogin()
     }
   }
 </script>

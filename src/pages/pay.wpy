@@ -23,7 +23,7 @@
         <view class="title">VIP培优计划套餐</view>
         <view class="line"></view>
       </view>
-      <view class="item {{current==index?'active':''}}" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-tab="{{index}}" @tap="click">
+      <view class="item {{current==index?'active':''}}" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-tab="{{index}}" @tap="clickMemberPackage">
         <view class="goodsWrap" data-tab="{{index}}">
           <view class="goods" data-tab="{{index}}">
             <view class="text" data-tab="{{index}}">{{item.month}}月VIP会员</view>
@@ -93,17 +93,13 @@
           this.hasReadProtocol = true
         }
       },
-      click (event) {
+      clickMemberPackage (event) {
         this.current = event.target.dataset.tab
         this.memberPackageId = this.list[this.current].id
       },
       payOrder () {
-        // if (this.hasReadProtocol) {
         wx.showLoading({title: '正在支付'})
         this._getPayInfo()
-        // } else {
-        //   wx.showToast({icon: 'none', title: '请先阅读悠数学收费服务协议', duration: 1400})
-        // }
       },
       showProtocolPage () {
         wx.navigateTo({
@@ -258,9 +254,6 @@
           if (res.err_desc) {
             wx.showToast({icon: 'none', title: res.err_desc, duration: 1400})
           }
-          // wx.navigateTo({
-          //   url: `/pages/pay-success`
-          // })
         }
       })
     }
@@ -275,8 +268,6 @@
     onShow () {
       console.log('pay.wpy --> onShow')
       this._setIsGetData()
-      // this._getMemberPackages()
-      // this._getUserInfo()
     }
   }
 </script>
@@ -289,15 +280,7 @@
     border-radius: 10rpx;
     display: flex;
     align-items: center;
-    // .viaImg{
-    //   display: block;
-    //   flex-shrink: 1;
-    //   width: 100rpx;
-    //   height: 100rpx;
-    //   margin-right: 30rpx;
-    // }
     .viaWrap{
-      // position: absolute;
       right: 40rpx;
       display: flex;
       flex-direction: column;

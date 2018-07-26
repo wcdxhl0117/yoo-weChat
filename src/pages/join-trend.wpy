@@ -14,7 +14,7 @@
       <view class="content" wx:else>
         <!-- <detail :index="index" :unfold.sync="unfold" :active="active" :date="date" :hourTime="hourTime" :list="list" @on-click.user="click"></detail> -->
         <repeat for="{{list}}" key="index" index="index" item="item">
-          <detail :index="index" :unfold.sync="item.unfold" :active="item.active" :date="item.date" :hourTime="item.hourTime" :list="item.list" @on-click.user="click"></detail>
+          <detail :index="index" :unfold.sync="item.unfold" :active="item.active" :date="item.date" :hourTime="item.hourTime" :list="item.list" @on-click.user="detailClick"></detail>
         </repeat>
         <view class="footer">到底了，支持查看近15天的学习动态</view>
       </view>
@@ -47,13 +47,25 @@
     computed = {}
 
     methods = {
-      click () {
+      detailClick () {
         if (this.list[arguments[0]]) {
           this.list[arguments[0]].unfold = !this.list[arguments[0]].unfold
         }
       }
     }
 
+    // 检查是否登陆
+    _checkLogin () {
+      console.log('join-trend.wpy --> _checkLogin')
+      if (this.$parent.globalData.isCheckLogin) {
+        this._getTrend()
+      } else {
+        setTimeout(() => {
+          this._checkLogin()
+        }, 100)
+      }
+    }
+    // 获取动态
     _getTrend (account, password) {
       let that = this
       wx.request({
@@ -418,19 +430,8 @@
         })
         return
       }
-      this._getTrend()
+      this._checkLogin()
     }
-
-    // onShareAppMessage (res) {
-    //   // if (res.from === 'button') {
-    //   //   // 来自页面内转发按钮
-    //   //   console.log(res.target)
-    //   // }
-    //   return {
-    //     title: '孩子近期学习动态',
-    //     path: '/pages/join-trend'
-    //   }
-    // }
   }
 // [{
 //   unfold: true,

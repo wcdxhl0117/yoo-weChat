@@ -90,7 +90,7 @@
 
     data = {
       tel: '',
-      isGetData: '',
+      isGetData: false,
       baseViaSrc: '../static/baseVia.png',
       baseArrowSrc: '../static/base-right-arrow.png',
       vipSrc: '../static/vip-radius.png'
@@ -177,9 +177,7 @@
           if (res.data.ret_code === 0) {
             that.methods.setBindStatus(res.data.ret.hasBind)
             if (res.data.ret.hasBind) {
-              that._getUserAllInfo()
-              // that._getUserInfo()
-              // that._getUserCenter()
+              that._getInfo()
             } else {
               that._reset()
             }
@@ -197,16 +195,16 @@
       })
     }
 
-    _getUserAllInfo () {
+    _getInfo () {
       let that = this
-      Promise.all([this._getUserInfo(), this._getUserCenter()]).then((result) => {
-        console.log('user.wpy --> _getUserAllInfo')
+      Promise.all([this._getUserVipInfo(), this._getUserBaseInfo()]).then((result) => {
+        console.log('user.wpy --> _getInfo')
         that.isGetData = true
         that.$apply()
       })
     }
 
-    _getUserInfo () {
+    _getUserVipInfo () {
       let that = this
       return new Promise((resolve, reject) => {
         wx.request({
@@ -217,27 +215,22 @@
             'S_T': wx.getStorageSync('token')
           },
           success (res) {
-            console.log('user.wpy --> _getUserInfo --> success')
+            console.log('user.wpy --> _getUserVipInfo --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              // that.methods.setChildName(res.data.ret.user.name)
               that.methods.setJoinStatus(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
               if (res.data.ret.userMember.memberType.toLowerCase().includes('vip')) {
                 that.methods.setExpiration(moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD'))
               }
               resolve(true)
-              // that.baseViaSrc = `${that.$parent.globalData.baseURL}${res.data.ret.user.minAvatarUrl}` || '../static/baseVia.png'
-              // that.$apply()
             } else {
-              // that.methods.setBindStatus(false)
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
               resolve(false)
             }
           },
           fail (res) {
-            console.log('user.wpy --> _getUserInfo --> fail')
+            console.log('user.wpy --> _getUserVipInfo --> fail')
             console.log(res)
-            // that.methods.setBindStatus(false)
             wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
             resolve(false)
           }
@@ -264,7 +257,7 @@
       })
     }
   
-    _getUserCenter () {
+    _getUserBaseInfo () {
       let that = this
       return new Promise((resolve, reject) => {
         wx.request({
@@ -275,10 +268,10 @@
             'S_T': wx.getStorageSync('token')
           },
           success (res) {
-            console.log('user.wpy --> _getUserCenter --> success')
+            console.log('user.wpy --> _getUserBaseInfo --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              that.tel = res.data.ret.customerTel1
+              // that.tel = res.data.ret.customerTel1
               that.methods.setChildName(res.data.ret.studentInfo.name)
               that.methods.setChildNickName(res.data.ret.studentAccount.name)
               if (res.data.ret.studentInfo.minAvatarUrl) {
@@ -298,7 +291,7 @@
             }
           },
           fail (res) {
-            console.log('user.wpy --> _getUserCenter --> fail')
+            console.log('user.wpy --> _getUserBaseInfo --> fail')
             console.log(res)
             // that.methods.setBindStatus(false)
             wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
@@ -321,7 +314,6 @@
           console.log('user.wpy --> _unbindStudent --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            // that.methods.setBindStatus(false)
             that._getBindStatus()
           } else {
             wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
@@ -335,15 +327,15 @@
       })
     }
 
-    _getAllInfo () {
-      setTimeout(() => {
-        if (this.$parent.globalData.isCheck) {
-          this._getTel()
-          this._getBindStatus()
-        } else {
-          this._getAllInfo()
-        }
-      }, 100)
+    _checkLogin () {
+      if (this.$parent.globalData.isCheckLogin) {
+        this._getTel()
+        this._getBindStatus()
+      } else {
+        setTimeout(() => {
+          this._checkLogin()
+        }, 100)
+      }
     }
 
     events = {}
@@ -351,16 +343,11 @@
     onLoad () {
       console.log('user.wpy --> onLoad')
       mta.Page.init()
-      // this.methods.setParentName('你爸爸')
-      // store.dispatch({type: SET_JOIN_STATUS, payload: true})
-      // console.log(store.getState())
     }
 
     onShow () {
-      // this._getTel()
-      this._getAllInfo()
-      // this._getBindStatus()
       console.log('user.wpy --> onShow')
+      this._checkLogin()
     }
   }
 </script>

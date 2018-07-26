@@ -8,17 +8,7 @@
       <view class="title">示例动态</view>
       <image class="lineImg" src="../static/line.png"/>
     </view>
-    <!-- <detail :date="date" :hourTime="hourTime" :list="list"></detail> -->
     <learndetail :unfold="unfold" :date="date" :hourTime="hourTime" :list="list"></learndetail>
-    <!-- <view class="iosPayMask" wx:if="{{isShowIosPay}}">
-      <view class="wrap {{iosPayMask?'active':''}}">
-        <view class="title">在客服会话中，继续后续操作</view>
-        <image class="img" src="../static/19@2x.png"/>
-        <view class="subTitle">由于苹果手机平台限制，请在客服会话中回复“VIP”获取购买链接，继续后续操作</view>
-        <button class="btn" open-type="contact" session-from="iso">回复“VIP”获取购买链接</button>
-      </view>
-      <view class="mask {{iosPayMask?'active':''}}" @touchstart="_closeIosPayMask"></view>
-    </view> -->
     <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
   </view>
 </template>
@@ -44,7 +34,6 @@
       unfold: true,
       date: '06-30（星期三）',
       hourTime: '21:00',
-      active: true,
       list: [
         {
           hourTime: '21:00',
@@ -93,8 +82,6 @@
           ]
         }
       ],
-      isJoin: false,
-      isPractice: false,
       lineSrc: '../static/line.png',
       isIOS: false,
       isShowIosPay: false
@@ -104,7 +91,7 @@
 
     methods = {
       showJoinVip () {
-        console.log('加入VIP培优计划')
+        console.log('not-join-trend.wpy --> showJoinVip')
         if (this.isIOS) {
           this._showIosPayModal()
         } else {
@@ -126,7 +113,7 @@
       let that = this
       wx.getSystemInfo({
         success (res) {
-          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+          console.log('not-join-trend.wpy --> _getSystemInfo --> success')
           console.log(res)
           that.hasGetSystemInfo = true
           if (res.system.toLowerCase().includes('ios')) {
@@ -135,7 +122,7 @@
           that.$apply()
         },
         fail (res) {
-          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+          console.log('not-join-trend.wpy --> _getSystemInfo --> fail')
           console.log(res)
           wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
         }
@@ -145,6 +132,7 @@
     events = {}
 
     onLoad () {
+      console.log('not-join-trend.wpy --> onLoad')
       mta.Page.init()
       this._getSystemInfo()
     }
