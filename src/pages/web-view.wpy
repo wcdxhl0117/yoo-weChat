@@ -26,9 +26,16 @@
     events = {}
 
     onLoad(options) {
+      console.log('web-view.wpy --> onLoad')
       mta.Page.init()
       if (options.url) {
+        console.log(options)
+        console.log(options.url)
         this.src = options.url
+        this.$apply()
+      } else {
+        this.src = this.$parent.globalData.webViewSrc
+        this.$apply()
       }
     }
   }

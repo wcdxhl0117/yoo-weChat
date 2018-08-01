@@ -143,16 +143,20 @@
       },
       BannerClick (e) {
         let pathUrl = e.currentTarget.dataset.path
+        // pathUrl = 'https://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510326821&idx=1&sn=c59f437e0b7f54bcf536a7692371d946&chksm=7705047b40728d6d1952f2dfb209039e1d16c5ce68716521baff4bfc87b7c18f57622bd7d241#rd'
         if (pathUrl === '/pages/vip-learn-club' || pathUrl === 'pages/index' || pathUrl === '/pages/user') {
+          console.log('index.wpy --> BannerClick --> switchTab --> ' + pathUrl)
           wepy.switchTab({
             url: pathUrl
           })
         } else if (pathUrl.indexOf('/pages') === -1) {
+          console.log('index.wpy --> BannerClick --> navigateTo --> ' + pathUrl)
+          this.$parent.globalData.webViewSrc = pathUrl
           wepy.navigateTo({
-            url: '/pages/web-view?url=' + pathUrl
+            url: '/pages/web-view'
           })
         } else {
-          console.log(0)
+          console.log('index.wpy --> BannerClick --> pathUrl --> ' + pathUrl)
           wepy.navigateTo({
             url: pathUrl
           })

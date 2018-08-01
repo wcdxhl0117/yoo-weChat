@@ -1,0 +1,48 @@
+<style lang="less">
+  
+</style>
+<template>
+  <view class="container">
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
+  export default class downPdf extends wepy.page {
+    config = {
+      navigationBarTitleText: '悠数学-家长'
+    }
+    components = {}
+
+    mixins = []
+
+    data = {}
+
+    computed = {}
+
+    methods = {}
+
+    events = {}
+
+    onLoad() {
+      mta.Page.init()
+      wx.downloadFile({
+        url: 'http://qnstatic.file.yoomath.com/%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF03.docx',  // 图片的下载地址
+        success: function (res) { // 图片下载成功
+          console.log('down-pdf ---> 下载文件成功')
+          wx.openDocument({
+            filePath: res.tempFilePath,
+            success: function (res) {
+              console.log('down-pdf ---> 打开文档成功')
+            }
+          })
+        },
+        fail: function (res) {
+          console.log("down-pdf ---> 文档下载失败")
+        }
+      })
+    }
+  }
+</script>

@@ -24,6 +24,7 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/down-pdf',
       'pages/analysis',
       'pages/authorizeIdx',
       'pages/child-input',
@@ -39,7 +40,6 @@ export default class extends wepy.app {
       'pages/pay-success',
       'pages/not-join-trend',
       'pages/user',
-      'pages/down-app',
       'pages/web-view'
     ],
     window: {
@@ -71,20 +71,23 @@ export default class extends wepy.app {
 
   globalData = {
     userCode: 'userCode',
+    // 正式
     baseURL: 'https://wx.yoomath.com',
+    h5URL: 'https://h5.yoomath.com',
+    // 测试
     // baseURL: 'http://192.168.66.70:80', // 于鹏程
     // baseURL: 'http://192.168.66.69:80', // 龙哥
     // baseURL: 'http://192.168.66.134:8080', // 赵鹏
-    // baseURL: 'http://wx.preview.yoomath.com',
+    // baseURL: 'http://wx.test1.yoomath.com',
     // h5URL: `http://localhost:8080`,
     // h5URL: 'http://192.168.66.73:8080',
-    h5URL: 'http://h5.yoomath.com',
-    // h5URL: 'http://h5.preview.yoomath.com',
+    // h5URL: 'http://h5.test1.yoomath.com',
     // h5URL: 'https://h5.preview.yoomath.com',
     isCheckLogin: false,
     isAuthorize: false,
     userInfo: null,
-    authorize: false
+    authorize: false,
+    webViewSrc: ''
   }
 
   constructor () {
