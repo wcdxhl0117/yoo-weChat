@@ -11,6 +11,6 @@
 	"appid": "wx8d6cde640cbc39eb",
 	"projectname": "wechat-app",
 	"miniprogramRoot": "./dist",
-	"libVersion": "2.1.0",
+	"libVersion": "2.2.2",
 	"condition": {}
 }

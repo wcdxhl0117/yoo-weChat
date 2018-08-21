@@ -7,17 +7,17 @@
       </view>
     </block>
     <block wx:else>
-      <view class="userInfo {{bindStatus?'binding':'unbinding'}}">
+      <view class="userInfo {{isBind?'binding':'unbinding'}}">
         <view class="info">
-          <view class="name" wx:if="{{bindStatus}}">{{childName}}的家长</view>
-          <view class="name" wx:if="{{!bindStatus}}">未绑定悠数学账号</view>
-          <view class="account" wx:if="{{bindStatus}}">孩子账号：{{childNickName}}</view>
-          <view class="describe" wx:if="{{bindStatus && !joinStatus}}">未加入VIP培优计划</view>
-          <view class="describe join" wx:if="{{bindStatus && joinStatus}}">已加入VIP培优计划：{{expirationDate}} 到期</view>
+          <view class="name" wx:if="{{isBind}}">{{childName}}的家长</view>
+          <view class="name" wx:if="{{!isBind}}">未绑定悠数学账号</view>
+          <view class="account" wx:if="{{isBind}}">孩子账号：{{childNickName}}</view>
+          <view class="describe" wx:if="{{isBind && !isJoin}}">未加入VIP培优计划</view>
+          <view class="describe join" wx:if="{{isBind && isJoin}}">已加入VIP培优计划：{{expirationDate}} 到期</view>
         </view>
         <view class="viaWrap">
-          <image class="viaImg {{joinStatus?'vip':''}}" src="{{baseViaSrc}}"/>
-          <image class="vipImg" wx:if="{{joinStatus}}" src="{{vipSrc}}"/>
+          <image class="viaImg {{isJoin?'vip':''}}" src="{{baseViaSrc}}"/>
+          <image class="vipImg" wx:if="{{isJoin}}" src="{{vipSrc}}"/>
         </view>
       </view>
       <!-- <button class="item" open-type="contact" session-from="user">
@@ -28,14 +28,23 @@
         <view class="label">电话客服</view>
         <image class="arrowImg" src="{{baseArrowSrc}}"/>
       </view>
-      <view class="item" wx:if="{{!bindStatus}}" @tap="showBindingPage">
+      <view class="item" wx:if="{{!isBind}}" @tap="showBindingPage">
         <view class="label">绑定孩子悠数学账号</view>
         <image class="arrowImg" src="{{baseArrowSrc}}"/>
       </view>
-      <view class="item" wx:if="{{bindStatus}}" @tap="showUnbindingModal">
+
+      <!-- <button class="item" open-type="getUserInfo" lang="zh_CN">
+        <view class="label">绑定孩子悠数学账号</view>
+        <image class="arrowImg" src="{{baseArrowSrc}}"/>
+      </button> -->
+
+      <view class="item" wx:if="{{isBind}}" @tap="showUnbindingModal">
         <view class="label">解除绑定</view>
         <image class="arrowImg" src="{{baseArrowSrc}}"/>
       </view>
+      <view>isAuthorize-{{isAuthorize}}</view>
+      <view>token-{{token}}</view>
+      <view>tel-{{tel}}</view>
     </block>
   </view>
 </template>
@@ -44,14 +53,32 @@
   import wepy from 'wepy'
   import { connect } from 'wepy-redux'
   import moment from 'moment'
-  import { SET_CHILD_NICK_NAME, SET_CHILD_NAME, SET_EXPIRATION_DATE, SET_JOIN_STATUS, SET_BIND_STATUS } from '../store/types/user'
+  import {
+    SET_CHILD_NICK_NAME,
+    SET_CHILD_NAME,
+    SET_EXPIRATION_DATE,
+    SET_IS_JOIN,
+    SET_IS_BIND
+  } from '../store/types/user'
+  import {
+    SET_TOKEN
+  } from '../store/types/app'
   // import { ASYNC_INCREMENT } from '../store/types/counter'
-  import { asyncInc } from '../store/actions'
+  import { asyncInc, getTel } from '../store/actions'
   import mta from '../utils/mta_analysis.js'
   // import configStore from '../store'
   // const store = configStore()
 
   @connect({
+    isSetToken (state) {
+      return state.app.isSetToken
+    },
+    tel (state) {
+      return state.app.tel
+    },
+    token (state) {
+      return state.app.token
+    },
     asyncNum (state) {
       return state.counter.asyncNum
     },
@@ -64,19 +91,21 @@
     expirationDate (state) {
       return state.user.expirationDate
     },
-    joinStatus (state) {
-      return state.user.joinStatus
+    isJoin (state) {
+      return state.user.isJoin
     },
-    bindStatus (state) {
-      return state.user.bindStatus
+    isBind (state) {
+      return state.user.isBind
     }
   }, {
     asyncInc: asyncInc,
     setChildNickName: SET_CHILD_NICK_NAME,
     setChildName: SET_CHILD_NAME,
     setExpiration: SET_EXPIRATION_DATE,
-    setJoinStatus: SET_JOIN_STATUS,
-    setBindStatus: SET_BIND_STATUS
+    setIsJoin: SET_IS_JOIN,
+    setIsBind: SET_IS_BIND,
+    setToken: SET_TOKEN,
+    getTel: getTel
   })
 
   export default class User extends wepy.page {
@@ -89,14 +118,17 @@
     mixins = []
 
     data = {
-      tel: '',
-      isGetData: false,
+      isGetData: true,
       baseViaSrc: '../static/baseVia.png',
       baseArrowSrc: '../static/base-right-arrow.png',
       vipSrc: '../static/vip-radius.png'
     }
 
-    computed = {}
+    computed = {
+      isAuthorize () {
+        return this.$parent.globalData.isAuthorize
+      }
+    }
 
     methods = {
       test () {
@@ -119,15 +151,7 @@
       },
       showBindingPage () {
         wx.navigateTo({
-          url: '/pages/child-input'
-        })
-      },
-      showToast () {
-        wx.showToast({
-          title: '成功',
-          icon: 'success',
-          image: '../static/baseVia.png',
-          duration: 1400
+          url: '/pages/associated-account'
         })
       },
       showCallActionSheet () {
@@ -150,13 +174,13 @@
     // 拨打客服电话
     _callService () {
       wx.makePhoneCall({
-        phoneNumber: this.tel.replace(/-/g, '')// 仅为示例，并非真实的电话号码
+        phoneNumber: this.tel.replace(/-/g, '')
       })
     }
 
     _reset () {
-      this.methods.setBindStatus(false)
-      this.methods.setJoinStatus(false)
+      this.methods.setIsBind(false)
+      this.methods.setIsJoin(false)
       this.isGetData = true
       this.baseViaSrc = '../static/baseVia.png'
       this.$apply()
@@ -175,7 +199,7 @@
           console.log('user.wpy --> _getBindStatus --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.methods.setBindStatus(res.data.ret.hasBind)
+            that.methods.setIsBind(res.data.ret.hasBind)
             if (res.data.ret.hasBind) {
               that._getInfo()
             } else {
@@ -218,7 +242,7 @@
             console.log('user.wpy --> _getUserVipInfo --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              that.methods.setJoinStatus(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
+              that.methods.setIsJoin(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
               if (res.data.ret.userMember.memberType.toLowerCase().includes('vip')) {
                 that.methods.setExpiration(moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD'))
               }
@@ -281,11 +305,11 @@
               }
               that.$apply()
               resolve(true)
-              // that.methods.setJoinStatus(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
+              // that.methods.setIsJoin(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
               // that.methods.setExpiration(moment(res.data.ret.userMember.endAt).format('YY-MM-DD'))
               // that.baseViaSrc = res.data.ret.user.minAvatarUrl || '../static/baseVia.png'
             } else {
-              // that.methods.setBindStatus(false)
+              // that.methods.setIsBind(false)
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
               resolve(false)
             }
@@ -293,7 +317,7 @@
           fail (res) {
             console.log('user.wpy --> _getUserBaseInfo --> fail')
             console.log(res)
-            // that.methods.setBindStatus(false)
+            // that.methods.setIsBind(false)
             wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
             resolve(false)
           }
@@ -328,7 +352,7 @@
     }
 
     _checkLogin () {
-      if (this.$parent.globalData.isCheckLogin) {
+      if (this.$parent.globalData.isSetToken) {
         this._getTel()
         this._getBindStatus()
       } else {
@@ -348,6 +372,10 @@
     onShow () {
       console.log('user.wpy --> onShow')
       this._checkLogin()
+      // this.methods.setToken('123')
+      // console.log('isSetToken')
+      // console.log(this.isSetToken)
+      // this.methods.getTel()
     }
   }
 </script>

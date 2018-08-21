@@ -176,7 +176,8 @@
 
     <!-- 下载客户端 -->
     <view class="down">
-      可在悠数学-学生端 查看作业题目
+      <view class="downHomework" @tap="download" wx:if="{{options.studentHomeworkId && pageData.studentHomework}}">下载作业</view>
+      也可在悠数学-学生端 查看作业题目和解析
     </view>
     <!-- ios支付弹窗 -->
     <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
@@ -217,6 +218,51 @@
     computed = {}
 
     methods = {
+      download () {
+        let that = this
+        if (!that.options.studentHomeworkId) return
+        wx.showLoading({title: '正在加载'})
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/isFileExist`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          data: {
+            stuHkId: that.options.studentHomeworkId
+          },
+          success (res) {
+            console.log('report-detail.wpy --> download --> success')
+            console.log(res)
+            // 作业已转存
+            if (res.data.ret_code === 0) {
+              wx.setStorageSync('dh-is-exist', true)
+              wx.setStorageSync('dh-title', that.pageData.studentHomework.homework.name)
+              wx.setStorageSync('dh-id', that.options.studentHomeworkId)
+              wx.setStorageSync('dh-url', `${that.$parent.globalData.baseURL}/${res.data.ret.url}`)
+
+              that._toDownHomeworkPage()
+            // 作业超过下载期限
+            } else if (~~res.data.ret_code === 10001) {
+              that._toDownHomeworkDisabledPage()
+            // 作业未转存
+            } else if (~~res.data.ret_code === 10002) {
+              wx.setStorageSync('dh-is-exist', false)
+              wx.setStorageSync('dh-title', that.pageData.studentHomework.homework.name)
+              wx.setStorageSync('dh-id', that.options.studentHomeworkId)
+              wx.setStorageSync('dh-url', '')
+              that._toDownHomeworkPage()
+            }
+            wx.hideLoading()
+          },
+          fail (res) {
+            console.log('report-detail.wpy --> download --> fail')
+            console.log(res)
+            wx.hideLoading()
+          }
+        })
+      },
       showBanTip() {
         this.showTipBan = !this.showTipBan
       },
@@ -244,6 +290,21 @@
         this.isShowIosPay = false
       }
     }
+    // 到下载页面
+    _toDownHomeworkPage () {
+      console.log('report-detail.wpy --> _toDownHomeworkPage')
+      wx.navigateTo({
+        url: `/pages/down-homework`
+      })
+    }
+    // 超过时间失效
+    _toDownHomeworkDisabledPage () {
+      console.log('report-detail.wpy --> _toDownHomeworkDisabledPage')
+      wx.navigateTo({
+        url: `/pages/down-homework-disabled`
+      })
+    }
+
     // 显示ios支付弹窗
     _showIosPayModal () {
       this.isShowIosPay = true
@@ -295,13 +356,12 @@
         wx.redirectTo({
           url: `/pages/authorizeIdx?to=/pages/index`
         })
-        return
       }
     }
 
     onLoad(options) {
       wx.showLoading({
-        title: '加载中'
+        title: '正在加载'
       })
       mta.Page.init()
       this._getSystemInfo()
@@ -772,14 +832,19 @@
   .down{
     padding: 0 30rpx;
     text-align: center;text-align: center;
-    margin-bottom: 80rpx;
-    height: 100rpx;
+    margin:50rpx 0 150rpx;
+    // height: 100rpx;
     width: 630rpx;
-    line-height: 100rpx;
+    // line-height: 100rpx;
     font-size: 30rpx;
     color: #999999;
   }
-
+  .downHomework{
+    font-size: 36rpx;
+    color: #007AFF;
+    line-height: 48rpx;
+    margin-bottom: 20rpx;
+  }
   .iosPayMask{
     position: fixed;
     display: flex;

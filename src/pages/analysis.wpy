@@ -42,7 +42,7 @@
     // 检查是否登陆
     _checkLogin () {
       console.log('analysis.wpy --> _checkLogin')
-      if (this.$parent.globalData.isCheckLogin) {
+      if (this.$parent.globalData.isSetToken ) {
         this.src = `${this.$parent.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
         this.$apply()
       } else {

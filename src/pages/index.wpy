@@ -109,7 +109,7 @@
 
     computed = {
       authorize() {
-        if (this.$parent.globalData.authorize) {
+        if (this.$parent.globalData.isAuthorize) {
           return true
         } else {
           return false
@@ -120,8 +120,11 @@
     methods = {
       showBindingPage () {
         wx.navigateTo({
-          url: '/pages/child-input'
+          url: '/pages/associated-account'
         })
+        // wx.navigateTo({
+        //   url: '/pages/child-input'
+        // })
       },
       readReport () {
         // 跳转报告页
@@ -224,11 +227,10 @@
       })
     }
 
-    // 应该用redux获取状态，再发起请求，整个项目都不应该这样乱写，可惜他们要求赶时间，完全不看代码质量，
     _checkLogin () {
       console.log('index.wpy --> _checkLogin')
       let _this = this
-      if (_this.$parent.globalData.isCheckLogin) {
+      if (_this.$parent.globalData.isSetToken ) {
         // 后台查看是否关联过孩子,isBind变为true
         let token = wx.getStorageSync('token')
         if (token) {

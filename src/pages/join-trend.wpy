@@ -57,7 +57,7 @@
     // 检查是否登陆
     _checkLogin () {
       console.log('join-trend.wpy --> _checkLogin')
-      if (this.$parent.globalData.isCheckLogin) {
+      if (this.$parent.globalData.isSetToken ) {
         this._getTrend()
       } else {
         setTimeout(() => {
@@ -424,7 +424,7 @@
 
     onShow () {
       console.log('join-trend.wpy --> onShow')
-      if (!this.$parent.globalData.authorize) {
+      if (!this.$parent.globalData.isAuthorize) {
         wx.redirectTo({
           url: `/pages/authorizeIdx?to=/pages/join-trend`
         })

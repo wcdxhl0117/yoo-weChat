@@ -1,17 +1,27 @@
-import { handleActions } from 'redux-actions'
-import { SET_CHILD_NICK_NAME, SET_CHILD_NAME, SET_EXPIRATION_DATE, SET_JOIN_STATUS, SET_BIND_STATUS } from '../types/user'
+import {
+  handleActions
+} from 'redux-actions'
+
+import {
+  SET_CHILD_NICK_NAME,
+  SET_CHILD_NAME,
+  SET_EXPIRATION_DATE,
+  SET_IS_JOIN,
+  SET_IS_BIND,
+  SET_IS_AUTHORIZE
+} from '../types/user'
 
 export default handleActions({
-  [SET_CHILD_NICK_NAME] (state, action) {
-    return {
-      ...state,
-      childNickName: action.payload
-    }
-  },
   [SET_CHILD_NAME] (state, action) {
     return {
       ...state,
       childName: action.payload
+    }
+  },
+  [SET_CHILD_NICK_NAME] (state, action) {
+    return {
+      ...state,
+      childNickName: action.payload
     }
   },
   [SET_EXPIRATION_DATE] (state, action) {
@@ -20,22 +30,29 @@ export default handleActions({
       expirationDate: action.payload
     }
   },
-  [SET_JOIN_STATUS] (state, action) {
+  [SET_IS_JOIN] (state, action) {
     return {
       ...state,
-      joinStatus: action.payload
+      isJoin: action.payload
     }
   },
-  [SET_BIND_STATUS] (state, action) {
+  [SET_IS_BIND] (state, action) {
     return {
       ...state,
-      bindStatus: action.payload
+      isBind: action.payload
+    }
+  },
+  [SET_IS_AUTHORIZE] (state, action) {
+    return {
+      ...state,
+      isAuthorize: action.payload
     }
   }
 }, {
   childName: '同学姓名',
   childNickName: '同学昵称',
   expirationDate: '',
-  joinStatus: false,
-  bindStatus: false
+  isJoin: false,
+  isBind: false,
+  isAuthorize: false
 })

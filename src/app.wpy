@@ -24,7 +24,12 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
-      'pages/down-pdf',
+      'pages/associated-account',
+      'pages/user',
+      'pages/verify-account',
+      'pages/down-homework',
+      'pages/down-homework-workflow',
+      'pages/down-homework-disabled',
       'pages/analysis',
       'pages/authorizeIdx',
       'pages/child-input',
@@ -39,7 +44,7 @@ export default class extends wepy.app {
       'pages/vip-learn-club',
       'pages/pay-success',
       'pages/not-join-trend',
-      'pages/user',
+      // 'pages/user',
       'pages/web-view'
     ],
     window: {
@@ -70,23 +75,25 @@ export default class extends wepy.app {
   }
 
   globalData = {
-    userCode: 'userCode',
+    // 配置
     // 正式
-    baseURL: 'https://wx.yoomath.com',
-    h5URL: 'https://h5.yoomath.com',
+    // baseURL: 'https://wx.yoomath.com',
+    // h5URL: 'https://h5.yoomath.com',
     // 测试
     // baseURL: 'http://192.168.66.70:80', // 于鹏程
     // baseURL: 'http://192.168.66.69:80', // 龙哥
     // baseURL: 'http://192.168.66.134:8080', // 赵鹏
-    // baseURL: 'http://wx.test1.yoomath.com',
-    // h5URL: `http://localhost:8080`,
-    // h5URL: 'http://192.168.66.73:8080',
-    // h5URL: 'http://h5.test1.yoomath.com',
-    // h5URL: 'https://h5.preview.yoomath.com',
-    isCheckLogin: false,
+    // release
+    // baseURL: 'http://wx.test.yoomath.com',
+    // h5URL: 'http://h5.test.yoomath.com',
+    // test1
+    baseURL: 'http://wx.test1.yoomath.com',
+    h5URL: 'http://h5.test1.yoomath.com',
+    mtaAanalysis: false, // 开启移动分析埋点
+    // 状态
+    isSetToken: false,
     isAuthorize: false,
     userInfo: null,
-    authorize: false,
     webViewSrc: ''
   }
 
@@ -213,14 +220,14 @@ export default class extends wepy.app {
           wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
         wx.hideLoading()
-        that.globalData.isCheckLogin = true
+        that.globalData.isSetToken = true
       },
       fail (res) {
         console.log('app.wpy --> _setToken --> fail')
         console.log(res)
         wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         wx.hideLoading()
-        that.globalData.isCheckLogin = true
+        that.globalData.isSetToken = true
       }
     })
   }
@@ -254,42 +261,39 @@ export default class extends wepy.app {
   async onLaunch(options) {
     console.log('app.wpy --> onLaunch')
     console.log(options)
-
-    mta.App.init({
-      'appID': '500627072',
-      'eventID': '500627074',
-      'statPullDownFresh': true,
-      'statShareApp': true,
-      'statReachBottom': true
-    })
-
-    let extra = ''
-    // let to = `/${options.path}`
-    let isFirst = true
-
-    for (const key in options.query) {
-      if (isFirst) {
-        extra = `&${key}=${options.query[key]}`
-        isFirst = false
-      } else {
-        extra = `${extra}&${key}=${options.query[key]}`
-      }
+    if (this.globalData.mtaAanalysis) {
+      mta.App.init({
+        'appID': '500627072',
+        'eventID': '500627074',
+        'statPullDownFresh': true,
+        'statShareApp': true,
+        'statReachBottom': true
+      })
     }
+    // let extra = ''
+    // // let to = `/${options.path}`
+    // let isFirst = true
 
-    // 在这获取状态,个人信息
-    this.testAsync()
+    // for (const key in options.query) {
+    //   if (isFirst) {
+    //     extra = `&${key}=${options.query[key]}`
+    //     isFirst = false
+    //   } else {
+    //     extra = `${extra}&${key}=${options.query[key]}`
+    //   }
+    // }
+
+    // this.testAsync()
     let isAuthorize = await this._getAuthorize()
     if (isAuthorize) {
-      this.globalData.authorize = true
       this.globalData.isAuthorize = true
       let checkToken = await this._checkToken()
       if (!checkToken) {
         this._login()
       } else {
-        this.globalData.isCheckLogin = true
+        this.globalData.isSetToken = true
       }
     } else {
-      this.globalData.authorize = false
       this.globalData.isAuthorize = false
     }
   }

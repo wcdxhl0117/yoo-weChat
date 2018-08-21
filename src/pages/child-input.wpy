@@ -26,14 +26,14 @@
 <script>
   import wepy from 'wepy'
   import { connect } from 'wepy-redux'
-  import { SET_BIND_STATUS } from '../store/types/user'
+  import { SET_IS_BIND } from '../store/types/user'
   import mta from '../utils/mta_analysis.js'
   @connect({
     bindStatus (state) {
       return state.user.bindStatus
     }
   }, {
-    setBindStatus: SET_BIND_STATUS
+    setBindStatus: SET_IS_BIND
   })
   export default class ChildInput extends wepy.page {
     config = {
@@ -99,7 +99,7 @@
                 duration: 1400,
                 success () {
                   setTimeout(() => {
-                    wx.navigateBack({delta: 1})
+                    wx.navigateBack({delta: 2})
                   }, 1400)
                 }
               })

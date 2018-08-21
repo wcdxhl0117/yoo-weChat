@@ -180,7 +180,7 @@
       let _this = this
       // 获取数据  865349521188593664  options.studentHomeworkId
       wx.showLoading({
-        title: '加载中'
+        title: '正在加载'
       })
       console.log(options)
       wx.request({

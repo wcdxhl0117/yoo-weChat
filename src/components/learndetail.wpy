@@ -17,7 +17,7 @@
             <view class="detailLineWrap" wx:if="{{contentItem.length == 2}}">
               <view class="detailLine"></view>
             </view>
-            <view class="detailTimeWrap" wx:for="{{contentItem}}" wx:key="detailIdx" wx:for-index="detailIdx" wx:for-item="detailItem">
+            <view class="detailTimeWrap {{contentItem.length == 2?'':'single'}}" wx:for="{{contentItem}}" wx:key="detailIdx" wx:for-index="detailIdx" wx:for-item="detailItem">
               <view class="detailTime">{{detailItem.time}}</view>
               <view class="detailAfterDay" wx:if="{{detailItem.afterDay}}">{{detailItem.afterDay}}</view>
               <image class="detailTimeImg" src="../static/exercise.png" wx:if="{{detailItem.type=='exercise'}}"/>
@@ -310,24 +310,24 @@
       }
     }
     .detailTimeWrap{
-      margin: 40rpx 0 24rpx;
+      margin: 40rpx 0 40rpx;
       display: flex;
       align-items: center;
       position: relative;
-      &:nth-child(n+2){
-        margin: 24rpx 0 40rpx;
-        // &::after{
-        //   align-self: flex-start;
-        //   content: "";
-        //   position: absolute;
-        //   width: 4rpx;
-        //   height: 100%;
-        //   left: 176rpx;
-        //   // left: 184rpx;
-        //   top: 0rpx;
-        //   background: red;
-        // }
+      &.single{
+        &:nth-child(odd){
+          margin: 40rpx 0 40rpx;
+        }
       }
+      &:nth-child(even){
+        margin: 40rpx 0 24rpx;
+      }
+      &:nth-child(odd){
+        margin: 24rpx 0 40rpx;
+      }
+      // &:nth-child(n+2){
+      //   margin: 24rpx 0 40rpx;
+      // }
       .detailAfterDay{
         position: absolute;
         color: #AAAAAA;

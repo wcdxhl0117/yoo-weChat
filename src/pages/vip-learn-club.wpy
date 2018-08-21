@@ -99,7 +99,7 @@
                 </view>
               </view>
               <view class="title">以信息化手段推动数学学科教学发展进步</view>
-              <view class="subTitle">现代化教学是迎合时代变革的新道路，传统教学已经不能满足素质教学的要求。智能产品的出现，弥补了传统教学的弊端，促进教学高效化、多资源化。</view>
+              <view class="subTitle">常态化使用悠数学，根据学生的作业数据分析，确定教学的重难点，进行有效教学设计，利用易错题引导学生主动思考、积极探索，突破课堂教学难点，以信息化手段辅助日常教学。</view>
             </view>
           </swiper-item>
           <swiper-item class="section7SwiperItem">
@@ -375,7 +375,7 @@
     // 检查是否登陆
     _checkLogin () {
       console.log('vip-learn-club.wpy --> _checkLogin')
-      if (this.$parent.globalData.isCheckLogin) {
+      if (this.$parent.globalData.isSetToken ) {
         this._getInfo()
       } else {
         setTimeout(() => {
