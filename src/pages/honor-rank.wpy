@@ -107,11 +107,13 @@
         <view>光荣榜仅展示成绩为“优秀和良好”的同学</view>
       </view>
     </view>
+    <authorizeModal :value.sync="isShow" @on-close.user="closeModal" @on-confirm.user="confirmModal"></authorizeModal>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import authorizeModal from '../components/authorizeModal'
   import mta from '../utils/mta_analysis.js'
   // 返回数组最大值
   // var n = Math.max(10, 5, 20, 5, 5)
@@ -120,7 +122,9 @@
     config = {
       navigationBarTitleText: '班级作业情况'
     }
-    components = {}
+    components = {
+      authorizeModal: authorizeModal
+    }
 
     mixins = []
 
@@ -129,12 +133,14 @@
       rankData: [],
       myChild: {},
       baseUrl: '',
+      isShow: false,
+      options: {}, // query
       // 算各个分数段的柱形图高度（240*（分数段人数 / 人数最分数段人数））eg:优秀：10，良好：5，及格：20，不及格：5，未提交：5--->[10, 5, 20, 5, 5]
-      yx: {h: 240 * (1 / 20), num: 10},
-      lh: {h: 240 * (1 / 20), num: 5},
-      jg: {h: 240 * (1 / 20), num: 20},
-      bjg: {h: 240 * (1 / 20), num: 8},
-      wtj: {h: 240 * (1 / 20), num: 7}
+      yx: {h: 240 * (1 / 20), num: 0},
+      lh: {h: 240 * (1 / 20), num: 0},
+      jg: {h: 240 * (1 / 20), num: 0},
+      bjg: {h: 240 * (1 / 20), num: 0},
+      wtj: {h: 240 * (1 / 20), num: 0}
     }
 
     computed = {
@@ -169,12 +175,49 @@
       }
     }
 
-    methods = {}
+    methods = {
+      // 授权弹窗
+      closeModal () {
+        this.isShow = false
+        this.notHave = true
+        this.$apply()
+      },
+      confirmModal () {
+        let _this = this
+        this.isShow = false
+        this.$apply()
+        wepy.$instance._onLaunch(() => {
+          wepy.$instance._shouldToBindPage(() => {
+            // 数据请求
+            _this._checkLogin()
+          })
+        })
+      }
+    }
+
+    // 检查是否登陆
+    _checkLogin () {
+      let _this = this
+      console.log('work-report.wpy --> _checkLogin')
+      if (wepy.$instance.globalData.hasSetToken) {
+        wepy.$instance._shouldToBindPage(() => {
+          _this._getHonnerInfo()
+        })
+      } else {
+        setTimeout(() => {
+          _this._checkLogin()
+        }, 100)
+      }
+    }
 
     events = {}
 
-    onLoad(options) {
-      mta.Page.init()
+    _showAuthorizeModal () {
+      this.isShow = true
+      this.$apply()
+    }
+
+    _getHonnerInfo() {
       // 获取基础链接
       this.baseUrl = this.$parent.globalData.baseURL
       let _this = this
@@ -182,28 +225,27 @@
       wx.showLoading({
         title: '正在加载'
       })
-      console.log(options)
       wx.request({
         url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/view`,
         method: 'POST',
         data: {
-          stuHkId: options.studentHomeworkId
+          stuHkId: _this.options.studentHomeworkId
+          // stuHkId: '1052989419448975360'
         },
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'S_T': wx.getStorageSync('token')
         },
         success (res) {
-          console.log(11111111111111)
           if (res.data.ret_code === 0) {
             _this.allData = res.data.ret.allStudentHomeworks
             _this.rankData = res.data.ret.studentHomeworks
             _this.myChild = res.data.ret.studentHomework
             // 循环去除对象中没用的homework对象
-            for(let i = 0; i < _this.allData.length; i++) {
+            for (let i = 0; i < _this.allData.length; i++) {
               _this.allData[i].homework = ''
             }
-            for(let i = 0; i < _this.rankData.length; i++) {
+            for (let i = 0; i < _this.rankData.length; i++) {
               _this.rankData[i].homework = ''
             }
             // 柱状图数据处理(最大做分母)
@@ -268,7 +310,6 @@
             }
             console.log()
             _this.$apply()
-            console.log(33333333333333333)
           } else {
             console.log(res)
           }
@@ -279,6 +320,24 @@
           console.log('/wx/micro/parent/homework/view ---> fail')
         }
       })
+    }
+
+    async onShow () {
+      let _this = this
+      console.log('report_work.wpy --> onShow')
+      let authorize = await wepy.$instance._getAuthorize()
+      if (!authorize) {
+        setTimeout(() => {
+          _this._showAuthorizeModal()
+        }, 0)
+      } else {
+        _this._checkLogin()
+      }
+    }
+
+    onLoad(options) {
+      this.options = options
+      mta.Page.init()
     }
     fm(t) {
       let a = t

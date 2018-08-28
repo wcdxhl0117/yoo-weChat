@@ -57,6 +57,7 @@
         wx.setClipboardData({
           data: this.url,
           success (res) {
+            mta.Event.stat('Down_Homework_Copy')
             wx.showToast({title: '内容已复制', icon: 'success', duration: 1400})
           }
         })
@@ -67,6 +68,7 @@
           filePath: this.filePath,
           success (res) {
             console.log('down-homework.wpy --> preview --> openDocument --> success')
+            mta.Event.stat('Down_Homework_Preview')
             console.log(res)
           },
           fail (res) {
@@ -78,6 +80,7 @@
       },
       toWorkflowPage () {
         console.log('down-homework.wpy --> toWorkflowPage')
+        mta.Event.stat('Down_Homework_Workflow')
         wepy.navigateTo({
           url: `/pages/down-homework-workflow`
         })
@@ -136,6 +139,7 @@
         success (res) {
           console.log('down-homework.wpy --> _downFile --> success')
           console.log(res)
+          mta.Event.stat('Down_Homework_Download')
           wx.showToast({title: '下载成功', icon: 'success', duration: 1400})
           that.loading = false
           that.isFinished = true

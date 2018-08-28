@@ -7,106 +7,53 @@
       </view>
     </block>
     <block wx:else>
-      <view class="userInfo {{isBind?'binding':'unbinding'}}">
+      <view class="userInfo {{hasBind?'binding':'unbinding'}}">
         <view class="info">
-          <view class="name" wx:if="{{isBind}}">{{childName}}的家长</view>
-          <view class="name" wx:if="{{!isBind}}">未绑定悠数学账号</view>
-          <view class="account" wx:if="{{isBind}}">孩子账号：{{childNickName}}</view>
-          <view class="describe" wx:if="{{isBind && !isJoin}}">未加入VIP培优计划</view>
-          <view class="describe join" wx:if="{{isBind && isJoin}}">已加入VIP培优计划：{{expirationDate}} 到期</view>
+          <view class="name" wx:if="{{hasBind}}">{{childName}}的家长</view>
+          <view class="name" wx:if="{{!hasBind}}">未绑定悠数学账号</view>
+          <view class="account" wx:if="{{hasBind}}">孩子账号：{{childNickName}}</view>
+          <view class="describe" wx:if="{{hasBind && !hasJoin}}">未加入VIP培优计划</view>
+          <view class="describe join" wx:if="{{hasBind && hasJoin}}">已加入VIP培优计划：{{expirationDate}} 到期</view>
         </view>
         <view class="viaWrap">
-          <image class="viaImg {{isJoin?'vip':''}}" src="{{baseViaSrc}}"/>
-          <image class="vipImg" wx:if="{{isJoin}}" src="{{vipSrc}}"/>
+          <image class="viaImg {{hasBind && hasJoin?'vip':''}}" src="{{childViaSrc}}"/>
+          <image class="vipImg" wx:if="{{hasBind && hasJoin}}" src="../static/vip-radius.png"/>
         </view>
       </view>
       <!-- <button class="item" open-type="contact" session-from="user">
         <view class="label">微信客服</view>
-        <image class="arrowImg" src="{{baseArrowSrc}}"/>
+        <image class="arrowImg" src="../static/base-right-arrow.png"/>
       </button> -->
-      <view class="item" @tap="showCallActionSheet">
+      <view class="item" @tap="showCallActionSheet" wx:if="{{hasAuthorize}}">
         <view class="label">电话客服</view>
-        <image class="arrowImg" src="{{baseArrowSrc}}"/>
+        <image class="arrowImg" src="../static/base-right-arrow.png"/>
       </view>
-      <view class="item" wx:if="{{!isBind}}" @tap="showBindingPage">
+      <button class="item" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+        <view class="label">电话客服</view>
+        <image class="arrowImg" src="../static/base-right-arrow.png"/>
+      </button>
+
+      <view class="item" wx:if="{{!hasBind && hasAuthorize}}" @tap="showBindingPage">
         <view class="label">绑定孩子悠数学账号</view>
-        <image class="arrowImg" src="{{baseArrowSrc}}"/>
+        <image class="arrowImg" src="../static/base-right-arrow.png"/>
       </view>
-
-      <!-- <button class="item" open-type="getUserInfo" lang="zh_CN">
+      <button class="item" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
         <view class="label">绑定孩子悠数学账号</view>
-        <image class="arrowImg" src="{{baseArrowSrc}}"/>
-      </button> -->
+        <image class="arrowImg" src="../static/base-right-arrow.png"/>
+      </button>
 
-      <view class="item" wx:if="{{isBind}}" @tap="showUnbindingModal">
+      <view class="item" wx:if="{{hasBind}}" @tap="showUnbindingModal">
         <view class="label">解除绑定</view>
-        <image class="arrowImg" src="{{baseArrowSrc}}"/>
+        <image class="arrowImg" src="../static/base-right-arrow.png"/>
       </view>
-      <view>isAuthorize-{{isAuthorize}}</view>
-      <view>token-{{token}}</view>
-      <view>tel-{{tel}}</view>
     </block>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
-  import { connect } from 'wepy-redux'
   import moment from 'moment'
-  import {
-    SET_CHILD_NICK_NAME,
-    SET_CHILD_NAME,
-    SET_EXPIRATION_DATE,
-    SET_IS_JOIN,
-    SET_IS_BIND
-  } from '../store/types/user'
-  import {
-    SET_TOKEN
-  } from '../store/types/app'
-  // import { ASYNC_INCREMENT } from '../store/types/counter'
-  import { asyncInc, getTel } from '../store/actions'
   import mta from '../utils/mta_analysis.js'
-  // import configStore from '../store'
-  // const store = configStore()
-
-  @connect({
-    isSetToken (state) {
-      return state.app.isSetToken
-    },
-    tel (state) {
-      return state.app.tel
-    },
-    token (state) {
-      return state.app.token
-    },
-    asyncNum (state) {
-      return state.counter.asyncNum
-    },
-    childNickName (state) {
-      return state.user.childNickName
-    },
-    childName (state) {
-      return state.user.childName
-    },
-    expirationDate (state) {
-      return state.user.expirationDate
-    },
-    isJoin (state) {
-      return state.user.isJoin
-    },
-    isBind (state) {
-      return state.user.isBind
-    }
-  }, {
-    asyncInc: asyncInc,
-    setChildNickName: SET_CHILD_NICK_NAME,
-    setChildName: SET_CHILD_NAME,
-    setExpiration: SET_EXPIRATION_DATE,
-    setIsJoin: SET_IS_JOIN,
-    setIsBind: SET_IS_BIND,
-    setToken: SET_TOKEN,
-    getTel: getTel
-  })
 
   export default class User extends wepy.page {
     config = {
@@ -118,31 +65,56 @@
     mixins = []
 
     data = {
-      isGetData: true,
-      baseViaSrc: '../static/baseVia.png',
-      baseArrowSrc: '../static/base-right-arrow.png',
-      vipSrc: '../static/vip-radius.png'
+      isGetData: true
     }
 
     computed = {
-      isAuthorize () {
-        return this.$parent.globalData.isAuthorize
+      hasAuthorize () {
+        return wepy.$instance.globalData.hasAuthorize
+      },
+      hasSetToken () {
+        return wepy.$instance.globalData.hasSetToken
+      },
+      childName () {
+        return wepy.$instance.globalData.childName
+      },
+      childNickName () {
+        return wepy.$instance.globalData.childNickName
+      },
+      childViaSrc () {
+        return wepy.$instance.globalData.childViaSrc
+      },
+      hasBind () {
+        return wepy.$instance.globalData.hasBind
+      },
+      hasJoin () {
+        return wepy.$instance.globalData.hasJoin
+      },
+      expirationDate () {
+        return wepy.$instance.globalData.expirationDate
+      },
+      serviceTel () {
+        return wepy.$instance.globalData.serviceTel
       }
     }
 
     methods = {
-      test () {
-        this.methods.asyncInc()
+      getuserinfo () {
+        // 这个判断授权 =。=
+        if (arguments[0].detail.errMsg.includes('ok')) {
+          wepy.$instance._onLaunch()
+        }
       },
       showUnbindingModal () {
         let that = this
+        mta.Event.stat('Unbound_Student_Show')
         wx.showModal({
           title: '确定解除绑定？',
           content: '解除绑定后公众号中将不再接收作业提醒推送',
           confirmColor: '#007AFF',
           success (res) {
             if (res.confirm) {
-              that._unbindStudent()
+              that._unboundStudent()
             } else if (res.cancel) {
               console.log('用户点击取消')
             }
@@ -157,11 +129,11 @@
       showCallActionSheet () {
         let that = this
         wx.showActionSheet({
-          itemList: [`拨打 ${that.tel}`],
+          itemList: [`拨打 ${that.serviceTel}`],
           itemColor: '#007AFF',
           success (res) {
             console.log(res)
-            if (that.tel) {
+            if (that.serviceTel) {
               that._callService()
             } else {
               wx.showToast({icon: 'none', title: '未获取到电话号码', duration: 1400})
@@ -173,23 +145,24 @@
 
     // 拨打客服电话
     _callService () {
+      mta.Event.stat('Call_Service')
       wx.makePhoneCall({
-        phoneNumber: this.tel.replace(/-/g, '')
+        phoneNumber: this.serviceTel.replace(/-/g, '')
       })
     }
 
     _reset () {
-      this.methods.setIsBind(false)
-      this.methods.setIsJoin(false)
+      wepy.$instance.globalData.hasBind = false
+      wepy.$instance.globalData.hasJoin = false
+      wepy.$instance.globalData.childViaSrc = '../static/baseVia.png'
       this.isGetData = true
-      this.baseViaSrc = '../static/baseVia.png'
       this.$apply()
     }
 
     _getBindStatus () {
       let that = this
       wx.request({
-        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/hasBind`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -199,7 +172,7 @@
           console.log('user.wpy --> _getBindStatus --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.methods.setIsBind(res.data.ret.hasBind)
+            wepy.$instance.globalData.hasBind = res.data.ret.hasBind
             if (res.data.ret.hasBind) {
               that._getInfo()
             } else {
@@ -229,10 +202,10 @@
     }
 
     _getUserVipInfo () {
-      let that = this
+      // let that = this
       return new Promise((resolve, reject) => {
         wx.request({
-          url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+          url: `${wepy.$instance.globalData.baseURL}/wx/parent/getUserInfo`,
           method: 'POST',
           header: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -242,50 +215,31 @@
             console.log('user.wpy --> _getUserVipInfo --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              that.methods.setIsJoin(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
+              wepy.$instance.globalData.hasJoin = res.data.ret.userMember.memberType.toLowerCase().includes('vip')
               if (res.data.ret.userMember.memberType.toLowerCase().includes('vip')) {
-                that.methods.setExpiration(moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD'))
+                wepy.$instance.globalData.expirationDate = moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD')
               }
               resolve(true)
             } else {
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
-              resolve(false)
+              reject(new Error('请求success，但ret_code不为0'))
             }
           },
           fail (res) {
             console.log('user.wpy --> _getUserVipInfo --> fail')
             console.log(res)
             wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
-            resolve(false)
+            reject(new Error('请求fail'))
           }
         })
       })
     }
 
-    _getTel () {
-      let that = this
-      wx.request({
-        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/user/userCenter`,
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'S_T': wx.getStorageSync('token')
-        },
-        success (res) {
-          console.log('user.wpy --> _getTel --> success')
-          console.log(res)
-          if (res.data.ret_code === 0) {
-            that.tel = res.data.ret.customerTel1
-          }
-        }
-      })
-    }
-  
     _getUserBaseInfo () {
       let that = this
       return new Promise((resolve, reject) => {
         wx.request({
-          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/user/userCenter`,
+          url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/user/userCenter`,
           method: 'POST',
           header: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -295,56 +249,50 @@
             console.log('user.wpy --> _getUserBaseInfo --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              // that.tel = res.data.ret.customerTel1
-              that.methods.setChildName(res.data.ret.studentInfo.name)
-              that.methods.setChildNickName(res.data.ret.studentAccount.name)
+              wepy.$instance.globalData.childName = res.data.ret.studentInfo.name
+              wepy.$instance.globalData.childNickName = res.data.ret.studentAccount.name
               if (res.data.ret.studentInfo.minAvatarUrl) {
-                that.baseViaSrc = `${that.$parent.globalData.baseURL}${res.data.ret.studentInfo.minAvatarUrl}`
+                wepy.$instance.globalData.childViaSrc = `${that.$parent.globalData.baseURL}${res.data.ret.studentInfo.minAvatarUrl}`
               } else {
-                that.baseViaSrc = '../static/baseVia.png'
+                wepy.$instance.globalData.childViaSrc = '../static/baseVia.png'
               }
-              that.$apply()
               resolve(true)
-              // that.methods.setIsJoin(res.data.ret.userMember.memberType.toLowerCase().includes('vip'))
-              // that.methods.setExpiration(moment(res.data.ret.userMember.endAt).format('YY-MM-DD'))
-              // that.baseViaSrc = res.data.ret.user.minAvatarUrl || '../static/baseVia.png'
             } else {
-              // that.methods.setIsBind(false)
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
-              resolve(false)
+              reject(new Error('请求success，但ret_code不为0'))
             }
           },
           fail (res) {
             console.log('user.wpy --> _getUserBaseInfo --> fail')
             console.log(res)
-            // that.methods.setIsBind(false)
             wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
-            resolve(false)
+            reject(new Error('请求fail'))
           }
         })
       })
     }
 
-    _unbindStudent () {
+    _unboundStudent () {
       let that = this
       wx.request({
-        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/user/unbindStudent`,
+        url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/user/unbindStudent`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'S_T': wx.getStorageSync('token')
         },
         success (res) {
-          console.log('user.wpy --> _unbindStudent --> success')
+          console.log('user.wpy --> _unboundStudent --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
+            mta.Event.stat('Unbound_Student_Confirm')
             that._getBindStatus()
           } else {
             wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
           }
         },
         fail (res) {
-          console.log('user.wpy --> _unbindStudent --> fail')
+          console.log('user.wpy --> _unboundStudent --> fail')
           console.log(res)
           wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
@@ -352,8 +300,8 @@
     }
 
     _checkLogin () {
-      if (this.$parent.globalData.isSetToken) {
-        this._getTel()
+      // console.log('user.wpy --> _checkLogin')
+      if (wepy.$instance.globalData.hasSetToken) {
         this._getBindStatus()
       } else {
         setTimeout(() => {
@@ -372,10 +320,6 @@
     onShow () {
       console.log('user.wpy --> onShow')
       this._checkLogin()
-      // this.methods.setToken('123')
-      // console.log('isSetToken')
-      // console.log(this.isSetToken)
-      // this.methods.getTel()
     }
   }
 </script>

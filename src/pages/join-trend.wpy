@@ -19,12 +19,14 @@
         <view class="footer">到底了，支持查看近15天的学习动态</view>
       </view>
     </block>
+    <authorizeModal :value.sync="isShow" @on-close.user="closeModal" @on-confirm.user="confirmModal"></authorizeModal>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import moment from 'moment'
+  import authorizeModal from '../components/authorizeModal'
   import learndetail from '../components/learndetail'
   import mta from '../utils/mta_analysis.js'
   export default class joinTrend extends wepy.page {
@@ -33,12 +35,14 @@
     }
 
     components = {
-      detail: learndetail
+      detail: learndetail,
+      authorizeModal: authorizeModal
     }
 
     mixins = []
 
     data = {
+      isShow: false,
       isGetData: false,
       noTrend: false,
       list: []
@@ -51,20 +55,42 @@
         if (this.list[arguments[0]]) {
           this.list[arguments[0]].unfold = !this.list[arguments[0]].unfold
         }
+      },
+      closeModal () {
+
+      },
+      confirmModal () {
+        this.isShow = false
+        this.$apply()
+        wepy.$instance._onLaunch(() => {
+          this._shouldToBindPage()
+        })
       }
+    }
+
+    _showAuthorizeModal () {
+      this.isShow = true
+      this.$apply()
+    }
+
+    _shouldToBindPage () {
+      wepy.$instance._shouldToBindPage(() => {
+        this._getTrend()
+      })
     }
 
     // 检查是否登陆
     _checkLogin () {
       console.log('join-trend.wpy --> _checkLogin')
-      if (this.$parent.globalData.isSetToken ) {
-        this._getTrend()
+      if (this.$parent.globalData.hasSetToken) {
+        this._shouldToBindPage()
       } else {
         setTimeout(() => {
           this._checkLogin()
         }, 100)
       }
     }
+
     // 获取动态
     _getTrend (account, password) {
       let that = this
@@ -422,15 +448,25 @@
       mta.Page.init()
     }
 
-    onShow () {
+    async onShow () {
       console.log('join-trend.wpy --> onShow')
-      if (!this.$parent.globalData.isAuthorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/join-trend`
-        })
-        return
+      let that = this
+      let authorize = await wepy.$instance._getAuthorize()
+      if (!authorize) {
+        setTimeout(() => {
+          that._showAuthorizeModal()
+        }, 0)
+      } else {
+        that._checkLogin()
       }
-      this._checkLogin()
+
+      // if (!this.$parent.globalData.hasAuthorize) {
+      //   wx.redirectTo({
+      //     url: `/pages/authorizeIdx?to=/pages/join-trend`
+      //   })
+      //   return
+      // }
+      // this._checkLogin()
     }
   }
 // [{

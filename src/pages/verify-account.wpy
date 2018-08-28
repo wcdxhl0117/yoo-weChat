@@ -45,15 +45,12 @@
     methods = {
       isMy () {
         console.log('verify-account.wpy --> isMy')
+        mta.Event.stat('Is_My_Child')
         this._bindAccount()
-        // wx.navigateBack({delta: 2})
-        // 后台交互，绑定成功去home
-        // wepy.switchTab({
-        //   url: `/pages/home`
-        // })
       },
       notMy () {
         console.log('verify-account.wpy --> notMy')
+        mta.Event.stat('Not_My_Child')
         wx.navigateBack({delta: 1})
       }
     }
@@ -76,7 +73,7 @@
           if (res.data.ret_code === 0) {
             wx.navigateBack({delta: 2})
           } else {
-            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
           }
         },
         fail (res) {

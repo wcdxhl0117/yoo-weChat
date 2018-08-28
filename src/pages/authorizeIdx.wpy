@@ -34,7 +34,7 @@
     components = {}
 
     data = {
-      isBind: true, // 是否绑定孩子
+      hasBind: true, // 是否绑定孩子
       imgUrls: [],
       indicatorDots: false,
       autoplay: true,

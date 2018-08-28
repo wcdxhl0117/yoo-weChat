@@ -13,7 +13,7 @@
         </view>
       </view>
       <view class="btn-area">
-        <button formType="submit" class="{{isBinding?'disabled':''}}"  disabled="{{isBinding}}">关联账号</button>
+        <button formType="submit" class="{{hasBinding?'disabled':''}}"  disabled="{{hasBinding}}">关联账号</button>
       </view>
 
       <!-- <view class="btn-area notSub" wx-if="{{!isSub}}">
@@ -43,7 +43,7 @@
 
     data = {
       showPsd: false,
-      isBinding: false,
+      hasBinding: false,
       count: '',
       psd: ''
     }
@@ -75,7 +75,7 @@
 
     _bindAccount (account, password) {
       console.log(account, password)
-      this.isBinding = true
+      this.hasBinding = true
       let that = this
       if (this.count && this.psd) {
         wx.request({
@@ -92,20 +92,23 @@
           success (res) {
             console.log('child-input.wpy --> _bindAccount --> success')
             console.log(res)
+            mta.Event.stat('Bind_Student')
             if (res.data.ret_code === 0) {
               wx.showToast({
                 title: '关联成功',
                 icon: 'success',
                 duration: 1400,
                 success () {
+                  mta.Event.stat('Bind_Student_Success')
                   setTimeout(() => {
                     wx.navigateBack({delta: 2})
                   }, 1400)
                 }
               })
             } else {
+              mta.Event.stat('Bind_Student_Fail')
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
-              that.isBinding = false
+              that.hasBinding = false
               that.$apply()
             }
           },
@@ -113,13 +116,13 @@
             console.log('child-input.wpy --> _bindAccount --> success')
             console.log(res)
             wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
-            that.isBinding = false
+            that.hasBinding = false
             that.$apply()
           }
         })
       } else {
         wx.showToast({icon: 'none', title: '账号和密码不能为空', duration: 1400})
-        that.isBinding = false
+        that.hasBinding = false
         that.$apply()
       }
     }

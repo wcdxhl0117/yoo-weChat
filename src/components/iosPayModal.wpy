@@ -1,17 +1,18 @@
 <template>
-    <view class="iosPayMask" wx:if="{{isShowIosPay}}">
-      <view class="wrap {{iosPayMask?'active':''}}">
-        <view class="title">在客服会话中，继续后续操作</view>
-        <image class="img" src="../static/19@2x.png"/>
-        <view class="subTitle">由于苹果手机平台限制，请在客服会话中回复“VIP”获取购买链接，继续后续操作</view>
-        <button class="btn" open-type="contact" session-from="iso">回复“VIP”获取购买链接</button>
-      </view>
-      <view class="mask {{iosPayMask?'active':''}}" @touchstart="closeIosPayMask"></view>
+  <view class="iosPayMask" wx:if="{{isShowIosPay}}">
+    <view class="wrap {{iosPayMask?'active':''}}">
+      <view class="title">在客服会话中，继续后续操作</view>
+      <image class="img" src="../static/19@2x.png"/>
+      <view class="subTitle">由于苹果手机平台限制，请在客服会话中回复“VIP”获取购买链接，继续后续操作</view>
+      <button class="btn" open-type="contact" session-from="iso" @contact="contact">回复“VIP”获取购买链接</button>
     </view>
+    <view class="mask {{iosPayMask?'active':''}}" @touchstart="closeIosPayMask"></view>
+  </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
   export default class iosPayModal extends wepy.component {
     components = {}
 
@@ -54,6 +55,9 @@
     methods = {
       closeIosPayMask () {
         this.$emit('on-click')
+      },
+      contact () {
+        mta.Event.stat('Get_Purchase_Link')
       }
     }
 
@@ -133,6 +137,9 @@
       border-bottom-left-radius: 10rpx;
       background: #fff;
     }
+  }
+  button::after{
+    border: none;
   }
 }
 // @keyframes myfirst{

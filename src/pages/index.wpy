@@ -1,5 +1,16 @@
 <template>
-  <view wx:if="{{authorize&&isReady}}" class="container">
+  <!-- <view wx:if="{{authorize&&isReady}}" class="container"> -->
+  <view class="container" wx:if="{{isReady}}">
+    <!-- 加入自己小程序提示 -->
+    <view class="joinTip" wx:if="{{tipNow}}">
+      <view class="Str">添加到【我的小程序】，微信首页下拉打开，使用更方便</view>
+      <image class="zhi" src="../static/figer.gif" />
+      <image @tap="delTip" class="todel" src="../static/tipdel.png" />
+      <!-- 授权按钮 -->
+      <button wx:if="{{!authorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
+      <!-- 绑定孩子按钮 -->
+      <view @tap="showBindingPage('Home_ToBind')" wx:if="{{authorize&&!hasBind}}" class="btn1"></view>
+    </view>
     <!-- banner -->
     <swiper
       indicator-dots="{{indicatorDots}}"
@@ -11,67 +22,104 @@
     >
       <repeat for="{{imgUrls}}" key="index" index="index" item="item" style="width:100%; height:100%;">
         <swiper-item style="width:100%; height:100%;">
-          <image src="{{item.imageUrl}}" bindtap="BannerClick" data-path="{{item.url}}" class="slide-image" style="width:100%; height:100%;" />
+          <image src="{{item.imageUrl}}" @tap="BannerClick({{item}}, {{index}})" data-path="{{item.url}}" class="slide-image" style="width:100%; height:100%;" />
         </swiper-item>
       </repeat>
     </swiper>
-    <!-- 关联结构 -->
-    <view class="btm" wx:if="{{!isBind}}">
-      <view class="txt1">暂未关联孩子账号</view>
-      <view class="txt2">关联孩子账号随时了解孩子的学习情况</view>
-      <view class="btn" @tap="showBindingPage"> 关联孩子的悠数学账号 </view>
-    </view>
     <!-- 已关联展示home结构 -->
-    <view class="content" wx:if="{{isBind}}">
+    <view class="content">
       <!-- 作业报告部分 -->
-      <view class="report" bindtap="readReport">
-        <view class="head">作业报告</view>
-        <view wx:if="{{idxData.homework}}" class="near">近期作业：《{{idxData.homework.name}}》</view>
-        <view wx:if="{{!idxData.homework}}" class="near">近期作业：暂无作业</view>
-        <view class="read">查看</view>
+      <view class="report">
+        <view class="reWrap"  @tap="readReport">
+          <view class="head">作业报告</view>
+          <view wx:if="{{idxData.homework}}" class="near">近期作业：《{{idxData.homework.name}}》</view>
+          <view wx:if="{{!idxData.homework}}" class="near">近期作业：暂无作业</view>
+          <view class="read">查看</view>
+        </view>
+        <!-- 授权按钮 -->
+        <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Report_Unbound')"></button>
+        <!-- 绑定孩子按钮 -->
+        <view @tap="showBindingPage('Home_Report_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
       </view>
       <!-- VIP培优服务 -->
       <view class="vip">
         <view class="vipHead">VIP培优服务<image src="../static/vip.png" /></view>
+
         <!-- 监控 -->
-        <view class="monitor" bindtap="toMonitor" wx:if="{{!isVip}}">
-          <view class="left">监控学习情况，有问题立即提醒</view>
-          <view class="right">了解详情<image src="../static/right-arrow.png" /></view>
+        <view class="monitor" wx:if="{{!isVip}}">
+          <view class="left" @tap="toMonitor">监控学习情况，有问题立即提醒</view>
+          <view class="right" @tap="toMonitor">了解详情<image src="../static/right-arrow.png" /></view>
+          <!-- 授权按钮 -->
+          <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Remind_Unbound')"></button>
+          <!-- 绑定孩子按钮 -->
+          <view @tap="showBindingPage('Home_Remind_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
         </view>
+
         <!-- vip没有报警 -->
-        <view class="monitor notHaveTip" bindtap="toMonitor" wx:if="{{isVip&&!idxData.smartRemind}}">
-          <view class="left">
+        <view class="monitor notHaveTip" wx:if="{{isVip&&!idxData.smartRemind}}">
+          <view class="left" @tap="toMonitor">
             <image src="../static/notHaveTip.gif" />
             <view>正在监控中...学习情况正常</view>
           </view>
+          <!-- 授权按钮 -->
+          <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Remind_Unbound')"></button>
+          <!-- 绑定孩子按钮 -->
+          <view @tap="showBindingPage('Home_Remind_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
         </view>
+
         <!-- vip有报警 -->
-        <view class="monitor HaveTip" bindtap="toMonitor" wx:if="{{isVip&&idxData.smartRemind}}">
-          <view class="left">
+        <view class="monitor HaveTip" wx:if="{{isVip&&idxData.smartRemind}}">
+          <view class="left" @tap="toMonitor">
             <image src="../static/HaveTip.png" />
             <view>有{{idxData.remindCount}}条异常警报：作业[{{idxData.smartRemind.homeworkName}}]正...</view>
           </view>
+          <!-- 授权按钮 -->
+          <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Remind_Unbound')"></button>
+          <!-- 绑定孩子按钮 -->
+          <view @tap="showBindingPage('Home_Remind_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
         </view>
 
         <!-- 学习动态  -->
-        <view wx:if="{{isVip}}" class="base learnState" bindtap="toState">
-          <view class="topH">学习动态<image wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.clickStatus=='ENABLED'}}" src="../static/new.png" /></view>
-          <view class="txt" wx:if="{{idxData.learnDynamic}}">{{dynamic.time}} {{dynamic.title}}</view>
-          <view class="txt" wx:if="{{!idxData.learnDynamic}}">暂无学习动态</view>
+        <view wx:if="{{isVip}}" class="base learnState">
+          <view class="topH" @tap="toState">学习动态<image wx:if="{{idxData.learnDynamic&&idxData.learnDynamic.clickStatus=='ENABLED'}}" src="../static/new.png" /></view>
+          <view class="txt" @tap="toState" wx:if="{{idxData.learnDynamic}}">{{dynamic.time}} {{dynamic.title}}</view>
+          <view class="txt" @tap="toState" wx:if="{{!idxData.learnDynamic}}">暂无学习动态</view>
+          <!-- 授权按钮 -->
+          <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Tend_Unbound')"></button>
+          <!-- 绑定孩子按钮 -->
+          <view @tap="showBindingPage('Home_Tend_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
         </view>
+
         <!-- 非vip的示例学习动态 -->
-        <view wx:if="{{!isVip}}" class="base learnState" bindtap="toState">
-          <view class="topH eg">学习动态<image src="../static/egMg.png" /></view>
-          <view class="txt">5-26 15:30 开始自主练习</view>
+        <view wx:if="{{!isVip}}" class="base learnState">
+          <view class="topH eg" @tap="toState">学习动态<image src="../static/egMg.png" /></view>
+          <view class="txt" @tap="toState">5-26 15:30 开始自主练习</view>
+          <!-- 授权按钮 -->
+          <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Tend_Unbound')"></button>
+          <!-- 绑定孩子按钮 -->
+          <view @tap="showBindingPage('Home_Tend_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
         </view>
+
         <!-- 学情分析 -->
-        <view class="base learnAnalysis" bindtap="toAnalysis">
-          <view class="topH">学情分析<image src="" /></view>
-          <view wx:if="{{idxData.weekReport}}" class="txt">{{idxData.weekReport.startDate}} ~ {{idxData.weekReport.endDate}} 周成绩报告</view>
-          <view wx:if="{{!idxData.weekReport}}" class="txt">暂无成绩报告</view>
+        <view class="base learnAnalysis">
+          <view class="topH" @tap="toAnalysis">学情分析<image src="" /></view>
+          <view wx:if="{{idxData.weekReport}}" @tap="toAnalysis" class="txt">{{idxData.weekReport.startDate}} ~ {{idxData.weekReport.endDate}} 周成绩报告</view>
+          <view wx:if="{{!idxData.weekReport}}" @tap="toAnalysis" class="txt">暂无成绩报告</view>
+          <!-- 授权按钮 -->
+          <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_Analysis_Unbound')"></button>
+          <!-- 绑定孩子按钮 -->
+          <view @tap="showBindingPage('Home_Analysis_Unbound')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
         </view>
       </view>
 
+    </view>
+    <view wx:if="{{!hasBind}}" style="height: 170rpx;"></view>
+    <view wx:if="{{!hasBind}}" class="btmTipImg">
+      <image src="../static/btnBg.png" />
+      <!-- 授权按钮 -->
+      <button wx:if="{{!authorize}}" class="btn2" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
+      <!-- 绑定孩子按钮 -->
+      <view @tap="showBindingPage('Home_ToBind')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
     </view>
   </view>
 </template>
@@ -87,10 +135,11 @@
     components = {}
 
     data = {
-      isBind: true, // 是否绑定孩子
-      isReady: false,  // 身份时候判断成功
-      isVip: true, // 是否是vip
-      newShow: true, // 学习动态
+      hasBind: false, // 是否绑定孩子
+      isReady: false,  // 身份是否判断成功
+      isVip: false, // 是否是vip
+      newShow: false, // 学习动态
+      tipNow: true, // 是否展示上面的tip
       dynamic: {}, // 学习动态对象
       idxData: {
         homework: '', // 作业报告
@@ -109,7 +158,7 @@
 
     computed = {
       authorize() {
-        if (this.$parent.globalData.isAuthorize) {
+        if (this.$parent.globalData.hasAuthorize) {
           return true
         } else {
           return false
@@ -118,21 +167,21 @@
     }
 
     methods = {
-      showBindingPage () {
+      showBindingPage (val) {
+        mta.Event.stat(val)
         wx.navigateTo({
           url: '/pages/associated-account'
         })
-        // wx.navigateTo({
-        //   url: '/pages/child-input'
-        // })
       },
       readReport () {
+        mta.Event.stat('Home_Report_Bind')
         // 跳转报告页
         wx.navigateTo({
           url: '/pages/work-report'
         })
       },
       toState () {
+        mta.Event.stat('Home_Tend_Bind')
         // 跳转学习动态页面
         if (this.isVip) {
           wepy.navigateTo({
@@ -144,8 +193,10 @@
           })
         }
       },
-      BannerClick (e) {
-        let pathUrl = e.currentTarget.dataset.path
+      BannerClick (item, index) {
+        // console.log(item, index)
+        mta.Event.stat('Home_banner', {'index': index})
+        let pathUrl = item.url
         // pathUrl = 'https://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510326821&idx=1&sn=c59f437e0b7f54bcf536a7692371d946&chksm=7705047b40728d6d1952f2dfb209039e1d16c5ce68716521baff4bfc87b7c18f57622bd7d241#rd'
         if (pathUrl === '/pages/vip-learn-club' || pathUrl === 'pages/index' || pathUrl === '/pages/user') {
           console.log('index.wpy --> BannerClick --> switchTab --> ' + pathUrl)
@@ -165,10 +216,10 @@
           })
         }
       },
-
       toAnalysis () {
         // 跳转学情分析页面
         console.log('跳转学情分析页面')
+        mta.Event.stat('Home_Analysis_Bind')
         wepy.navigateTo({
           url: '/pages/analysis'
         })
@@ -176,9 +227,34 @@
       toMonitor () {
         // 跳转警告页
         console.log('跳转警告页')
+        mta.Event.stat('Home_Remind_Bind')
         wepy.navigateTo({
           url: `/pages/warn`
         })
+      },
+      delTip () {
+        let _this = this
+        wx.setStorage({
+          key: 'tipNow',
+          data: 'true',
+          success: function () {
+            _this.tipNow = false
+            _this.$apply()
+          }
+        })
+      },
+      async onGotUserInfo (val) {
+        mta.Event.stat(val)
+        let _this = this
+        let authorize = await this._getAuthorize()
+        if (!authorize) {
+          this.isReady = true
+          this.$apply()
+          return
+        }
+        this.$parent.globalData.hasAuthorize = authorize
+        this.$parent._login()
+        _this._checkLogin()
       }
     }
 
@@ -230,8 +306,8 @@
     _checkLogin () {
       console.log('index.wpy --> _checkLogin')
       let _this = this
-      if (_this.$parent.globalData.isSetToken ) {
-        // 后台查看是否关联过孩子,isBind变为true
+      if (_this.$parent.globalData.hasSetToken) {
+        // 后台查看是否关联过孩子,hasBind变为true
         let token = wx.getStorageSync('token')
         if (token) {
           // 查看是否绑定孩子
@@ -246,7 +322,7 @@
               console.log('index.wpy --> _checkLogin --> hasBind --> success')
               console.log(res)
               if (res.data.ret_code === 0) {
-                _this.isBind = res.data.ret.hasBind
+                _this.hasBind = res.data.ret.hasBind
                 _this.isReady = true
                 _this.$apply()
                 _this.getDataIdx()
@@ -627,17 +703,29 @@
     }
 
     onLoad() {
+      let _this = this
       console.log('index.wpy --> onLoad')
       mta.Page.init()
+      // 是否展示tip
+      wx.getStorage({
+        key: 'tipNow',
+        success: function(res) {
+          console.log(res.data)
+          if (res.data) {
+            _this.tipNow = false
+            _this.$apply()
+          }
+        }
+      })
     }
 
     async onShow() {
       console.log('index.wpy --> onShow')
       let authorize = await this._getAuthorize()
       if (!authorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/index`
-        })
+        this.isReady = true
+        this.imgUrls[0] = {'imageUrl': '../static/authIdx.png', 'url': '/pages/vip-learn-club'}
+        this.$apply()
         return
       }
       this._checkLogin()
@@ -649,6 +737,44 @@
   .container{
     width: 100%;
     height: auto;
+    margin-bottom: 30rpx;
+  }
+  .joinTip{
+    background: #FFE288;
+    display: flex;
+    width: 100%;
+    position: relative;
+    view{
+      width: 550rpx;
+      padding: 20rpx 38rpx;
+      line-height: 40rpx;
+      font-size: 30rpx;
+      color: #000000; 
+      padding-right: 0;
+    }
+    .zhi{
+      display: block;
+      width: 72rpx;
+      height: 72rpx;
+      padding-top: 20rpx;
+      margin-left: 26rpx;
+    }
+    .todel{
+      display: block;
+      width: 32rpx;
+      height: 32rpx;
+      padding: 40rpx;
+      padding-left: 30rpx;
+    }
+    .btn1{
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 110rpx;
+      height: 110rpx;
+      opacity: 0;
+    }
+
   }
   swiper{
     height:230rpx;
@@ -669,36 +795,48 @@
       height: 160rpx;
       position: relative;
       border-bottom: 1rpx solid #cce4ff;
-      .head{
-        position: absolute;
-        top: 15rpx;
-        left: 0;
-        font-size: 40rpx;
-        font-weight: 900;
+      .reWrap{
+        width: 100%;
+        height: 160rpx;
+        .head{
+          position: absolute;
+          top: 15rpx;
+          left: 0;
+          font-size: 40rpx;
+          font-weight: 900;
+        }
+        .near{
+          width:75%;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-size: 30rpx;
+          color: #999999;
+          position: absolute;
+          bottom: 30rpx;
+          left: 0;
+        }
+        .read{
+          position: absolute;
+          top: 30rpx;
+          right: 0;
+          width: 160rpx;
+          height: 60rpx;
+          color: #007AFF;
+          background: #cce4ff;
+          border-radius: 30rpx;
+          text-align: center;
+          line-height: 60rpx;
+          font-size: 30rpx;
+        }
       }
-      .near{
-        width:75%;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        font-size: 30rpx;
-        color: #999999;
+      .btn2{
         position: absolute;
-        bottom: 30rpx;
+        top: 0;
         left: 0;
-      }
-      .read{
-        position: absolute;
-        top: 30rpx;
         right: 0;
-        width: 160rpx;
-        height: 60rpx;
-        color: #007AFF;
-        background: #cce4ff;
-        border-radius: 30rpx;
-        text-align: center;
-        line-height: 60rpx;
-        font-size: 30rpx;
+        bottom: 0;
+        opacity: 0;
       }
     }
     .vip{
@@ -724,8 +862,10 @@
         margin-top: 30rpx;
         background: #B2D7FD;
         border-radius: 10rpx;
+        position: relative;
         .left{
           color: #007AFF;
+          min-width: 470rpx;
         }
         .right{
           color: #007AFF;
@@ -737,7 +877,14 @@
             padding-left: 20rpx;
           }
         }
-
+        .btn2{
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          opacity: 0;
+        }
       }
       .notHaveTip{
         background: #60CAA1;
@@ -786,6 +933,7 @@
         min-height: 160rpx;
         margin-top: 30rpx;
         border-radius: 10rpx;
+        position: relative;
         .topH{
           font-size: 40rpx;
           font-weight: 900;
@@ -809,6 +957,14 @@
           overflow: hidden;
           text-overflow:ellipsis;
           white-space: nowrap;
+        }
+        .btn2{
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          opacity: 0;
         }
       }
       .learnState{
@@ -854,6 +1010,25 @@
       text-align: center;
       line-height: 90rpx;
       border-radius: 10rpx;
+    }
+  }
+  .btmTipImg{
+    width: 100%;
+    height: 186rpx;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    image{
+      width: 100%;
+      height: 186rpx;
+    }
+    .btn2{
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0;
     }
   }
 </style>

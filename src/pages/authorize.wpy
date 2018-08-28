@@ -29,9 +29,9 @@
 
     methods = {
       async onGotUserInfo (res) {
-        let isAuthorize = await this._getAuthorize()
-        this.$parent.globalData.isAuthorize = isAuthorize
-        if (isAuthorize) {
+        let hasAuthorize = await this._getAuthorize()
+        this.$parent.globalData.hasAuthorize = hasAuthorize
+        if (hasAuthorize) {
           let checkToken = await this._checkToken()
           if (checkToken) {
             this._reLaunch()
@@ -73,7 +73,7 @@
 
     _reLaunch () {
       console.log(`url = ${this.to || '/pages/index'}${this.extra}`)
-      this.$parent.globalData.isSetToken  = true
+      this.$parent.globalData.hasSetToken = true
       wx.reLaunch({
         url: `${this.to || '/pages/index'}${this.extra}`
       })

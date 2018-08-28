@@ -24,27 +24,26 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/work-report',
+      'pages/honor-rank',
+      'pages/report-detail',
+      'pages/join-trend',
+      'pages/analysis',
       'pages/associated-account',
       'pages/user',
       'pages/verify-account',
       'pages/down-homework',
       'pages/down-homework-workflow',
       'pages/down-homework-disabled',
-      'pages/analysis',
       'pages/authorizeIdx',
       'pages/child-input',
-      'pages/honor-rank',
-      'pages/report-detail',
-      'pages/work-report',
       'pages/protocol',
       'pages/warn',
       'pages/authorize',
       'pages/pay',
-      'pages/join-trend',
       'pages/vip-learn-club',
       'pages/pay-success',
       'pages/not-join-trend',
-      // 'pages/user',
       'pages/web-view'
     ],
     window: {
@@ -87,14 +86,64 @@ export default class extends wepy.app {
     // baseURL: 'http://wx.test.yoomath.com',
     // h5URL: 'http://h5.test.yoomath.com',
     // test1
-    baseURL: 'http://wx.test1.yoomath.com',
-    h5URL: 'http://h5.test1.yoomath.com',
+    // baseURL: 'http://wx.test1.yoomath.com',
+    // h5URL: 'http://h5.test1.yoomath.com',
+    // preview
+    baseURL: 'http://wx.preview.yoomath.com',
+    h5URL: 'http://h5.preview.yoomath.com',
     mtaAanalysis: false, // 开启移动分析埋点
     // 状态
-    isSetToken: false,
-    isAuthorize: false,
-    userInfo: null,
-    webViewSrc: ''
+    // wepy.$instance.globalData
+    hasAuthorize: false,
+    hasSetToken: false,
+    childName: '',
+    childNickName: '',
+    childViaSrc: '../static/baseVia.png',
+    hasBind: false,
+    hasJoin: false,
+    expirationDate: '',
+    serviceTel: '',
+    isIOS: false,
+    hasGetSystemInfo: false,
+    // 其他
+    webViewSrc: '',
+    observer: this._observer()
+  }
+
+  _observer () {
+    let _msg = {}
+    return {
+      regist (type, fn) {
+        if (_msg[type]) {
+          _msg[type].push(fn)
+        } else {
+          _msg[type] = [fn]
+        }
+      },
+      fire (type, args) {
+        if (!_msg[type]) return
+        var events = {
+          type: type,
+          args: args || {}
+        }
+        var i = 0
+        var len = _msg[type].length
+        for (; i < len; i++) {
+          _msg[type][i].call(this, events)
+        }
+      },
+      remove (type, fn) {
+        if (_msg[type] instanceof Array) {
+          let i = _msg[type].length - 1
+          for (; i >= 0; i--) {
+            _msg[type][i] === fn && _msg[type].splice(i, 1)
+          }
+        }
+      },
+      clear (type) {
+        _msg[type] = null
+      }
+    }
   }
 
   constructor () {
@@ -102,11 +151,25 @@ export default class extends wepy.app {
     this.use('requestfix')
   }
 
-  async _login () {
+  async _login (cb) {
     wx.showLoading({title: '正在获取数据'})
     let code = await this._getCode()
     let {encryptedData, iv} = await this._getUserInfo()
-    this._setToken(code, encryptedData, iv)
+    this._setToken(code, encryptedData, iv, cb)
+  }
+
+  // 是否跳转到绑定页面
+  _shouldToBindPage (cb) {
+    this._onLaunch(async () => {
+      let hasBind = await wepy.$instance._getBindStatus()
+      if (!hasBind) {
+        wepy.navigateTo({
+          url: '/pages/associated-account'
+        })
+      } else {
+        cb && cb()
+      }
+    })
   }
 
   // 判断用户是否授权
@@ -198,7 +261,7 @@ export default class extends wepy.app {
     })
   }
 
-  _setToken (code, encryptedData, iv) {
+  _setToken (code, encryptedData, iv, cb) {
     let that = this
     wx.request({
       url: `${this.globalData.baseURL}/wx/micro/parent/login`,
@@ -220,45 +283,105 @@ export default class extends wepy.app {
           wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
         wx.hideLoading()
-        that.globalData.isSetToken = true
+        that.globalData.hasSetToken = true
+        // that.$apply()
+        cb && cb()
       },
       fail (res) {
         console.log('app.wpy --> _setToken --> fail')
         console.log(res)
         wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
         wx.hideLoading()
-        that.globalData.isSetToken = true
+        that.globalData.hasSetToken = true
+        // that.$apply()
       }
     })
   }
 
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
-
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
-  }
-
-  getUserInfo(cb) {
-    const that = this
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo
-    }
-    wx.getUserInfo({
+  // 获取电话号码
+  _getTel () {
+    // let that = this
+    wx.request({
+      url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/user/userCenter`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
       success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
+        console.log('app.wpy --> _getTel --> success')
+        console.log(res)
+        if (res.data.ret_code === 0) {
+          wepy.$instance.globalData.serviceTel = res.data.ret.customerTel1
+        }
       }
     })
   }
 
-  async onLaunch(options) {
+  // 获取操作系统
+  _getSystemInfo () {
+    // let that = this
+    wx.getSystemInfo({
+      success (res) {
+        console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
+        console.log(res)
+        wepy.$instance.globalData.hasGetSystemInfo = true
+        if (res.system.toLowerCase().includes('ios')) {
+          wepy.$instance.globalData.isIOS = true
+        }
+      },
+      fail (res) {
+        console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
+        console.log(res)
+        wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+      }
+    })
+  }
+
+  // 获取绑定状态
+  _getBindStatus () {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          console.log('user.wpy --> _getBindStatus --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            resolve(res.data.ret.hasBind)
+          } else {
+            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            reject(new Error('请求success，但ret_code不为0'))
+          }
+        },
+        fail (res) {
+          console.log('user.wpy --> _getBindStatus --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          reject(new Error('请求fail'))
+        }
+      })
+    })
+  }
+
+  async _onLaunch (cb) {
+    let that = this
+    that.globalData.hasAuthorize = await that._getAuthorize()
+    if (that.globalData.hasAuthorize) {
+      let checkToken = await that._checkToken()
+      if (!checkToken) {
+        that._login(cb)
+      } else {
+        that.globalData.hasSetToken = true
+        cb && cb()
+      }
+    }
+  }
+
+  onLaunch(options) {
     console.log('app.wpy --> onLaunch')
     console.log(options)
     if (this.globalData.mtaAanalysis) {
@@ -270,32 +393,9 @@ export default class extends wepy.app {
         'statReachBottom': true
       })
     }
-    // let extra = ''
-    // // let to = `/${options.path}`
-    // let isFirst = true
-
-    // for (const key in options.query) {
-    //   if (isFirst) {
-    //     extra = `&${key}=${options.query[key]}`
-    //     isFirst = false
-    //   } else {
-    //     extra = `${extra}&${key}=${options.query[key]}`
-    //   }
-    // }
-
-    // this.testAsync()
-    let isAuthorize = await this._getAuthorize()
-    if (isAuthorize) {
-      this.globalData.isAuthorize = true
-      let checkToken = await this._checkToken()
-      if (!checkToken) {
-        this._login()
-      } else {
-        this.globalData.isSetToken = true
-      }
-    } else {
-      this.globalData.isAuthorize = false
-    }
+    this._getTel()
+    this._getSystemInfo()
+    this._onLaunch()
   }
 }
 </script>

@@ -121,7 +121,7 @@
         <view class="left">班级整体情况对比</view>
         <view class="right">
           <text wx:if="{{showTipBan}}">作业时间未截止前 数据会发生变化</text>
-          <image bindtap="showBanTip" src="../static/wenhao.png">
+          <image bindtap="showBanTip" src="../static/wenhao.png" />
         </view>
       </view>
       <view class="lis">
@@ -181,6 +181,7 @@
     </view>
     <!-- ios支付弹窗 -->
     <iosPayModal :value.sync="isShowIosPay" @on-click.user="closeIosPayModal"></iosPayModal>
+    <authorizeModal :value.sync="isShow" @on-close.user="closeModal" @on-confirm.user="confirmModal"></authorizeModal>
   </view>
 </template>
 
@@ -188,13 +189,17 @@
   import wepy from 'wepy'
   import moment from 'moment'
   import iosPayModal from '../components/iosPayModal'
+  import authorizePop from '../components/authorizePop'
+  import authorizeModal from '../components/authorizeModal'
   import mta from '../utils/mta_analysis.js'
   export default class reportDetail extends wepy.page {
     config = {
       navigationBarTitleText: '作业详情'
     }
     components = {
-      iosPayModal: iosPayModal
+      iosPayModal: iosPayModal,
+      authorizePop: authorizePop,
+      authorizeModal: authorizeModal
     }
 
     data = {
@@ -212,7 +217,8 @@
         // minTime: ''  // 最短用时
       },
       isIOS: false,
-      isShowIosPay: false
+      isShowIosPay: false,
+      isShow: false
     }
 
     computed = {}
@@ -273,6 +279,7 @@
         })
       },
       toBillboard() {
+        mta.Event.stat('Hall_Of_Fame')
         wepy.navigateTo({
           url: `/pages/honor-rank?studentHomeworkId=` + this.options.studentHomeworkId
         })
@@ -288,11 +295,43 @@
       },
       closeIosPayModal () {
         this.isShowIosPay = false
+      },
+      // 授权弹窗
+      closeModal () {
+        this.isShow = false
+        this.notHave = true
+        this.$apply()
+      },
+      confirmModal () {
+        let _this = this
+        this.isShow = false
+        this.$apply()
+        wepy.$instance._onLaunch(() => {
+          wepy.$instance._shouldToBindPage(() => {
+            // 数据请求
+            _this._checkLogin()
+          })
+        })
+      }
+    }
+     // 检查是否登陆
+    _checkLogin () {
+      let _this = this
+      console.log('work-report.wpy --> _checkLogin')
+      if (wepy.$instance.globalData.hasSetToken) {
+        wepy.$instance._shouldToBindPage(() => {
+          _this._gitDetialUnfo()
+        })
+      } else {
+        setTimeout(() => {
+          _this._checkLogin()
+        }, 100)
       }
     }
     // 到下载页面
     _toDownHomeworkPage () {
       console.log('report-detail.wpy --> _toDownHomeworkPage')
+      mta.Event.stat('Down_Homework_Show')
       wx.navigateTo({
         url: `/pages/down-homework`
       })
@@ -347,27 +386,19 @@
       })
     }
 
-    events = {}
-
-    async onShow () {
-      console.log('report-detail.wpy --> onShow')
-      let authorize = await this._getAuthorize()
-      if (!authorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/index`
-        })
-      }
+    _showAuthorizeModal () {
+      this.isShow = true
+      this.$apply()
     }
 
-    onLoad(options) {
+    _gitDetialUnfo() {
       wx.showLoading({
         title: '正在加载'
       })
-      mta.Page.init()
+      console.log('report-detail.wpy --> _gitDetialUnfo')
       this._getSystemInfo()
       let _this = this
       // studentHomeworkId  eg: studentHomeworkId = 996514346697760768,,,1028276705740980224
-      this.options = options
       console.log(this.options)
       // 查看用户是否是vip(写完发现不用写，就放着吧，你大爷的)
       wx.request({
@@ -398,7 +429,8 @@
         url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/view`,
         method: 'POST',
         data: {
-          stuHkId: options.studentHomeworkId
+          stuHkId: this.options.studentHomeworkId
+          // stuHkId: '1052989419448975360'
         },
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -458,6 +490,27 @@
           console.log('/wx/micro/parent/homework/view ---> fail')
         }
       })
+    }
+
+    events = {}
+
+    async onShow () {
+      let _this = this
+      console.log('report_work.wpy --> onShow')
+      let authorize = await wepy.$instance._getAuthorize()
+      if (!authorize) {
+        setTimeout(() => {
+          _this._showAuthorizeModal()
+        }, 0)
+      } else {
+        _this._gitDetialUnfo()
+      }
+    }
+
+    async onLoad(options) {
+      mta.Page.init()
+      this.options = options
+      this.$apply()
     }
 
     timeSet(t) {

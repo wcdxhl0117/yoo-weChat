@@ -22,23 +22,38 @@
       </view>
       <view class="section1">
         <image class="img" src="../static/P1@2x.png"/>
-        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <view class="button" wx:if="{{hasAuthorize}}" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <button class="button" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+          加入VIP培优计划   立即体验
+        </button>
       </view>
       <view class="section2">
         <image class="img" src="../static/P2@2x.png"/>
-        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <view class="button" wx:if="{{hasAuthorize}}" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <button class="button" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+          加入VIP培优计划   立即体验
+        </button>
       </view>
       <view class="section3">
         <image class="img" src="../static/P3@2x.png"/>
-        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <view class="button" wx:if="{{hasAuthorize}}" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <button class="button" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+          加入VIP培优计划   立即体验
+        </button>
       </view>
       <view class="section4">
         <image class="img" src="../static/P4@2x.png"/>
-        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <view class="button" wx:if="{{hasAuthorize}}" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <button class="button" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+          加入VIP培优计划   立即体验
+        </button>
       </view>
       <view class="section5">
         <image class="img" src="../static/P5@2x.png"/>
-        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <view class="button" wx:if="{{hasAuthorize}}" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <button class="button" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+          加入VIP培优计划   立即体验
+        </button>
       </view>
       <view class="section6">
         <image class="img" src="../static/school.png"/>
@@ -136,12 +151,18 @@
       </view>
       <view class="section8">
         <image class="img" src="../static/VIP@2x.png"/>
-        <view class="button" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <view class="button" wx:if="{{hasAuthorize}}" @tap="toPayPage">加入VIP培优计划   立即体验</view>
+        <button class="button" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+          加入VIP培优计划   立即体验
+        </button>
       </view>
       <view class="supernatant">
         <view class="wrap">
           <view class="text">本月已有{{joinNumber}}位同学加入VIP培优计划{{scrollTop}}</view>
-          <view class="btn" @touchstart="toPayPage">立即加入</view>
+          <view class="btn" wx:if="{{hasAuthorize}}" @touchstart="toPayPage">立即加入</view>
+          <button class="btn" open-type="getUserInfo" wx:if="{{!hasAuthorize}}" @getuserinfo="getuserinfo">
+            立即加入
+          </button>
         </view>
       </view>
       </view>
@@ -170,35 +191,54 @@
     data = {
       isFlexed: false,
       // 是否获取到数据
-      isGetData: false,
+      isGetData: true,
       isShowIosPay: false,
       // 当前显示区域对应的身份
       toIdentify: 'student',
       swiperCurrentTab: 0,
       // vip人数
-      joinNumber: 0,
-      isIOS: false,
-      hasGetSystemInfo: false,
-      isBind: false
+      joinNumber: 0
     }
 
-    computed = {}
+    computed = {
+      hasAuthorize () {
+        return wepy.$instance.globalData.hasAuthorize
+      },
+      hasBind () {
+        return wepy.$instance.globalData.hasBind
+      },
+      hasGetSystemInfo () {
+        return wepy.$instance.globalData.hasGetSystemInfo
+      },
+      isIOS () {
+        return wepy.$instance.globalData.isIOS
+      }
+    }
 
     methods = {
+      getuserinfo () {
+        // 这个判断授权 =。=
+        if (arguments[0].detail.errMsg.includes('ok')) {
+          wepy.$instance._onLaunch()
+        }
+      },
       closeIosPayModal () {
         this.isShowIosPay = false
       },
       // 支付
       toPayPage () {
-        if (!this.isBind) {
+        // console.log('toPayPage')
+        // console.log(this.hasBind)
+        if (!this.hasBind) {
           wx.navigateTo({
-            url: '/pages/child-input'
+            url: '/pages/associated-account'
           })
           return
         }
         if (!this.hasGetSystemInfo) {
           return wx.showToast({icon: 'none', title: '等待接口返回数据，请稍等', duration: 1400})
         }
+        mta.Event.stat('Join_VIP_Club')
         if (this.isIOS) {
           this._showIosPayModal()
         } else {
@@ -218,8 +258,8 @@
       async scrollToSection4 () {
         let scrollTop = await this._getScrollTop()
         let viewTop = await this._getViewTop('.section4')
-        console.log(scrollTop)
-        console.log(viewTop)
+        // console.log(scrollTop)
+        // console.log(viewTop)
         wx.pageScrollTo({
           scrollTop: viewTop + scrollTop,
           duration: 600
@@ -261,32 +301,13 @@
     _showIosPayModal () {
       this.isShowIosPay = true
     }
-    // 获取操作系统
-    _getSystemInfo () {
-      let that = this
-      wx.getSystemInfo({
-        success (res) {
-          console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
-          console.log(res)
-          that.hasGetSystemInfo = true
-          if (res.system.toLowerCase().includes('ios')) {
-            that.isIOS = true
-          }
-          that.$apply()
-        },
-        fail (res) {
-          console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
-          console.log(res)
-          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
-        }
-      })
-    }
+
     // 获取vip人数
     _getVipNumber () {
       let that = this
       return new Promise((resolve, reject) => {
         wx.request({
-          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/user/getVipNumber`,
+          url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/user/getVipNumber`,
           method: 'POST',
           header: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -318,7 +339,7 @@
       let that = this
       return new Promise((resolve, reject) => {
         wx.request({
-          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+          url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/hasBind`,
           method: 'POST',
           header: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -328,9 +349,9 @@
             console.log('vip-learn-club.wpy --> _getBindStatus --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              that.isBind = res.data.ret.hasBind
+              wepy.$instance.globalData.hasBind = res.data.ret.hasBind
             } else {
-              that.isBind = false
+              wepy.$instance.globalData.hasBind = false
               wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
             }
             that.$apply()
@@ -339,7 +360,7 @@
           fail (res) {
             console.log('vip-learn-club.wpy --> _getBindStatus --> fail')
             console.log(res)
-            that.isBind = false
+            wepy.$instance.globalData.hasBind = false
             that.$apply()
             wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
             resolve(false)
@@ -374,8 +395,9 @@
     }
     // 检查是否登陆
     _checkLogin () {
-      console.log('vip-learn-club.wpy --> _checkLogin')
-      if (this.$parent.globalData.isSetToken ) {
+      // console.log('vip-learn-club.wpy --> _checkLogin')
+      if (wepy.$instance.globalData.hasSetToken) {
+        // this._getBindStatus()
         this._getInfo()
       } else {
         setTimeout(() => {
@@ -417,20 +439,20 @@
     onLoad () {
       console.log('vip-learn-club.wpy --> onLoad')
       mta.Page.init()
-      this._getSystemInfo()
     }
 
     async onShow () {
       console.log('vip-learn-club.wpy --> onShow')
       // 判断授权
-      let authorize = await this._getAuthorize()
-      if (!authorize) {
-        wx.redirectTo({
-          url: `/pages/authorizeIdx?to=/pages/vip-learn-club`
-        })
-        return
-      }
+      // let authorize = await this._getAuthorize()
+      // if (!authorize) {
+      //   wx.redirectTo({
+      //     url: `/pages/authorizeIdx?to=/pages/vip-learn-club`
+      //   })
+      //   return
+      // }
       this._checkLogin()
+      this._getVipNumber()
     }
   }
 </script>
@@ -797,8 +819,14 @@
       }
     }
   }
+  button{
+    margin:0;
+    padding: 0;
+    background-color: transparent;
+  }
   button::after{
-    border:none;
+    margin: 0;
+    border: none;
   }
   .loading{
     display: flex;

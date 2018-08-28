@@ -1,7 +1,7 @@
 <template>
   <view id="associatedAccount">
     <view class="text">打开悠数学-学生端APP，进入“我”的页面，点击右上角的二维码图标，进行扫码</view>
-    <image class="pic" src="../static/code@2x.png"/>
+    <image class="pic" src="http://qnstatic.file.yoomath.com/jiazhangduanguanlianzhiyin.gif"/>
     <view class="btn" @tap="scan">扫码关联</view>
     <view class="btn ghost" @tap="input">输入孩子的账号和密码进行关联</view>
   </view>
@@ -17,6 +17,7 @@
     SET_STUDENT_ID
   } from '../store/types/associated-account'
   import mta from '../utils/mta_analysis.js'
+  import CryptoJS from 'crypto-js'
 
   @connect({}, {
     setAvatarUrl: SET_AVATAR_URL,
@@ -41,44 +42,60 @@
     methods = {
       scan () {
         let that = this
-        wx.scanCode({
+        mta.Event.stat('scan_code')
+        wepy.scanCode({
           success (res) {
             console.log('associated-account.wpy --> scan --> succcess')
             console.log(res)
-            // wx.showToast({icon: 'none', title: res.result, duration: 1400})
-            that._bindAccount(res.result)
+            try {
+              that._getAccountInfo(that._decryptByDES(res.result, 'elanking'))
+            } catch (error) {
+              wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+            }
           },
           fail (res) {
             console.log('associated-account.wpy --> scan --> fail')
             console.log(res)
             if (!res.errMsg.includes('cancel')) {
-              wx.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+              wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
             }
           }
         })
       },
       input () {
         console.log('associated-account.wpy --> input')
-        wx.navigateTo({
+        mta.Event.stat('Enter_Account')
+        wepy.navigateTo({
           url: '/pages/child-input'
         })
       }
     }
 
-    _bindAccount (id) {
+    _decryptByDES (ciphertext, key) {
+      let keyHex = CryptoJS.enc.Utf8.parse(key)
+      let decrypted = CryptoJS.DES.decrypt({
+        ciphertext: CryptoJS.enc.Base64.parse(ciphertext)
+      }, keyHex, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      })
+      return decrypted.toString(CryptoJS.enc.Utf8)
+    }
+
+    _getAccountInfo (id) {
       let that = this
-      wx.request({
+      wepy.request({
         url: `${this.$parent.globalData.baseURL}/wx/micro/parent/scanFindStu`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'S_T': wx.getStorageSync('token')
+          'S_T': wepy.getStorageSync('token')
         },
         data: {
           stuId: id
         },
         success (res) {
-          console.log('associated-account.wpy --> _bindAccount --> success')
+          console.log('associated-account.wpy --> _getAccountInfo --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
             that.methods.setStudentId(id)
@@ -88,24 +105,14 @@
             wepy.navigateTo({
               url: '/pages/verify-account'
             })
-            // wx.showToast({
-            //   title: '关联成功',
-            //   icon: 'success',
-            //   duration: 1400,
-            //   success () {
-            //     setTimeout(() => {
-            //       wx.navigateBack({delta: 2})
-            //     }, 1400)
-            //   }
-            // })
           } else {
-            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
           }
         },
         fail (res) {
-          console.log('associated-account.wpy --> _bindAccount --> fail')
+          console.log('associated-account.wpy --> _getAccountInfo --> fail')
           console.log(res)
-          wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+          wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
         }
       })
     }

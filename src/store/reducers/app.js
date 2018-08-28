@@ -8,14 +8,14 @@ export default handleActions({
   [SET_TOKEN] (state, action) {
     return {
       ...state,
-      isSetToken: true,
+      hasSetToken: true,
       token: action.payload
     }
   },
   // [SET_IS_SET_TOKEN] (state, action) {
   //   return {
   //     ...state,
-  //     isSetToken: action.payload
+  //     hasSetToken: action.payload
   //   }
   // },
   [GET_TEL] (state, action) {
@@ -27,5 +27,5 @@ export default handleActions({
 }, {
   tel: '',
   token: '',
-  isSetToken: false
+  hasSetToken: false
 })

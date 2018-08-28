@@ -58,21 +58,29 @@
         </repeat>
       </view>
     </view>
+    <authorizeModal :value.sync="isShow" @on-close.user="closeModal" @on-confirm.user="confirmModal"></authorizeModal>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import moment from 'moment'
+  import authorizeModal from '../components/authorizeModal'
   import mta from '../utils/mta_analysis.js'
   export default class workReport extends wepy.page {
     config = {
       navigationBarTitleText: '作业报告'
     }
+
+    components = {
+      authorizeModal: authorizeModal
+    }
+
     data = {
       notHave: false,
       todo: [], // 待完成的作业列表
-      didItems: [] // 已完成的作业列表
+      didItems: [], // 已完成的作业列表
+      isShow: false
     }
 
     computed = {}
@@ -83,11 +91,45 @@
         wepy.navigateTo({
           url: '/pages/report-detail?studentHomeworkId=' + e.currentTarget.dataset.id
         })
+      },
+      closeModal () {
+        this.isShow = false
+        this.notHave = true
+        this.$apply()
+      },
+      confirmModal () {
+        let _this = this
+        this.isShow = false
+        this.$apply()
+        wepy.$instance._onLaunch(() => {
+          wepy.$instance._shouldToBindPage(() => {
+            // 数据请求
+            _this._checkLogin()
+          })
+        })
       }
     }
 
-    onLoad() {
-      mta.Page.init()
+     // 检查是否登陆
+    _checkLogin () {
+      let _this = this
+      console.log('work-report.wpy --> _checkLogin')
+      if (wepy.$instance.globalData.hasSetToken) {
+        wepy.$instance._shouldToBindPage(() => {
+          _this._getList()
+        })
+      } else {
+        setTimeout(() => {
+          _this._checkLogin()
+        }, 100)
+      }
+    }
+
+    _showAuthorizeModal () {
+      this.isShow = true
+      this.$apply()
+    }
+    _getList() {
       let _this = this
       // 获取列表数据
       wx.showLoading({
@@ -137,6 +179,21 @@
           console.log('/wx/micro/parent/homework/indexHk --- fail')
         }
       })
+    }
+    onLoad() {
+      mta.Page.init()
+    }
+    async onShow() {
+      let _this = this
+      console.log('report_work.wpy --> onShow')
+      let authorize = await wepy.$instance._getAuthorize()
+      if (!authorize) {
+        setTimeout(() => {
+          _this._showAuthorizeModal()
+        }, 0)
+      } else {
+        _this._checkLogin()
+      }
     }
     // 可返回今明天
     timeSet(t) {

@@ -33,26 +33,26 @@ export default handleActions({
   [SET_IS_JOIN] (state, action) {
     return {
       ...state,
-      isJoin: action.payload
+      hasJoin: action.payload
     }
   },
   [SET_IS_BIND] (state, action) {
     return {
       ...state,
-      isBind: action.payload
+      hasBind: action.payload
     }
   },
   [SET_IS_AUTHORIZE] (state, action) {
     return {
       ...state,
-      isAuthorize: action.payload
+      hasAuthorize: action.payload
     }
   }
 }, {
   childName: '同学姓名',
   childNickName: '同学昵称',
   expirationDate: '',
-  isJoin: false,
-  isBind: false,
-  isAuthorize: false
+  hasJoin: false,
+  hasBind: false,
+  hasAuthorize: false
 })
