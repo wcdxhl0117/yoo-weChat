@@ -745,7 +745,7 @@
     width: 100%;
     position: relative;
     view{
-      width: 550rpx;
+      width: 560rpx;
       padding: 20rpx 38rpx;
       line-height: 40rpx;
       font-size: 30rpx;
@@ -757,14 +757,14 @@
       width: 72rpx;
       height: 72rpx;
       padding-top: 20rpx;
-      margin-left: 26rpx;
+      margin-left: 16rpx;
     }
     .todel{
       display: block;
       width: 32rpx;
       height: 32rpx;
       padding: 40rpx;
-      padding-left: 30rpx;
+      padding-left: 50rpx;
     }
     .btn1{
       position: absolute;

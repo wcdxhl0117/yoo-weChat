@@ -333,14 +333,14 @@
       console.log('report-detail.wpy --> _toDownHomeworkPage')
       mta.Event.stat('Down_Homework_Show')
       wx.navigateTo({
-        url: `/pages/down-homework`
+        url: `/pages/download-homework`
       })
     }
     // 超过时间失效
     _toDownHomeworkDisabledPage () {
       console.log('report-detail.wpy --> _toDownHomeworkDisabledPage')
       wx.navigateTo({
-        url: `/pages/down-homework-disabled`
+        url: `/pages/download-homework-disabled`
       })
     }
 
