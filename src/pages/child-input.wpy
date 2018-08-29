@@ -52,6 +52,7 @@
       formSubmit (e) {
         // 后台交互
         console.log('form发生了submit事件，携带数据为：', e.detail.value)
+        mta.Event.stat('Bind_Student')
         this._bindAccount(e.detail.value.account, e.detail.value.password)
         // 弹窗
         // wepy.showToast({
@@ -92,7 +93,6 @@
           success (res) {
             console.log('child-input.wpy --> _bindAccount --> success')
             console.log(res)
-            mta.Event.stat('Bind_Student')
             if (res.data.ret_code === 0) {
               wx.showToast({
                 title: '关联成功',

@@ -78,6 +78,7 @@
 
     data = {
       notHave: false,
+      options: {}, // query
       todo: [], // 待完成的作业列表
       didItems: [], // 已完成的作业列表
       isShow: false
@@ -167,7 +168,37 @@
             } else {
               _this.notHave = true
             }
-            console.log(JSON.stringify(_this.didItems).length + JSON.stringify(_this.todo).length)
+            // 处理客户端跳转光荣榜
+            let nativeOff = false
+            if (_this.options.homeworkId && wx.getStorageSync('NativeFirst')) {
+              wx.removeStorage({
+                key: 'NativeFirst',
+                success: function(res) {
+                  console.log('清除成功')
+                }
+              })
+              if (_this.didItems.length > 0) {
+                for (let j=0; j < _this.didItems.length; j++) {
+                  if (_this.didItems[j].homeworkId === _this.options.homeworkId) {
+                    console.log(_this.didItems[j].homeworkId)
+                    wepy.navigateTo({
+                      url: `/pages/honor-rank?studentHomeworkId=` + _this.didItems[j].id
+                    })
+                  }
+                }
+              }
+              if (_this.todo.length > 0) {
+                for (let k=0; k < _this.todo.length; k++) {
+                  if (_this.todo[k].homeworkId === _this.options.homeworkId) {
+                    console.log(_this.todo[k].homeworkId)
+                    wepy.navigateTo({
+                      url: `/pages/honor-rank?studentHomeworkId=` + _this.todo[k].id
+                    })
+                  }
+                }
+              }
+            } else {}
+            // 跳转光荣榜结束
             _this.$apply()
           } else {
             console.log(res)
@@ -180,8 +211,22 @@
         }
       })
     }
-    onLoad() {
+    onLoad(options) {
       mta.Page.init()
+      this.options = options
+      console.log(options)
+      if (this.options.homeworkId) {
+        console.log('有homeworkId')
+        wx.setStorage({
+          key: 'NativeFirst',
+          data: '1',
+          success: function(res) {
+            console.log('homeworkId存本地成功')
+          } 
+        });
+      } else {
+        console.log('没有homeworkId')
+      }
     }
     async onShow() {
       let _this = this

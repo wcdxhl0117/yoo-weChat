@@ -137,6 +137,7 @@
         }
       },
       setUp() {
+        mta.Event.stat('Smart_Reminder_Setting')
         this.red1 = false
         this.red2 = false
         this.red3 = false
@@ -189,7 +190,6 @@
             },
             success (res) {
               if (res.data.ret_code === 0) {
-                mta.Event.stat('Smart_Reminder_Setting')
                 wepy.showToast({
                   title: '设置成功',
                   icon: 'none',

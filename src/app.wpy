@@ -24,11 +24,12 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
-      'pages/work-report',
       'pages/honor-rank',
-      'pages/report-detail',
-      'pages/join-trend',
       'pages/analysis',
+      'pages/not-join-trend',
+      'pages/join-trend',
+      'pages/report-detail',
+      'pages/work-report',
       'pages/associated-account',
       'pages/user',
       'pages/verify-account',
@@ -43,7 +44,6 @@ export default class extends wepy.app {
       'pages/pay',
       'pages/vip-learn-club',
       'pages/pay-success',
-      'pages/not-join-trend',
       'pages/web-view'
     ],
     window: {
@@ -88,6 +88,9 @@ export default class extends wepy.app {
     // test1
     // baseURL: 'http://wx.test1.yoomath.com',
     // h5URL: 'http://h5.test1.yoomath.com',
+    // test2
+    // baseURL: 'http://wx.test2.yoomath.com',
+    // h5URL: 'http://h5.test2.yoomath.com',
     // preview
     baseURL: 'http://wx.preview.yoomath.com',
     h5URL: 'http://h5.preview.yoomath.com',

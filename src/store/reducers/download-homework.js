@@ -1,39 +1,39 @@
 import { handleActions } from 'redux-actions'
 import {
-  SET_AVATAR_URL,
-  SET_SCHOOL_NAME,
-  SET_STUDENT_NAME,
-  SET_STUDENT_ID
-} from '../types/associated-account'
+  SET_HOMEWORK_EXIST,
+  SET_HOMEWORK_TITLE,
+  SET_HOMEWORK_ID,
+  SET_HOMEWORK_URL
+} from '../types/download-homework'
 
 export default handleActions({
-  [SET_AVATAR_URL] (state, action) {
+  [SET_HOMEWORK_EXIST] (state, action) {
     return {
       ...state,
-      avatarUrl: action.payload
+      exist: !!action.payload
     }
   },
-  [SET_SCHOOL_NAME] (state, action) {
+  [SET_HOMEWORK_TITLE] (state, action) {
     return {
       ...state,
-      schoolName: action.payload
+      title: action.payload || '作业'
     }
   },
-  [SET_STUDENT_NAME] (state, action) {
+  [SET_HOMEWORK_ID] (state, action) {
     return {
       ...state,
-      studentName: action.payload
+      id: action.payload
     }
   },
-  [SET_STUDENT_ID] (state, action) {
+  [SET_HOMEWORK_URL] (state, action) {
     return {
       ...state,
-      studentId: action.payload
+      url: action.payload
     }
   }
 }, {
-  avatarUrl: '',
-  schoolName: '',
-  studentName: '',
-  studentId: ''
+  exist: false,
+  title: '作业',
+  id: '',
+  url: ''
 })

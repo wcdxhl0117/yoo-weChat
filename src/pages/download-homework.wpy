@@ -15,6 +15,33 @@
 <script>
   import wepy from 'wepy'
   import mta from '../utils/mta_analysis.js'
+
+  import { connect } from 'wepy-redux'
+  import {
+    SET_HOMEWORK_EXIST,
+    SET_HOMEWORK_TITLE,
+    SET_HOMEWORK_ID,
+    SET_HOMEWORK_URL
+  } from '../store/types/download-homework'
+  @connect({
+    exist (state) {
+      return state.downloadHomework.exist
+    },
+    title (state) {
+      return state.downloadHomework.title
+    },
+    id (state) {
+      return state.downloadHomework.id
+    },
+    url (state) {
+      return state.downloadHomework.url
+    }
+  }, {
+    setHomeworkExit: SET_HOMEWORK_EXIST,
+    setHomeworkTitle: SET_HOMEWORK_TITLE,
+    setHomeworkId: SET_HOMEWORK_ID,
+    setHomeworkUrl: SET_HOMEWORK_URL
+  })
   export default class downloadHomework extends wepy.page {
     config = {
       navigationBarTitleText: '下载作业'
@@ -27,12 +54,7 @@
     data = {
       isFinished: false,
       loading: false,
-      filePath: '',
-      // type: 'doc',
-      title: '标题',
-      id: '',
-      url: '',
-      isExist: false
+      filePath: ''
     }
 
     computed = {}
@@ -42,11 +64,12 @@
         console.log('download-homework.wpy --> download')
         if (!this.loading) {
           this.loading = true
-          if (this.isExist) {
-          // 如果url存在，则直接下载文件
+          console.log(this.exist)
+          if (this.exist) {
+            // 如果url存在，则直接下载文件
             this._downFile()
           } else {
-          // 否则先转存文件再下载
+            // 否则先转存文件再下载
             this._createFile()
           }
         }
@@ -63,11 +86,11 @@
       },
       preview () {
         console.log('download-homework.wpy --> preview')
+        mta.Event.stat('Down_Homework_Preview')
         wx.openDocument({
           filePath: this.filePath,
           success (res) {
             console.log('download-homework.wpy --> preview --> openDocument --> success')
-            mta.Event.stat('Down_Homework_Preview')
             console.log(res)
           },
           fail (res) {
@@ -95,7 +118,7 @@
     _createFile () {
       let that = this
       wx.request({
-        url: `${that.$parent.globalData.baseURL}/wx/micro/parent/homework/createHomeworkFile`,
+        url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/homework/createHomeworkFile`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -103,15 +126,14 @@
         },
         data: {
           stuHkId: that.id,
-          host: that.$parent.globalData.baseURL
+          host: wepy.$instance.globalData.baseURL
         },
         success (res) {
           console.log('download-homework.wpy --> _createFile --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.url = `${that.$parent.globalData.baseURL}/${res.data.ret.url}`
-            wx.setStorageSync('dh-is-exist', true)
-            wx.setStorageSync('dh-url', that.url)
+            that.methods.setHomeworkExit(true)
+            that.methods.setHomeworkUrl(`${wepy.$instance.globalData.baseURL}/${res.data.ret.url}`)
             that._downFile()
           } else {
             wx.showToast({title: '下载失败', image: '../static/fail.png', duration: 1400})
@@ -132,12 +154,12 @@
     // 下载文件
     _downFile () {
       let that = this
+      mta.Event.stat('Down_Homework_Download')
       wx.downloadFile({
         url: that.url,
         success (res) {
           console.log('download-homework.wpy --> _downFile --> success')
           console.log(res)
-          mta.Event.stat('Down_Homework_Download')
           wx.showToast({title: '下载成功', icon: 'success', duration: 1400})
           that.loading = false
           that.isFinished = true
@@ -165,15 +187,6 @@
 
     onShow (options) {
       console.log('download-homework --> onShow')
-      // console.log(wx.getStorageSync('dh-title'))
-      // console.log(wx.getStorageSync('dh-id'))
-      // console.log(wx.getStorageSync('dh-url'))
-      // console.log(wx.getStorageSync('dh-is-exist'))
-
-      this.isExist = wx.getStorageSync('dh-is-exist')
-      this.title = wx.getStorageSync('dh-title')
-      this.id = wx.getStorageSync('dh-id')
-      this.url = wx.getStorageSync('dh-url')
     }
   }
 </script>

@@ -259,6 +259,7 @@
     }
 
     getDataIdx () {
+      console.log('index.wepy--to --> getDataIdx')
       let _this = this
       wx.request({
         url: `${this.$parent.globalData.baseURL}/wx/micro/parent/index`,

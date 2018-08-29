@@ -23,17 +23,17 @@
         <view class="title">VIP培优计划套餐</view>
         <view class="line"></view>
       </view>
-      <view class="item {{current==index?'active':''}}" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-tab="{{index}}" @tap="clickMemberPackage">
-        <view class="goodsWrap" data-tab="{{index}}">
-          <view class="goods" data-tab="{{index}}">
-            <view class="text" data-tab="{{index}}">{{item.month}}月VIP会员</view>
-            <view class="tag" data-tab="{{index}}" wx:if="{{item.tagName}}">{{item.tagName}}</view>
+      <view class="item {{current==index?'active':''}}" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-tab="{{index}}" @tap="clickMemberPackage({{index}})">
+        <view class="goodsWrap">
+          <view class="goods">
+            <view class="text">{{item.month}}月VIP会员</view>
+            <view class="tag" wx:if="{{item.tagName}}">{{item.tagName}}</view>
           </view>
-          <view class="extra" data-tab="{{index}}" wx:if="{{item.extraMonth}}">赠送{{item.extraMonth}}月会员</view>
+          <view class="extra" wx:if="{{item.extraMonth}}">赠送{{item.extraMonth}}月会员</view>
         </view>
-        <view class="priceWrap" data-tab="{{index}}">
-          <view class="discount" data-tab="{{index}}">¥{{item.presentPrice}}</view>
-          <view class="price" data-tab="{{index}}" wx:if="{{item.originalPrice}}">¥{{item.originalPrice}}</view>
+        <view class="priceWrap">
+          <view class="discount">¥{{item.presentPrice}}</view>
+          <view class="price" wx:if="{{item.originalPrice}}">¥{{item.originalPrice}}</view>
         </view>
       </view>
       <view class="agreementWrap">
@@ -93,11 +93,12 @@
           this.hasReadProtocol = true
         }
       },
-      clickMemberPackage (event) {
-        this.current = event.target.dataset.tab
-        this.memberPackageId = this.list[this.current].id
+      clickMemberPackage (index) {
+        this.current = index
+        this.memberPackageId = this.list[index].id
       },
       payOrder () {
+        mta.Event.stat('Agree_And_Open')
         wx.showLoading({title: '正在支付'})
         this._getPayInfo()
       },
@@ -124,7 +125,12 @@
             if (res.data.ret_code === 0) {
               that.endDate = moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD')
               that.isVip = res.data.ret.userMember.memberType.toLowerCase().includes('vip')
-              that.list = res.data.ret.memberPackages
+              // that.list = res.data.ret.memberPackages
+              let list = res.data.ret.memberPackages.map(item => {
+                item.tagName = item.tagName.trim()
+                return item
+              })
+              that.list = list
               that.memberPackageId = that.list[that.current].id
               that.$apply()
               resolve(true)
