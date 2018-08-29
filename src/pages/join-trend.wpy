@@ -82,7 +82,7 @@
     // 检查是否登陆
     _checkLogin () {
       console.log('join-trend.wpy --> _checkLogin')
-      if (this.$parent.globalData.hasSetToken) {
+      if (this.$parent.globalData.hasCheckToken) {
         this._shouldToBindPage()
       } else {
         setTimeout(() => {

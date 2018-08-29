@@ -9,7 +9,7 @@
       <!-- 授权按钮 -->
       <button wx:if="{{!authorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
       <!-- 绑定孩子按钮 -->
-      <view @tap="showBindingPage('Home_ToBind')" wx:if="{{authorize&&!hasBind}}" class="btn1"></view>
+      <!-- <view @tap="showBindingPage('Home_ToBind')" wx:if="{{authorize&&!hasBind}}" class="btn1"></view> -->
     </view>
     <!-- banner -->
     <swiper
@@ -253,7 +253,7 @@
           return
         }
         this.$parent.globalData.hasAuthorize = authorize
-        this.$parent._login()
+        await this.$parent._login()
         _this._checkLogin()
       }
     }
@@ -307,7 +307,7 @@
     _checkLogin () {
       console.log('index.wpy --> _checkLogin')
       let _this = this
-      if (_this.$parent.globalData.hasSetToken) {
+      if (_this.$parent.globalData.hasCheckToken) {
         // 后台查看是否关联过孩子,hasBind变为true
         let token = wx.getStorageSync('token')
         if (token) {

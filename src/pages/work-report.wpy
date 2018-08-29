@@ -115,7 +115,7 @@
     _checkLogin () {
       let _this = this
       console.log('work-report.wpy --> _checkLogin')
-      if (wepy.$instance.globalData.hasSetToken) {
+      if (wepy.$instance.globalData.hasCheckToken) {
         wepy.$instance._shouldToBindPage(() => {
           _this._getList()
         })

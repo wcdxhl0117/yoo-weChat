@@ -8,7 +8,7 @@
       <view class="btnWrap">
         <view class="btn ghost"  @touchstart="close">取消</view>
         <!-- <view class="btn"  @touchstart="confirm">立即授权</view> -->
-        <button class="btn" open-type="getUserInfo" @getuserinfo="confirm">
+        <button class="btn" open-type="getUserInfo" @getuserinfo="confirm" @tap="click">
           立即授权
         </button>
       </view>
@@ -60,6 +60,14 @@
     computed = {}
 
     methods = {
+      click () {
+        this.modalShow = false
+        setTimeout(() => {
+          this.maskShow = false
+          this.modalShow = false
+          this.$apply()
+        }, 200)
+      },
       close () {
         this.modalShow = false
         this.maskShow = false
@@ -73,8 +81,18 @@
       },
       confirm () {
         if (arguments[0].detail.errMsg.includes('ok')) {
+          // 确定
           mta.Event.stat('Authorization_Permit')
           this.$emit('on-confirm')
+        } else {
+          // 取消
+          // 弹窗显示
+          this.modalShow = true
+          setTimeout(() => {
+            this.maskShow = true
+            this.modalShow = true
+            this.$apply()
+          }, 20)
         }
       }
     }

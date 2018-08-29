@@ -56,7 +56,7 @@
     // 检查是否登陆
     _checkLogin () {
       console.log('analysis.wpy --> _checkLogin')
-      if (wepy.$instance.globalData.hasSetToken) {
+      if (wepy.$instance.globalData.hasCheckToken) {
         this._shouldToBindPage()
       } else {
         setTimeout(() => {

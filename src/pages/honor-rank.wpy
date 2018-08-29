@@ -13,7 +13,7 @@
     <!-- 列表 -->
     <view class="rankWrap">
       <!-- 我的孩子 -->
-      <view class="myChild rankLis">
+      <view @tap="toDetail" class="myChild rankLis">
         <!-- 排名没出 -->
         <view wx:if="{{!myChild.rank}}" class="pm">--</view>
         <!-- 有排名 -->
@@ -192,6 +192,11 @@
             _this._checkLogin()
           })
         })
+      },
+      toDetail () {
+       wepy.navigateTo({
+          url: '/pages/report-detail?studentHomeworkId=' + this.options.studentHomeworkId
+        })
       }
     }
 
@@ -199,7 +204,7 @@
     _checkLogin () {
       let _this = this
       console.log('work-report.wpy --> _checkLogin')
-      if (wepy.$instance.globalData.hasSetToken) {
+      if (wepy.$instance.globalData.hasCheckToken) {
         wepy.$instance._shouldToBindPage(() => {
           _this._getHonnerInfo()
         })

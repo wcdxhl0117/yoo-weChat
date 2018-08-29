@@ -396,7 +396,7 @@
     // 检查是否登陆
     _checkLogin () {
       // console.log('vip-learn-club.wpy --> _checkLogin')
-      if (wepy.$instance.globalData.hasSetToken) {
+      if (wepy.$instance.globalData.hasCheckToken) {
         // this._getBindStatus()
         this._getInfo()
       } else {
