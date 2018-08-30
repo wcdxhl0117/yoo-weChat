@@ -98,7 +98,7 @@ export default class extends wepy.app {
     // 状态
     // wepy.$instance.globalData
     hasAuthorize: false,
-    hasSetToken: false,
+    hasCheckToken: false,
     childName: '',
     childNickName: '',
     childViaSrc: '../static/baseVia.png',
@@ -155,10 +155,13 @@ export default class extends wepy.app {
   }
 
   async _login (cb) {
-    wx.showLoading({title: '正在获取数据'})
+    wepy.showLoading({title: '正在获取数据'})
     let code = await this._getCode()
     let {encryptedData, iv} = await this._getUserInfo()
-    this._setToken(code, encryptedData, iv, cb)
+    await this._setToken(code, encryptedData, iv)
+    wepy.hideLoading()
+    cb && cb()
+    // this._setToken(code, encryptedData, iv, cb)
   }
 
   // 是否跳转到绑定页面
@@ -178,7 +181,7 @@ export default class extends wepy.app {
   // 判断用户是否授权
   _getAuthorize () {
     return new Promise((resolve, reject) => {
-      wx.getSetting({
+      wepy.getSetting({
         success (res) {
           console.log('app.wpy --> _getAuthorize --> success')
           console.log(res)
@@ -195,20 +198,20 @@ export default class extends wepy.app {
   _getCode () {
     console.log()
     return new Promise((resolve, reject) => {
-      wx.login({
+      wepy.login({
         success (res) {
           console.log('app.wpy --> _getCode --> success')
           console.log(res)
           if (res.code) {
             resolve(res.code)
           } else {
-            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
           }
         },
         fail (res) {
           console.log('app.wpy --> _getCode --> fail')
           console.log(res)
-          wx.showToast({icon: 'none', title: '获取用户code失败', duration: 1400})
+          wepy.showToast({icon: 'none', title: '获取用户code失败', duration: 1400})
         }
       })
     })
@@ -216,7 +219,7 @@ export default class extends wepy.app {
 
   _getUserInfo () {
     return new Promise((resolve, reject) => {
-      wx.getUserInfo({
+      wepy.getUserInfo({
         withCredentials: true,
         success (res) {
           console.log('app.wpy --> _getUserInfo --> success')
@@ -226,7 +229,7 @@ export default class extends wepy.app {
         fail (res) {
           console.log('app.wpy --> _getUserInfo --> fail')
           console.log(res)
-          wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+          wepy.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
         }
       })
     })
@@ -234,10 +237,10 @@ export default class extends wepy.app {
 
   _checkToken () {
     return new Promise((resolve, reject) => {
-      let token = wx.getStorageSync('token')
+      let token = wepy.getStorageSync('token')
       if (token) {
-        wx.request({
-          url: `${this.globalData.baseURL}/wx/micro/parent/checkToken`,
+        wepy.request({
+          url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/checkToken`,
           method: 'POST',
           header: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -265,46 +268,49 @@ export default class extends wepy.app {
   }
 
   _setToken (code, encryptedData, iv, cb) {
-    let that = this
-    wx.request({
-      url: `${this.globalData.baseURL}/wx/micro/parent/login`,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: {
-        code: code,
-        encryptedData: encryptedData,
-        iv: iv
-      },
-      success (res) {
-        console.log('app.wpy --> _setToken --> success')
-        console.log(res)
-        if (res.data.ret_code === 0) {
-          wx.setStorageSync('token', res.data.ret.token)
-        } else {
-          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+    return new Promise((resolve, reject) => {
+      wepy.request({
+        url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/login`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        data: {
+          code: code,
+          encryptedData: encryptedData,
+          iv: iv
+        },
+        success (res) {
+          console.log('app.wpy --> _setToken --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            wepy.setStorageSync('token', res.data.ret.token)
+          } else {
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          }
+          wepy.hideLoading()
+          wepy.$instance.globalData.hasCheckToken = true
+          resolve(true)
+          // that.$apply()
+          // cb && cb()
+        },
+        fail (res) {
+          console.log('app.wpy --> _setToken --> fail')
+          console.log(res)
+          wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          wepy.hideLoading()
+          wepy.$instance.globalData.hasCheckToken = true
+          // that.$apply()
+          reject(new Error('请求fail'))
         }
-        wx.hideLoading()
-        that.globalData.hasSetToken = true
-        // that.$apply()
-        cb && cb()
-      },
-      fail (res) {
-        console.log('app.wpy --> _setToken --> fail')
-        console.log(res)
-        wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
-        wx.hideLoading()
-        that.globalData.hasSetToken = true
-        // that.$apply()
-      }
+      })
     })
   }
 
   // 获取电话号码
   _getTel () {
     // let that = this
-    wx.request({
+    wepy.request({
       url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/user/userCenter`,
       method: 'POST',
       header: {
@@ -323,7 +329,7 @@ export default class extends wepy.app {
   // 获取操作系统
   _getSystemInfo () {
     // let that = this
-    wx.getSystemInfo({
+    wepy.getSystemInfo({
       success (res) {
         console.log('vip-learn-club.wpy --> _getSystemInfo --> success')
         console.log(res)
@@ -335,7 +341,7 @@ export default class extends wepy.app {
       fail (res) {
         console.log('vip-learn-club.wpy --> _getSystemInfo --> fail')
         console.log(res)
-        wx.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+        wepy.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
       }
     })
   }
@@ -343,12 +349,12 @@ export default class extends wepy.app {
   // 获取绑定状态
   _getBindStatus () {
     return new Promise((resolve, reject) => {
-      wx.request({
+      wepy.request({
         url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/hasBind`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'S_T': wx.getStorageSync('token')
+          'S_T': wepy.getStorageSync('token')
         },
         success (res) {
           console.log('user.wpy --> _getBindStatus --> success')
@@ -356,14 +362,14 @@ export default class extends wepy.app {
           if (res.data.ret_code === 0) {
             resolve(res.data.ret.hasBind)
           } else {
-            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
             reject(new Error('请求success，但ret_code不为0'))
           }
         },
         fail (res) {
           console.log('user.wpy --> _getBindStatus --> fail')
           console.log(res)
-          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           reject(new Error('请求fail'))
         }
       })
@@ -372,22 +378,22 @@ export default class extends wepy.app {
 
   async _onLaunch (cb) {
     let that = this
-    that.globalData.hasAuthorize = await that._getAuthorize()
-    if (that.globalData.hasAuthorize) {
+    wepy.$instance.globalData.hasAuthorize = await that._getAuthorize()
+    if (wepy.$instance.globalData.hasAuthorize) {
       let checkToken = await that._checkToken()
       if (!checkToken) {
-        that._login(cb)
+        await that._login()
       } else {
-        that.globalData.hasSetToken = true
-        cb && cb()
+        wepy.$instance.globalData.hasCheckToken = true
       }
+      cb && cb()
     }
   }
 
   onLaunch(options) {
     console.log('app.wpy --> onLaunch')
     console.log(options)
-    if (this.globalData.mtaAanalysis) {
+    if (wepy.$instance.globalData.mtaAanalysis) {
       mta.App.init({
         'appID': '500627072',
         'eventID': '500627074',
