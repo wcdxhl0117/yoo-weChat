@@ -169,7 +169,6 @@
               _this.notHave = true
             }
             // 处理客户端跳转光荣榜
-            let nativeOff = false
             if (_this.options.homeworkId && wx.getStorageSync('NativeFirst')) {
               wx.removeStorage({
                 key: 'NativeFirst',
@@ -223,7 +222,7 @@
           success: function(res) {
             console.log('homeworkId存本地成功')
           } 
-        });
+        })
       } else {
         console.log('没有homeworkId')
       }

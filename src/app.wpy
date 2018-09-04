@@ -23,6 +23,9 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/shareAct/introduction',
+      'pages/shareAct/end',
+      'pages/shareAct/only-once',
       'pages/index',
       'pages/honor-rank',
       'pages/analysis',
@@ -86,21 +89,25 @@ export default class extends wepy.app {
     // baseURL: 'http://wx.test.yoomath.com',
     // h5URL: 'http://h5.test.yoomath.com',
     // test1
-    // baseURL: 'http://wx.test1.yoomath.com',
-    // h5URL: 'http://h5.test1.yoomath.com',
+    baseURL: 'http://wx.test1.yoomath.com',
+    h5URL: 'http://h5.test1.yoomath.com',
     // test2
     // baseURL: 'http://wx.test2.yoomath.com',
     // h5URL: 'http://h5.test2.yoomath.com',
     // preview
-    baseURL: 'http://wx.preview.yoomath.com',
-    h5URL: 'http://h5.preview.yoomath.com',
-    mtaAanalysis: false, // 开启移动分析埋点
+    // baseURL: 'http://wx.preview.yoomath.com',
+    // h5URL: 'http://h5.preview.yoomath.com',
+    // hotfix
+    // baseURL: 'http://wx.hotfix.yoomath.com',
+    // h5URL: 'http://h5.hotfix.yoomath.com',
+    mtaAanalysis: true, // 开启移动分析埋点
     // 状态
     // wepy.$instance.globalData
     hasAuthorize: false,
     hasCheckToken: false,
     childName: '',
     childNickName: '',
+    userInfoAll: '',
     childViaSrc: '../static/baseVia.png',
     hasBind: false,
     hasJoin: false,
@@ -385,6 +392,16 @@ export default class extends wepy.app {
         await that._login()
       } else {
         wepy.$instance.globalData.hasCheckToken = true
+        // 存全局个人信息
+        wepy.getUserInfo({
+          success (res) {
+            console.log('存全局个人信息')
+            wepy.$instance.globalData.userInfoAll = res.userInfo
+          },
+          fail (res) {
+            wepy.showToast({icon: 'none', title: '获取用户信息失败', duration: 1400})
+          }
+        })
       }
       cb && cb()
     }

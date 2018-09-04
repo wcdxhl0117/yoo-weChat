@@ -2,7 +2,7 @@
   <view id="associatedAccount">
     <view class="text">打开悠数学-学生端APP，进入“我”的页面，点击右上角的二维码图标，进行扫码</view>
     <image class="pic" src="http://qnstatic.file.yoomath.com/jiazhangduanguanlianzhiyin.gif"/>
-    <view class="btn" @tap="scan">扫码关联</view>
+    <view class="btn" @tap="scan">扫码关联孩子账号</view>
     <view class="btn ghost" @tap="input">输入孩子的账号和密码进行关联</view>
   </view>
 </template>
@@ -99,7 +99,11 @@
           console.log(res)
           if (res.data.ret_code === 0) {
             that.methods.setStudentId(id)
-            that.methods.setAvatarUrl(`${that.$parent.globalData.baseURL}${res.data.ret.photoUrl}`)
+            if (res.data.ret.photoUrl) {
+              that.methods.setAvatarUrl(`${that.$parent.globalData.baseURL}${res.data.ret.photoUrl}`)
+            } else {
+              that.methods.setAvatarUrl('../static/baseVia.png')
+            }
             that.methods.setSchoolName(res.data.ret.schoolName)
             that.methods.setStudentName(res.data.ret.studentName)
             wepy.navigateTo({

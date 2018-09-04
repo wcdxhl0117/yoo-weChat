@@ -46,7 +46,7 @@
         <view class="vipHead">VIP培优服务<image src="../static/vip.png" /></view>
 
         <!-- 监控 -->
-        <view class="monitor" wx:if="{{!isVip}}">
+        <view class="monitor" wx:if="{{!isVip || !hasBind}}">
           <view class="left" @tap="toMonitor">监控学习情况，有问题立即提醒</view>
           <view class="right" @tap="toMonitor">了解详情<image src="../static/right-arrow.png" /></view>
           <!-- 授权按钮 -->
@@ -56,7 +56,7 @@
         </view>
 
         <!-- vip没有报警 -->
-        <view class="monitor notHaveTip" wx:if="{{isVip&&!idxData.smartRemind}}">
+        <view class="monitor notHaveTip" wx:if="{{isVip&&!idxData.smartRemind&&hasBind}}">
           <view class="left" @tap="toMonitor">
             <image src="../static/notHaveTip.gif" />
             <view>正在监控中...学习情况正常</view>
@@ -68,7 +68,7 @@
         </view>
 
         <!-- vip有报警 -->
-        <view class="monitor HaveTip" wx:if="{{isVip&&idxData.smartRemind}}">
+        <view class="monitor HaveTip" wx:if="{{isVip&&idxData.smartRemind&&hasBind}}">
           <view class="left" @tap="toMonitor">
             <image src="../static/HaveTip.png" />
             <view>有{{idxData.remindCount}}条异常警报：作业[{{idxData.smartRemind.homeworkName}}]正...</view>

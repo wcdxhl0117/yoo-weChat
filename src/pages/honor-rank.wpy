@@ -194,7 +194,7 @@
         })
       },
       toDetail () {
-       wepy.navigateTo({
+        wepy.navigateTo({
           url: '/pages/report-detail?studentHomeworkId=' + this.options.studentHomeworkId
         })
       }
