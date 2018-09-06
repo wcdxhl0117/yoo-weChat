@@ -23,9 +23,10 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/shareAct/home',
       'pages/shareAct/introduction',
-      'pages/shareAct/end',
       'pages/shareAct/only-once',
+      'pages/shareAct/end',
       'pages/index',
       'pages/honor-rank',
       'pages/analysis',
@@ -100,7 +101,7 @@ export default class extends wepy.app {
     // hotfix
     // baseURL: 'http://wx.hotfix.yoomath.com',
     // h5URL: 'http://h5.hotfix.yoomath.com',
-    mtaAanalysis: true, // 开启移动分析埋点
+    mtaAanalysis: false, // 开启移动分析埋点
     // 状态
     // wepy.$instance.globalData
     hasAuthorize: false,

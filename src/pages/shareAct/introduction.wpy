@@ -3,7 +3,7 @@
     <view class="wrap">
       <view class="topImg">
         <image src="../../static/itrTop.png" />
-        <view @tap="showRules">活动规则</view>
+        <view @tap="showRule">活动规则</view>
       </view>
       <view class="btm">
         <image class="title" src="../../static/itrtitle.png" />
@@ -32,22 +32,32 @@
       </view>
       <view class="btn" @tap="toDetail">立即领取</view>
       <view class="txt" @tap="toItr">点击了解悠数学</view>
+      <!-- 授权按钮 -->
+      <button wx:if="{{!authorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
     </view>
+    <shareRuleModal :value.sync="showRuleModal"  @on-close.user="showRuleModalClose"></shareRuleModal>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import scroll from '../../components/scroll'
+  import shareRuleModal from '../../components/shareRuleModal'
+  import mta from '../../utils/mta_analysis.js'
   export default class introduction extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
-    components = {}
-
+    components = {
+      scroll: scroll,
+      shareRuleModal: shareRuleModal
+    }
     mixins = []
 
     data = {
+      showRuleModal: false
       // isShowPage: false
+      isAuthorize: false
     }
 
     computed = {}
@@ -64,8 +74,13 @@
           url: '/pages/web-view'
         })
       },
-      showRules() {
-        // 展示规则弹窗
+      showRule () {
+        console.log('shareAct --> introduction.wpy --> showRule')
+        this.showRuleModal = true
+      },
+      showRuleModalClose() {
+        console.log('shareAct --> introduction.wpy --> showRuleModalClose')
+        this.showRuleModal = false
       }
     }
 
@@ -210,12 +225,61 @@
       })
     }
 
-    onLoad(options) {
+    _getAuthorize () {
+      return new Promise((resolve, reject) => {
+        wx.getSetting({
+          success (res) {
+            console.log(res)
+            if (res.authSetting['scope.userInfo']) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          }
+        })
+      })
+    }
+
+    async onGotUserInfo (val) {
+      mta.Event.stat(val)
+      let authorize = await this._getAuthorize()
+      if (!authorize) {
+        return
+      }
+      this.$parent.globalData.hasAuthorize = authorize
+      await this.$parent._login()
+      this._hasBindChild()
+    }
+
+    async onLoad() {
+      wepy.$instance.globalData.hasAuthorize = await this._getAuthorize()
+      if (!wepy.$instance.globalData.hasAuthorize) {
+        console.log(1)
+        return
+      }
       this._hasJoinAct()
+    }
+
+    onShareAppMessage (res) {
+      return {
+        title: '【悠数学】助力孩子学习，一起来领取开学大礼包',
+        path: '/pages/shareAct/introduction',
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/itrShare.png'
+      }
+    }
+
+    computed = {
+      authorize() {
+        if (this.$parent.globalData.hasAuthorize) {
+          return true
+        } else {
+          return false
+        }
+      }
     }
   }
 </script>
-<style lang="less">
+<style lang="less" scoped>
   .container{
     width: 100%;
     position: absolute;
@@ -287,13 +351,21 @@
         margin: 0 auto;
       }
       .txt{
-        width: 190rpx;
+        width: 176rpx;
         text-align: center;
         margin: 20rpx auto;
         font-size: 24rpx;
         color: #ffffff;
         border-bottom: 1px solid #ffffff;
         margin-top: 20rpx;
+      }
+      .btn1{
+        position: absolute;
+        top: 980rpx;
+        right: 70rpx;
+        width: 610rpx;
+        height: 150rpx;
+        opacity: 0;
       }
     }
   }
