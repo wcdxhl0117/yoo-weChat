@@ -69,7 +69,7 @@
       },
       toItr() {
         // 公众号文章链接
-        this.$parent.globalData.webViewSrc = 'https://www.jianshu.com/'
+        this.$parent.globalData.webViewSrc = 'http://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510327342&idx=2&sn=6ee376fbd84f7981163e5b615f2e29db&chksm=7705067040728f66feb51d914efa23935537d51c392a723ff75804c9cdb0cb4eaac1a2ac054e#rd'
         wepy.navigateTo({
           url: '/pages/web-view'
         })
@@ -91,11 +91,14 @@
       let token = wx.getStorageSync('token')
       let _this = this
       wx.request({
-        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'S_T': token
+        },
+        data: {
+          'activityId': 1
         },
         success (res) {
           console.log('introduction.wpy --> 是否参加过活动 --> success')
