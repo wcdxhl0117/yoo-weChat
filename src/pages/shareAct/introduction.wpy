@@ -57,7 +57,8 @@
     data = {
       showRuleModal: false,
       // isShowPage: false
-      isAuthorize: false
+      isAuthorize: false,
+      parentId: ''
     }
 
     computed = {}
@@ -93,22 +94,24 @@
       wx.request({
         url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
         method: 'POST',
+        data: {
+          'activityId': 1
+        },
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'S_T': token
-        },
-        data: {
-          'activityId': 1
         },
         success (res) {
           console.log('introduction.wpy --> 是否参加过活动 --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
+            _this.parentId = res.data.ret.parent.parentId
             // 如果参加，判断是否绑定孩子
-            if (res.data.ret.hasBind) {
+            if (res.data.ret.parent.joinIn) {
               _this._hasBindChild()
             } else {
-              // 展示页面
+              // 取消loding, 展示页面
+              wx.hideLoading()
             }
           } else {
             // console.log(res)
@@ -255,9 +258,11 @@
     }
 
     async onLoad() {
+      wx.showLoading({
+        title: '正在加载'
+      })
       wepy.$instance.globalData.hasAuthorize = await this._getAuthorize()
       if (!wepy.$instance.globalData.hasAuthorize) {
-        console.log(1)
         return
       }
       this._hasJoinAct()
