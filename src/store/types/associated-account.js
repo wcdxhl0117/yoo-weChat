@@ -1,7 +1,0 @@
-export const SET_AVATAR_URL = 'SET_AVATAR_URL'
-
-export const SET_SCHOOL_NAME = 'SET_SCHOOL_NAME'
-
-export const SET_STUDENT_NAME = 'SET_STUDENT_NAME'
-
-export const SET_STUDENT_ID = 'SET_STUDENT_ID'
