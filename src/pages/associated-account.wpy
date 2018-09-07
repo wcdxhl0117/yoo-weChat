@@ -1,0 +1,170 @@
+<template>
+  <view id="associatedAccount">
+    <view class="text">打开悠数学-学生端APP，进入“我”的页面，点击右上角的二维码图标，进行扫码</view>
+    <image class="pic" src="http://qnstatic.file.yoomath.com/jiazhangduanguanlianzhiyin.gif"/>
+    <view class="btn" @tap="scan">扫码关联孩子账号</view>
+    <view class="btn ghost" @tap="input">输入孩子的账号和密码进行关联</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { connect } from 'wepy-redux'
+  import {
+    SET_AVATAR_URL,
+    SET_SCHOOL_NAME,
+    SET_STUDENT_NAME,
+    SET_STUDENT_ID
+  } from '../store/types/associated-account'
+  import mta from '../utils/mta_analysis.js'
+  import CryptoJS from 'crypto-js'
+
+  @connect({}, {
+    setAvatarUrl: SET_AVATAR_URL,
+    setSchoolName: SET_SCHOOL_NAME,
+    setStudentName: SET_STUDENT_NAME,
+    setStudentId: SET_STUDENT_ID
+  })
+
+  export default class associatedAccount extends wepy.page {
+    config = {
+      navigationBarTitleText: '关联孩子账号'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {}
+
+    computed = {}
+
+    methods = {
+      scan () {
+        let that = this
+        mta.Event.stat('scan_code')
+        wepy.scanCode({
+          success (res) {
+            console.log('associated-account.wpy --> scan --> succcess')
+            console.log(res)
+            try {
+              that._getAccountInfo(that._decryptByDES(res.result, 'elanking'))
+            } catch (error) {
+              wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+            }
+          },
+          fail (res) {
+            console.log('associated-account.wpy --> scan --> fail')
+            console.log(res)
+            if (!res.errMsg.includes('cancel')) {
+              wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+            }
+          }
+        })
+      },
+      input () {
+        console.log('associated-account.wpy --> input')
+        mta.Event.stat('Enter_Account')
+        wepy.navigateTo({
+          url: '/pages/child-input'
+        })
+      }
+    }
+
+    _decryptByDES (ciphertext, key) {
+      let keyHex = CryptoJS.enc.Utf8.parse(key)
+      let decrypted = CryptoJS.DES.decrypt({
+        ciphertext: CryptoJS.enc.Base64.parse(ciphertext)
+      }, keyHex, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      })
+      return decrypted.toString(CryptoJS.enc.Utf8)
+    }
+
+    _getAccountInfo (id) {
+      let that = this
+      wepy.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/scanFindStu`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wepy.getStorageSync('token')
+        },
+        data: {
+          stuId: id
+        },
+        success (res) {
+          console.log('associated-account.wpy --> _getAccountInfo --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.methods.setStudentId(id)
+            if (res.data.ret.photoUrl) {
+              that.methods.setAvatarUrl(`${that.$parent.globalData.baseURL}${res.data.ret.photoUrl}`)
+            } else {
+              that.methods.setAvatarUrl('../static/baseVia.png')
+            }
+            that.methods.setSchoolName(res.data.ret.schoolName)
+            that.methods.setStudentName(res.data.ret.studentName)
+            wepy.navigateTo({
+              url: '/pages/verify-account'
+            })
+          } else {
+            wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+          }
+        },
+        fail (res) {
+          console.log('associated-account.wpy --> _getAccountInfo --> fail')
+          console.log(res)
+          wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+        }
+      })
+    }
+
+    events = {}
+
+    onLoad () {
+      console.log('associated-account.wpy --> onLoad')
+      mta.Page.init()
+    }
+
+    onShow () {
+      console.log('associated-account.wpy --> onShow')
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#associatedAccount{
+  .text{
+    margin: 66rpx 70rpx;
+    color: rgba(0,0,0,1);
+    text-align: center;
+    font-size: 30rpx;
+    line-height: 40rpx;
+  }
+  .pic{
+    margin: 0 auto;
+    display: block;
+    width: 480rpx;
+    height: 612rpx;
+  }
+  .btn{
+    margin: 80rpx 30rpx 0;
+    box-sizing: border-box;
+    height: 90rpx;
+    color: #fff;
+    background: rgba(0,122,255,1);
+    border-radius: 10rpx;
+    text-align: center;
+    font-size: 30rpx;
+    line-height: 90rpx;
+    &.ghost{
+      margin: 40rpx 30rpx 80rpx;
+      color: rgba(153,153,153,1);
+      background: #fff;
+      border: 1rpx solid rgba(153,153,153,1);
+      border-radius: 10rpx;
+    }
+  }
+}
+</style>

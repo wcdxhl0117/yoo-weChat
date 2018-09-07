@@ -1,0 +1,551 @@
+<template>
+  <view class="container">
+    <!-- 柱形图 -->
+    <view class="chart">
+      <repeat for="{{charts}}" key="index" index="index" item="item">
+        <view class="lis">
+          <view class="rs"><text>{{item.title}}\n{{item.num}}人</text></view>
+          <view class="zhu" style="{{charts[index].sty}}"></view>
+        </view>
+       </repeat>
+    </view>
+    
+    <!-- 列表 -->
+    <view class="rankWrap">
+      <!-- 我的孩子 -->
+      <view @tap="toDetail" class="myChild rankLis">
+        <!-- 排名没出 -->
+        <view wx:if="{{!myChild.rank}}" class="pm">--</view>
+        <!-- 有排名 -->
+        <view wx:if="{{myChild.rank}}" class="pm myPm">{{myChild.rank}}</view>
+        <view class="tx">
+          <!-- vip有边框 -->
+          <image class="img1 {{(myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{myChild.user.avatarUrl?(baseUrl+myChild.user.avatarUrl):'../static/baseVia.png'}}" />
+          <!-- 如果是vip -->
+          <image wx:if="{{myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip-radius.png" />
+        </view>
+        <view class="mz">
+          <view class="theName">
+            <view class="myCname">{{myChild.user.name}}</view>
+            <view class="tt">(孩子)</view>
+          </view>
+          <view class="theTime">{{myChild.homeworkTime?myChild.homeworkTime:'--'}}
+            <image wx:if="{{myChild.timeout}}" src="../static/chaoshi.png" />
+          </view>
+        </view>
+        <view class="js"><image wx:if="{{myChild.user.memberType=='VIP' || myChild.user.memberType=='SCHOOL_VIP'}}" src="../static/jspg.png" /></view>
+        <view class="zql">
+          <!-- 还未出结果(必须是提交过，但正确率还没出来) -->
+          <view 
+            wx:if="{{myChild.stuSubmitAt&&myChild.shieldRightRateTime=='0'&&(!myChild.rightRate&&myChild.rightRate!=0)&&(myChild.correctStatus=='CORRECTING'||myChild.correctStatus=='AUTO_CORRECTING'||myChild.correctStatus=='TOBE_CORRECTED')}}" 
+            class="notR"
+          >批改中</view>
+          <!-- 出结果 -->
+          <view wx:if="{{myChild.stuSubmitAt&&myChild.shieldRightRateTime=='0'&&(myChild.rightRate||myChild.rightRate==0)}}" class="rWrap">
+            <view wx:if="{{myChild.rightRate<60}}" class="t">不及格</view>
+            <view wx:if="{{myChild.rightRate<70&&myChild.rightRate>=60}}" class="t">及格</view>
+            <view wx:if="{{myChild.rightRate>=70&&myChild.rightRate<85}}" class="t">良好</view>
+            <view wx:if="{{myChild.rightRate>=85}}" class="t">优秀</view>
+            <view 
+              class="rate {{myChild.rightRate<60?'pre_60':''}} {{(myChild.rightRate>=60&&myChild.rightRate<70)?'pre_70':''}} {{(myChild.rightRate>=70&&myChild.rightRate<85)?'pre_85':''}} {{(myChild.rightRate>=85)?'pre_100':''}}"
+            >{{myChild.rightRate}}%</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 光荣榜标题 -->
+      <view class="titleBig">作业光荣榜</view>
+
+      <view class="rankTitle" wx:if="{{rankData.length>0}}">
+        <view class="num">排名</view>
+        <view class="name">姓名</view>
+        <view class="rate">正确率</view>
+      </view>
+      <!-- 排名循环结构 -->
+      <view wx:if="{{rankData.length>0}}">
+        <repeat for="{{rankData}}" key="index" index="index" item="item">
+          <view class="rankLis forS">
+            <!-- 前三排名为红色，后面为灰 -->
+            <view style="color:{{index>2?'#999':'#F14B40'}}" class="pm myPm">{{item.rank}}</view>
+            <view class="tx">
+              <!-- vip有边框 -->
+            <image class="img1 {{(item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP')?'vipBor':''}}" src="{{item.user.avatarUrl?(baseUrl+item.user.avatarUrl):'../static/baseVia.png'}}" />
+            <!-- 如果是vip -->
+            <image wx:if="{{item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP'}}" class="vipIcon" src="../static/vip-radius.png" />
+          </view>
+            <view class="mz">
+              <view class="theName">{{item.user.name}}</view>
+              <view class="theTime">{{item.homeworkTime?item.homeworkTime:'--'}}
+                <image wx:if="{{item.timeout}}" src="../static/chaoshi.png" />
+              </view>
+            </view>
+            <view class="js"><image wx:if="{{item.user.memberType=='VIP' || item.user.memberType=='SCHOOL_VIP'}}" src="../static/jspg.png" /></view>
+            <view class="zql">
+              <view 
+              wx:if="{{item.stuSubmitAt&&item.shieldRightRateTime=='0'&&(!item.rightRate&&item.rightRate!=0)&&(item.correctStatus=='CORRECTING'||item.correctStatus=='AUTO_CORRECTING'||item.correctStatus=='TOBE_CORRECTED')}}" 
+              class="notR"
+            >批改中</view>
+            <!-- 出结果 -->
+            <view wx:if="{{item.stuSubmitAt&&item.shieldRightRateTime=='0'&&(item.rightRate||item.rightRate==0)}}" class="rWrap">
+              <view wx:if="{{item.rightRate<60}}" class="t">不及格</view>
+              <view wx:if="{{item.rightRate<70&&item.rightRate>=60}}" class="t">及格</view>
+              <view wx:if="{{item.rightRate>=70&&item.rightRate<85}}" class="t">良好</view>
+              <view wx:if="{{item.rightRate>=85}}" class="t">优秀</view>
+              <view 
+                class="rate {{item.rightRate<60?'pre_60':''}} {{(item.rightRate>=60&&item.rightRate<70)?'pre_70':''}} {{(item.rightRate>=70&&item.rightRate<85)?'pre_85':''}} {{(item.rightRate>=85)?'pre_100':''}}"
+              >{{item.rightRate}}%</view>
+            </view>
+            </view>
+          </view>
+        </repeat>
+      </view>
+      <!-- 循环结构结束 -->
+      
+      <!-- 排名为空时的状态 -->
+      <view class="notRank" wx:if="{{rankData.length==0}}">
+        <view>暂无上榜的同学</view>
+        <view>光荣榜仅展示成绩为“优秀和良好”的同学</view>
+      </view>
+    </view>
+    <authorizeModal :value.sync="isShow" @on-close.user="closeModal" @on-confirm.user="confirmModal"></authorizeModal>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import authorizeModal from '../components/authorizeModal'
+  import mta from '../utils/mta_analysis.js'
+  // 返回数组最大值
+  // var n = Math.max(10, 5, 20, 5, 5)
+  // console.log(n)
+  export default class honorRank extends wepy.page {
+    config = {
+      navigationBarTitleText: '班级作业情况'
+    }
+    components = {
+      authorizeModal: authorizeModal
+    }
+
+    mixins = []
+
+    data = {
+      allData: [],
+      rankData: [],
+      myChild: {},
+      baseUrl: '',
+      isShow: false,
+      options: {}, // query
+      // 算各个分数段的柱形图高度（240*（分数段人数 / 人数最分数段人数））eg:优秀：10，良好：5，及格：20，不及格：5，未提交：5--->[10, 5, 20, 5, 5]
+      yx: {h: 240 * (1 / 20), num: 0},
+      lh: {h: 240 * (1 / 20), num: 0},
+      jg: {h: 240 * (1 / 20), num: 0},
+      bjg: {h: 240 * (1 / 20), num: 0},
+      wtj: {h: 240 * (1 / 20), num: 0}
+    }
+
+    computed = {
+      charts() {
+        return [
+          {
+            sty: 'height: ' + this.yx.h + 'rpx; width: 40rpx; background: #00BB9D;',
+            title: '优秀',
+            num: this.yx.num
+          },
+          {
+            sty: 'height: ' + this.lh.h + 'rpx; width: 40rpx; background: #7DCA60;',
+            title: '良好',
+            num: this.lh.num
+          },
+          {
+            sty: 'height: ' + this.jg.h + 'rpx; width: 40rpx; background: #F8C438;',
+            title: '及格',
+            num: this.jg.num
+          },
+          {
+            sty: 'height: ' + this.bjg.h + 'rpx; width: 40rpx; background: #F64848;',
+            title: '不及格',
+            num: this.bjg.num
+          },
+          {
+            sty: 'height: ' + this.wtj.h + 'rpx; width: 40rpx; background: #CCCCCC;',
+            title: '未提交',
+            num: this.wtj.num
+          }
+        ]
+      }
+    }
+
+    methods = {
+      // 授权弹窗
+      closeModal () {
+        this.isShow = false
+        this.notHave = true
+        this.$apply()
+      },
+      confirmModal () {
+        let _this = this
+        this.isShow = false
+        this.$apply()
+        wepy.$instance._onLaunch(() => {
+          wepy.$instance._shouldToBindPage(() => {
+            // 数据请求
+            _this._checkLogin()
+          })
+        })
+      },
+      toDetail () {
+        wepy.navigateTo({
+          url: '/pages/report-detail?studentHomeworkId=' + this.options.studentHomeworkId
+        })
+      }
+    }
+
+    // 检查是否登陆
+    _checkLogin () {
+      let _this = this
+      console.log('work-report.wpy --> _checkLogin')
+      if (wepy.$instance.globalData.hasCheckToken) {
+        wepy.$instance._shouldToBindPage(() => {
+          _this._getHonnerInfo()
+        })
+      } else {
+        setTimeout(() => {
+          _this._checkLogin()
+        }, 100)
+      }
+    }
+
+    events = {}
+
+    _showAuthorizeModal () {
+      this.isShow = true
+      this.$apply()
+    }
+
+    _getHonnerInfo() {
+      // 获取基础链接
+      this.baseUrl = this.$parent.globalData.baseURL
+      let _this = this
+      // 获取数据  865349521188593664  options.studentHomeworkId
+      wx.showLoading({
+        title: '正在加载'
+      })
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/homework/view`,
+        method: 'POST',
+        data: {
+          stuHkId: _this.options.studentHomeworkId
+          // stuHkId: '1058557288610021376'
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          if (res.data.ret_code === 0) {
+            _this.allData = res.data.ret.allStudentHomeworks
+            _this.rankData = res.data.ret.studentHomeworks
+            _this.myChild = res.data.ret.studentHomework
+            // 循环去除对象中没用的homework对象
+            for (let i = 0; i < _this.allData.length; i++) {
+              _this.allData[i].homework = ''
+            }
+            for (let i = 0; i < _this.rankData.length; i++) {
+              _this.rankData[i].homework = ''
+            }
+            // 柱状图数据处理(最大做分母)
+            let yxNum = 0
+            let lhNum = 0
+            let jgNum = 0
+            let bjgNum = 0
+            let wtjNum = 0
+            for (let i = 0; i < _this.allData.length; i++) {
+              if ((_this.allData[i].rightRate || _this.allData[i].rightRate === 0) && _this.allData[i].shieldRightRateTime === '0') {
+                if (_this.allData[i].rightRate < 60) {
+                  bjgNum++
+                } else if (_this.allData[i].rightRate >= 60 && _this.allData[i].rightRate < 70) {
+                  jgNum++
+                } else if (_this.allData[i].rightRate >= 70 && _this.allData[i].rightRate < 85) {
+                  lhNum++
+                } else if (_this.allData[i].rightRate >= 85) {
+                  yxNum++
+                }
+              } else if (_this.allData[i].shieldRightRateTime !== '0' && (_this.allData[i].rightRate || _this.allData[i].rightRate === 0)) {
+                // 提交了并且已经批改了，但是不是会员的傻逼不能剔除已提交
+              } else if (!_this.allData[i].stuSubmitAt) {
+                // 未提交
+                wtjNum++
+              }
+            }
+            let maxNum = Math.max.apply(null, [yxNum, lhNum, jgNum, bjgNum, wtjNum]) + 1
+            if (yxNum === 0) {
+              _this.yx = {h: 10, num: yxNum}
+            } else {
+              _this.yx = {h: 240 * ((yxNum + 1) / maxNum), num: yxNum}
+            }
+
+            if (lhNum === 0) {
+              _this.lh = {h: 10, num: lhNum}
+            } else {
+              _this.lh = {h: 240 * ((lhNum + 1) / maxNum), num: lhNum}
+            }
+
+            if (jgNum === 0) {
+              _this.jg = {h: 10, num: jgNum}
+            } else {
+              _this.jg = {h: 240 * ((jgNum + 1) / maxNum), num: jgNum}
+            }
+
+            if (bjgNum === 0) {
+              _this.bjg = {h: 10, num: bjgNum}
+            } else {
+              _this.bjg = {h: 240 * ((bjgNum + 1) / maxNum), num: bjgNum}
+            }
+
+            if (wtjNum === 0) {
+              _this.wtj = {h: 10, num: wtjNum}
+            } else {
+              _this.wtj = {h: 240 * ((wtjNum + 1) / maxNum), num: wtjNum}
+            }
+            // 排名数据处理
+            // 用时格式
+            _this.myChild.homeworkTime = _this.fm(_this.myChild.homeworkTime)
+            for (let i = 0; i < _this.rankData.length; i++) {
+              _this.rankData[i].homeworkTime = _this.fm(_this.rankData[i].homeworkTime)
+            }
+            console.log()
+            _this.$apply()
+          } else {
+            console.log(res)
+          }
+          wx.hideLoading()
+        },
+        fail (res) {
+          wx.hideLoading()
+          console.log('/wx/micro/parent/homework/view ---> fail')
+        }
+      })
+    }
+
+    async onShow () {
+      let _this = this
+      console.log('report_work.wpy --> onShow')
+      let authorize = await wepy.$instance._getAuthorize()
+      if (!authorize) {
+        setTimeout(() => {
+          _this._showAuthorizeModal()
+        }, 0)
+      } else {
+        _this._checkLogin()
+      }
+    }
+
+    onLoad(options) {
+      this.options = options
+      mta.Page.init()
+    }
+    fm(t) {
+      let a = t
+      if (t >= 60) {
+        t = Math.floor(t / 60) + '\'' + ''
+      } else {
+        t = '00' + '\''
+      }
+      if (a % 60 !== 0) {
+        t += a % 60 + ''
+        t += "\""
+      } else {
+        t += t + '00'
+      }
+      return t
+    }
+  }
+</script>
+<style lang="less">
+  .notRank{
+    text-align: center;
+    margin-top: 120rpx;
+    font-size: 36rpx;
+    font-weight: 900;
+    color: #999999;
+    line-height: 60rpx;
+  }
+  .container{
+    height: 100%;
+    background: #f0f0f0;
+  }
+  .chart{
+    width: 690rpx;
+    height: 320rpx;
+    display: flex;
+    justify-content: space-around;
+    font-size: 24rpx;
+    color: #999;
+    padding: 30rpx 30rpx;
+    background: #ffffff;
+    margin-bottom: 15rpx;
+    .lis{
+      height: 320rpx;
+      width: 100rpx;
+      text-align: center;
+      display: flex;
+      flex-direction: column-reverse;
+      .rs{
+        margin-top: 6rpx;
+      }
+      .zhu{
+        margin: 0 auto;
+      }
+    }
+  }
+  .titleBig{
+    font-size: 40rpx;
+    font-weight: 900;
+    width: 690rpx;
+    margin: 0 30rpx;
+    background: #ffffff;
+    height: 140rpx;
+    line-height: 130rpx;
+    border-bottom: 2rpx solid #f0f0f0;
+    color: #333333;
+  }
+  .rankTitle{
+    width: 690rpx;
+    margin: 0 auto;
+    margin-top: 30rpx;
+    font-size: 24rpx;
+    display: flex;
+    .num{
+      width: 100rpx;
+    }
+    .name{
+      width: 90rpx;
+    }
+    .rate{
+      width: 470rpx;
+      text-align: right;
+    }
+  }
+  .rankWrap{
+    width: 100%;
+    background: #ffffff;
+    font-size: 30rpx;
+    .myChild{
+      border-bottom: 15rpx solid #f0f0f0;
+    }
+    .rankLis{
+      width: 690rpx;
+      padding: 0 30rpx;
+      height: 180rpx;
+      display: flex;
+      justify-content: space-between;
+      line-height: 180rpx;
+      .pm{
+        width: 70rpx;
+        color: #999;
+      }
+      .myPm{
+        color: #F14B40;
+      }
+      .tx{
+        width: 128rpx;
+        position: relative;
+        .img1{
+          width: 100rpx;
+          height: 100rpx;
+          vertical-align: middle;
+          margin-top: -5rpx;
+          border-radius: 50%;
+        }
+        .vipBor{
+          border: 4rpx solid #FDBB2C;
+        }
+        .vipIcon{
+          position: absolute;
+          bottom: 32rpx;
+          left: 25rpx;
+          width: 60rpx;
+          height: 24rpx;
+        }
+      }
+      .mz{
+        width: 245rpx;
+        line-height: 40rpx;
+        .theName{
+          width: 245rpx;
+          overflow: hidden;
+          height: 40rpx;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin-top: 58rpx;
+          color: #000;
+          font-weight: 900;
+          font-size: 30rpx;
+          // display: flex;
+          .tt{
+            float: left;
+          }
+          .myCname{
+            float: left;
+            max-width: 160rpx;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+          }
+        }
+        .theTime{
+          color: #999;
+          font-size: 24rpx;
+          image{
+            width: 50rpx;
+            height: 22rpx;
+            vertical-align: middle;
+          }
+        }
+      }
+      .js{
+        width: 124rpx;
+        image{
+          width: 120rpx;
+          height: 30rpx;
+          vertical-align: middle;
+          margin-top: -5rpx;
+        }
+      }
+      .zql{
+        width: 128rpx;
+        text-align: center;
+        line-height: 40rpx;
+        .notR{
+          line-height: 180rpx;
+        }
+        .t{
+          margin-top: 50rpx;
+          color: #999;
+          font-size: 24rpx;
+        }
+        .rate{
+          font-size: 32rpx;
+          font-weight: 900;
+        }
+        .pre_60{
+          color: #F14B40;
+        }
+        .pre_70{
+          color: #F8C438;
+        }
+        .pre_85{
+          color: #7DCA60;
+        }
+        .pre_100{
+          color: #00BB9D;
+        }
+      }
+    }
+    .forS{
+      .mz, .js, .zql{
+        border-bottom: 1rpx solid #e5e5e5;
+      }
+    }
+  }
+</style>

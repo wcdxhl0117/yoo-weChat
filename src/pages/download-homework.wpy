@@ -1,0 +1,254 @@
+<template>
+  <view id="downHomework">
+    <!-- <image class="icon" wx:if="{{type == 'pdf'}}" src="../static/pdf.png"/> -->
+    <image class="icon" src="../static/doc.png"/>
+    <view class="title">{{title}}</view>
+    <view class="subtitle" @tap="preview" wx:if="{{isFinished}}">预览</view>
+    <text  class="paragraph" selectable="true" wx:if="{{isFinished}}">{{url}}</text>
+    <button class="button" loading="{{loading}}" @tap="download" wx:if="{{!isFinished}}">{{loading?'':'下载'}}</button>
+    <button class="button" loading="{{loading}}" @tap="copy" wx:if="{{isFinished}}">{{loading?'':'复制下载链接'}}</button>
+    <view class="describe" wx:if="{{isFinished}}">建议使用Word2007以上的版本进行打开</view>
+    <view class="extra" @tap="toWorkflowPage">作业打印流程</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
+
+  import { connect } from 'wepy-redux'
+  import {
+    SET_HOMEWORK_EXIST,
+    SET_HOMEWORK_TITLE,
+    SET_HOMEWORK_ID,
+    SET_HOMEWORK_URL
+  } from '../store/types/download-homework'
+  @connect({
+    exist (state) {
+      return state.downloadHomework.exist
+    },
+    title (state) {
+      return state.downloadHomework.title
+    },
+    id (state) {
+      return state.downloadHomework.id
+    },
+    url (state) {
+      return state.downloadHomework.url
+    }
+  }, {
+    setHomeworkExit: SET_HOMEWORK_EXIST,
+    setHomeworkTitle: SET_HOMEWORK_TITLE,
+    setHomeworkId: SET_HOMEWORK_ID,
+    setHomeworkUrl: SET_HOMEWORK_URL
+  })
+  export default class downloadHomework extends wepy.page {
+    config = {
+      navigationBarTitleText: '下载作业'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {
+      isFinished: false,
+      loading: false,
+      filePath: ''
+    }
+
+    computed = {}
+
+    methods = {
+      download () {
+        console.log('download-homework.wpy --> download')
+        if (!this.loading) {
+          this.loading = true
+          console.log(this.exist)
+          if (this.exist) {
+            // 如果url存在，则直接下载文件
+            this._downFile()
+          } else {
+            // 否则先转存文件再下载
+            this._createFile()
+          }
+        }
+      },
+      copy () {
+        console.log('download-homework.wpy --> copy')
+        wx.setClipboardData({
+          data: this.url,
+          success (res) {
+            mta.Event.stat('Down_Homework_Copy')
+            wx.showToast({title: '内容已复制', icon: 'success', duration: 1400})
+          }
+        })
+      },
+      preview () {
+        console.log('download-homework.wpy --> preview')
+        mta.Event.stat('Down_Homework_Preview')
+        wx.openDocument({
+          filePath: this.filePath,
+          success (res) {
+            console.log('download-homework.wpy --> preview --> openDocument --> success')
+            console.log(res)
+          },
+          fail (res) {
+            console.log('download-homework.wpy --> preview --> openDocument --> res')
+            console.log(res)
+            wx.showToast({title: '预览失败', icon: 'none', duration: 1400})
+          }
+        })
+      },
+      toWorkflowPage () {
+        console.log('download-homework.wpy --> toWorkflowPage')
+        mta.Event.stat('Down_Homework_Workflow')
+        wepy.navigateTo({
+          url: `/pages/download-homework-workflow`
+        })
+      },
+      toDisabledPage () {
+        console.log('download-homework.wpy --> toDisabledPage')
+        wepy.navigateTo({
+          url: `/pages/download-homework-disabled`
+        })
+      }
+    }
+    // 转存文件
+    _createFile () {
+      let that = this
+      wx.request({
+        url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/homework/createHomeworkFile`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        data: {
+          stuHkId: that.id,
+          host: wepy.$instance.globalData.baseURL
+        },
+        success (res) {
+          console.log('download-homework.wpy --> _createFile --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.methods.setHomeworkExit(true)
+            that.methods.setHomeworkUrl(`${wepy.$instance.globalData.baseURL}/${res.data.ret.url}`)
+            that._downFile()
+          } else {
+            wx.showToast({title: '下载失败', image: '../static/fail.png', duration: 1400})
+            that.loading = false
+            that.$apply()
+          }
+        },
+        fail (res) {
+          console.log('download-homework.wpy --> _createFile --> fail')
+          console.log(res)
+          that.loading = false
+          that.isFinished = false
+          that.filePath = ''
+          that.$apply()
+        }
+      })
+    }
+    // 下载文件
+    _downFile () {
+      let that = this
+      mta.Event.stat('Down_Homework_Download')
+      wx.downloadFile({
+        url: that.url,
+        success (res) {
+          console.log('download-homework.wpy --> _downFile --> success')
+          console.log(res)
+          wx.showToast({title: '下载成功', icon: 'success', duration: 1400})
+          that.loading = false
+          that.isFinished = true
+          that.filePath = res.tempFilePath
+          that.$apply()
+        },
+        fail (res) {
+          console.log('download-homework.wpy --> _downFile --> fail')
+          console.log(res)
+          wx.showToast({title: '下载失败', image: '../static/fail.png', duration: 1400})
+          that.loading = false
+          that.isFinished = false
+          that.filePath = ''
+          that.$apply()
+        }
+      })
+    }
+  
+    events = {}
+
+    onLoad (options) {
+      console.log('download-homework --> onLoad')
+      mta.Page.init()
+    }
+
+    onShow (options) {
+      console.log('download-homework --> onShow')
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#downHomework{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 0 30rpx;
+  height: 100vh;
+  box-sizing: border-content;
+  .icon{
+    margin: 90rpx 0 0;
+    display: block;
+    width: 200rpx;
+    height: 200rpx;
+    flex-shrink:0;
+  }
+  .title{
+    margin: 40rpx 0 40rpx;
+    font-weight: bold;
+    font-size: 36rpx;
+  }
+  .subtitle{
+    font-weight: bold;
+    font-size: 36rpx;
+    color: rgba(0,122,255,1);
+    line-height: 40rpx;
+  }
+  .paragraph{
+    background: #f6f6f6;
+    margin: 60rpx 0 0;
+    padding: 30rpx;
+    font-size: 30rpx;
+    color: rgba(0,0,0,1);
+    line-height: 42rpx;
+    word-break: break-all;
+  }
+  .button{
+    font-weight: bold;
+    width: 100%;
+    margin: 20rpx 0 0;
+    font-size: 30rpx;
+    color: #fff;
+    background: #007AFF;
+  }
+  .extra{
+    position: absolute;
+    bottom: 100rpx;
+    text-decoration: underline;
+    font-size: 30rpx;
+    color:rgba(21,126,251,1);
+    line-height: 24rpx;
+  }
+  .describe{
+    color: #999999;
+    margin: 30rpx;
+    font-size: 30rpx;
+    line-height: 40rpx;
+  }
+  button::after{
+    border:none;
+  }
+}
+</style>

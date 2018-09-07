@@ -1,0 +1,11 @@
+export const SET_CHILD_NICK_NAME = 'SET_CHILD_NICK_NAME'
+
+export const SET_CHILD_NAME = 'SET_CHILD_NAME'
+
+export const SET_EXPIRATION_DATE = 'SET_EXPIRATION_DATE'
+
+export const SET_IS_JOIN = 'SET_IS_JOIN'
+
+export const SET_IS_BIND = 'SET_IS_BIND'
+
+export const SET_IS_AUTHORIZE = 'SET_IS_AUTHORIZE'

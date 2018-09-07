@@ -1,0 +1,146 @@
+<template>
+  <view id="verifyAccount">
+    <!-- <view class="topTip">该微信号已绑定悠数学学生端</view> -->
+    <image class="avatar" src="{{avatarUrl}}"/>
+    <view class="studentName">{{studentName}}</view>
+    <view class="schoolName">{{schoolName}}</view>
+    <view class="button" @tap="isMy">是我的孩子</view>
+    <view class="button ghost" @tap="notMy">不是我的孩子</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import { connect } from 'wepy-redux'
+  import mta from '../utils/mta_analysis.js'
+
+  @connect({
+    avatarUrl (state) {
+      return state.associatedAccount.avatarUrl
+    },
+    schoolName (state) {
+      return state.associatedAccount.schoolName
+    },
+    studentName (state) {
+      return state.associatedAccount.studentName
+    },
+    studentId (state) {
+      return state.associatedAccount.studentId
+    }
+  })
+
+  export default class verifyAccount extends wepy.page {
+    config = {
+      navigationBarTitleText: '关联孩子账号'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {}
+
+    computed = {}
+
+    methods = {
+      isMy () {
+        console.log('verify-account.wpy --> isMy')
+        mta.Event.stat('Is_My_Child')
+        this._bindAccount()
+      },
+      notMy () {
+        console.log('verify-account.wpy --> notMy')
+        mta.Event.stat('Not_My_Child')
+        wx.navigateBack({delta: 1})
+      }
+    }
+
+    _bindAccount () {
+      let that = this
+      wx.request({
+        url: `${that.$parent.globalData.baseURL}/wx/micro/parent/bindStuById`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        data: {
+          stuId: that.studentId
+        },
+        success (res) {
+          console.log('verify-account.wpy --> _bindAccount --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            wx.navigateBack({delta: 2})
+          } else {
+            wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+          }
+        },
+        fail (res) {
+          console.log('verify-account.wpy --> _bindAccount --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+        }
+      })
+    }
+
+    events = {}
+
+    onLoad () {
+      console.log('verify-account.wpy --> onLoad')
+      mta.Page.init()
+    }
+
+    onShow () {
+      console.log('verify-account.wpy --> onShow')
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#verifyAccount{
+  text-align: center;
+  .topTip{
+    margin-top: 100rpx;
+    line-height: 60rpx;
+    height: 60rpx;
+    font-size: 40rpx;
+    font-weight: 900;
+  }
+  .avatar{
+    width: 180rpx;
+    height: 180rpx;
+    border-radius: 50%;
+    display: block;
+    margin: 60rpx auto;
+    margin-bottom: 20rpx;
+  }
+  .studentName{
+    font-size: 34rpx;
+    color: rgba(0,0,0,1);
+    line-height: 40rpx;
+    font-weight: bold;
+  }
+  .schoolName{
+    font-size: 30rpx;
+    color: rgba(153,153,153,1);
+    line-height: 40rpx;
+  }
+  .button{
+    margin: 0 30rpx;
+    font-size: 32rpx;
+    font-weight: 900;
+    line-height: 90rpx;
+    background: #007AFF;
+    border-radius: 10rpx;
+    color: #ffffff;
+    margin-top: 70rpx;
+    &.ghost{
+      margin-top: 40rpx;
+      color: #999999;
+      box-sizing: border-box;
+      background: #fff;
+      border: 1rpx solid #999999;
+    }
+  }
+}
+</style>

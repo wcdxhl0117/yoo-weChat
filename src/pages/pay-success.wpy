@@ -1,0 +1,204 @@
+<template>
+  <view id="paySuccess">
+    <block wx:if="{{!isGetData}}">
+      <view class="loading">
+        <image class="rotate" src="../static/loading.png"/>
+        <view class="text">正在加载</view>
+      </view>
+    </block>
+    <block wx:else>
+      <image class="achieveImg" src="../static/achieve.png"/>
+      <view class="achieveText">会员开通成功</view>
+      <view class="wrap">
+        <view class="title">VIP会员</view>
+        <view class="subTitle">{{month}}个月 <view wx:if="{{extraMonth}}">（另外赠送{{extraMonth}}个月）</view></view>
+        <view class="describe">{{endAt}}到期（立即生效）</view>
+      </view>
+      <view class="btn" @tap="showIndexPage">返回首页</view>
+    </block>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
+  export default class paySuccess extends wepy.page {
+    config = {
+      navigationBarTitleText: '加入VIP培优计划'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {
+      isGetData: false,
+      month: '',
+      extraMonth: '',
+      endAt: '',
+      orderId: '',
+      sign: ''
+    }
+
+    computed = {}
+
+    methods = {
+      showIndexPage () {
+        wx.switchTab({
+          url: '/pages/index'
+        })
+      }
+    }
+
+    _getOrderInfo () {
+      let that = this
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/zy/m/anpay/member/getOrderInfoToPay`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        data: {
+          id: that.orderId,
+          sign: that.sign,
+          complate: true,
+          fromWX: true
+        },
+        success (res) {
+          console.log('pay-success.wpy --> _getOrderInfo --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.month = res.data.ret.month
+            that.extraMonth = res.data.ret.extraMonth
+            that.endAt = res.data.ret.endAt
+          } else {
+            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+          }
+          that.isGetData = true
+          that.$apply()
+        },
+        fail (res) {
+          console.log('pay-success.wpy --> _getOrderInfo --> fail')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          that.isGetData = true
+          that.$apply()
+        }
+      })
+    }
+
+    events = {}
+
+    onLoad (options) {
+      console.log('pay-success.wpy --> onLoad')
+      mta.Page.init()
+    }
+
+    onShow (options) {
+      console.log('pay-success.wpy --> onShow')
+      this.orderId = wx.getStorageSync('orderId')
+      this.sign = wx.getStorageSync('sign')
+      this._getOrderInfo()
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#paySuccess{
+  display: flex;
+  flex-direction: column;
+  padding: 70rpx 30rpx;
+  align-items: center;
+  .achieveImg{
+    display: block;
+    width: 200rpx;
+    height: 200rpx;
+  }
+  .achieveText{
+    font-weight: bold;
+    color: #09BB07;
+    font-size: 40rpx;
+    margin: 40rpx 0 90rpx;
+  }
+  .wrap{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 40rpx 40rpx 50rpx;
+    background:#f6f6f6;
+    border-radius: 10rpx;
+    .title{
+      font-weight: bold;
+      color: #000000;
+      font-size: 40rpx;
+    }
+    .subTitle{
+      display: flex;
+      color: #000000;
+      font-size: 30rpx;
+      margin: 20rpx 0 30rpx;
+    }
+    .describe{
+      color: #999999;
+      font-size: 30rpx;
+    }
+  }
+  .check{
+    font-weight: bold;
+    color: #000000;
+    align-self: flex-start;
+    font-size: 30rpx;
+    margin: 60rpx 0 40rpx;
+  }
+  .appImg{
+    width: 100%;
+    height: 279rpx;
+    background:#000000;
+  }
+  .btn{
+    margin-top: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 90rpx;
+    background:#007aff;
+    color: #ffffff;
+    font-size: 30rpx;
+    line-height: 30rpx;
+    border-radius: 10rpx;
+  }
+  .loading{
+    display: flex;
+    height: 100vh;
+    background: #ffffff;
+    flex-direction: column;
+    flex:1 1 auto;
+    align-items: center;
+    justify-content: center;
+    .text{
+      font-weight: bold;
+      font-size: 30rpx;
+      line-height: 40rpx;  
+    }
+  }
+  @keyframes rotate{
+    0%{
+      transform: rotate(0);
+    }
+    50%{
+    	transform:rotate(180deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  .rotate{
+    display: block;
+    width: 60rpx;
+    height: 60rpx;
+    margin-bottom: 4rpx;
+    transition: 0.5s;
+    animation: rotate 0.8s linear infinite;
+  }
+}
+</style>

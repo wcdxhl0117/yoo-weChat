@@ -1,0 +1,45 @@
+<template>
+  <view class="container">
+    <web-view src="{{src}}"></web-view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import mta from '../utils/mta_analysis.js'
+  export default class webView extends wepy.page {
+    config = {
+      navigationBarTitleText: '悠数学-家长'
+    }
+    components = {}
+
+    mixins = []
+
+    data = {
+      src: ''
+    }
+
+    computed = {}
+
+    methods = {}
+
+    events = {}
+
+    onLoad(options) {
+      console.log('web-view.wpy --> onLoad')
+      mta.Page.init()
+      if (options.url) {
+        console.log(options)
+        console.log(options.url)
+        this.src = options.url
+        this.$apply()
+      } else {
+        this.src = this.$parent.globalData.webViewSrc
+        this.$apply()
+      }
+    }
+  }
+</script>
+<style lang="less">
+  
+</style>

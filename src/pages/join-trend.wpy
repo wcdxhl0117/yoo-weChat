@@ -1,0 +1,566 @@
+<template>
+  <view id="joinTrend" class="{{noTrend?'noTrend':''}}">
+    <block wx:if="{{!isGetData}}">
+      <view class="loading">
+        <image class="rotate" src="../static/loading.png"/>
+        <view class="text">正在加载</view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="content" wx:if="{{noTrend}}">
+        <view class="paragraph">近15天孩子暂无学习动态</view>
+        <view class="paragraph">去鼓励孩子进行在线练习吧</view>
+      </view>
+      <view class="content" wx:else>
+        <!-- <detail :index="index" :unfold.sync="unfold" :active="active" :date="date" :hourTime="hourTime" :list="list" @on-click.user="click"></detail> -->
+        <repeat for="{{list}}" key="index" index="index" item="item">
+          <detail :index="index" :unfold.sync="item.unfold" :active="item.active" :date="item.date" :hourTime="item.hourTime" :list="item.list" @on-click.user="detailClick"></detail>
+        </repeat>
+        <view class="footer">到底了，支持查看近15天的学习动态</view>
+      </view>
+    </block>
+    <authorizeModal :value.sync="isShow" @on-close.user="closeModal" @on-confirm.user="confirmModal"></authorizeModal>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import moment from 'moment'
+  import authorizeModal from '../components/authorizeModal'
+  import learndetail from '../components/learndetail'
+  import mta from '../utils/mta_analysis.js'
+  export default class joinTrend extends wepy.page {
+    config = {
+      navigationBarTitleText: '学习动态'
+    }
+
+    components = {
+      detail: learndetail,
+      authorizeModal: authorizeModal
+    }
+
+    mixins = []
+
+    data = {
+      isShow: false,
+      isGetData: false,
+      noTrend: false,
+      list: []
+    }
+
+    computed = {}
+
+    methods = {
+      detailClick () {
+        if (this.list[arguments[0]]) {
+          this.list[arguments[0]].unfold = !this.list[arguments[0]].unfold
+        }
+      },
+      closeModal () {
+
+      },
+      confirmModal () {
+        this.isShow = false
+        this.$apply()
+        wepy.$instance._onLaunch(() => {
+          this._shouldToBindPage()
+        })
+      }
+    }
+
+    _showAuthorizeModal () {
+      this.isShow = true
+      this.$apply()
+    }
+
+    _shouldToBindPage () {
+      wepy.$instance._shouldToBindPage(() => {
+        this._getTrend()
+      })
+    }
+
+    // 检查是否登陆
+    _checkLogin () {
+      console.log('join-trend.wpy --> _checkLogin')
+      if (this.$parent.globalData.hasCheckToken) {
+        this._shouldToBindPage()
+      } else {
+        setTimeout(() => {
+          this._checkLogin()
+        }, 100)
+      }
+    }
+
+    // 获取动态
+    _getTrend (account, password) {
+      let that = this
+      wx.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/listDynamic`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        success (res) {
+          console.log('join-trend.wpy --> _getTrend --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 遍历顺序的问题 出错别找我 后端不返回数组 ♪(^∇^*)
+            let list = []
+            Object.keys(res.data.ret).forEach((key) => {
+              let listItem = {}
+              let dateList = key.split(':')
+              let date = ''
+              if (dateList[1]) {
+                date = `${dateList[0]}（${dateList[1] || ''}）`
+              } else {
+                date = `${dateList[0]}`
+              }
+              listItem['unfold'] = false
+              listItem['date'] = date
+              listItem['active'] = true
+              listItem['list'] = []
+              Object.keys(res.data.ret[key]).forEach((hourTimeKey) => {
+                let hourTimeItem = {}
+                hourTimeItem['hourTime'] = hourTimeKey
+                hourTimeItem['list'] = []
+                for (let i of res.data.ret[key][hourTimeKey]) {
+                  let detailList = []
+                  let detailStart = {}
+                  let detailEnd = {}
+                  // 计算相差日期
+                  let afterDay = ''
+                  if (i.endAt) {
+                    let dateDiff = moment(i.endAt).format('D') - moment(i.startAt).format('D')
+                    let hourDiff = ~~((i.endAt - i.startAt) / 1000 / 60 / 60 / 24)
+                    if (dateDiff < 0 || hourDiff !== 0) {
+                      afterDay = moment(i.endAt).format('MM-DD')
+                    }
+                    if (afterDay && i.type !== 'HOMEWORK_CORRECT' && i.type !== 'HOMEWORK_CORRECT') {
+                      detailEnd['afterDay'] = afterDay
+                    }
+                  }
+                  // 智能出卷
+                  if (i.type === 'SMART_EXAM_PAPER') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「智能出卷」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「智能出卷」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出自主练习「智能出卷」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「智能出卷」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `complete`
+                      detailEnd['title'] = `提交自主练习「智能出卷」`
+                      detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                    }
+                  // 每日练
+                  } else if (i.type === 'DAILY_PRACTISE') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「每日练」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「每日练」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出自主练习「每日练」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「每日练」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `complete`
+                      detailEnd['title'] = `提交自主练习「每日练」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    }
+                  // 错题练习
+                  } else if (i.type === 'FALLIBLE_PRACTISE') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「错题练习」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「错题练习」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出自主练习「错题练习」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「错题练习」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `complete`
+                      detailEnd['title'] = `提交自主练习「错题练习」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    }
+                  // 章节练习
+                  } else if (i.type === 'SECTION_PRACTISE') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「章节练习」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「章节练习」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出自主练习「章节练习」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始自主练习「章节练习」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `complete`
+                      detailEnd['title'] = `提交自主练习「章节练习」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    }
+                  // 教辅练习
+                  } else if (i.type === 'TEACH_PRACTISE') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始教辅练习「${i.name}」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始教辅练习「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出教辅练习「${i.name}」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始教辅练习「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `complete`
+                      detailEnd['title'] = `提交教辅练习「${i.name}」`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    }
+                  // 做作业
+                  } else if (i.type === 'HOMEWORK') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `homework`
+                      detailStart['title'] = `做作业「${i.name}」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `homework`
+                      detailStart['title'] = `做作业「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出作答`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `homework`
+                      detailStart['title'] = `做作业「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `complete`
+                      detailEnd['title'] = `提交作业`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒`
+                      }
+                    }
+                  // 作业错题订正
+                  } else if (i.type === 'HOMEWORK_CORRECT') {
+                    detailStart['time'] = moment(i.startAt).format('HH:mm')
+                    detailStart['type'] = `revisal`
+                    detailStart['title'] = `作业错题订正「${i.name}」`
+                    detailStart['subTitle'] = `完成${i.completeQuestionCount}道题目订正`
+                  // 练习错题订正
+                  } else if (i.type === 'PRACTISE_CORRECT') {
+                    detailStart['time'] = moment(i.startAt).format('HH:mm')
+                    detailStart['type'] = `revisal`
+                    detailStart['title'] = `练习错题订正「${i.name}」`
+                    detailStart['subTitle'] = `完成${i.completeQuestionCount}道题目订正`
+                  // 错题针对性练习
+                  } else if (i.type === 'TARGET_FALLIBLE_PRACTISE') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始错题针对性练习「${i.name}」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始错题针对性练习「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出错题针对性练习`
+                      detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始错题针对性练习「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `提交错题针对性练习`
+                      detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                    }
+                  // 薄弱知识点针对性练习
+                  } else if (i.type === 'WEAK_POINT') {
+                    if (i.status === 'START') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始薄弱知识点针对性练习「${i.name}」`
+                    } else if (i.status === 'EXIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始薄弱知识点针对性练习「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `退出薄弱知识点针对性练习`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    } else if (i.status === 'COMMIT') {
+                      detailStart['time'] = moment(i.startAt).format('HH:mm')
+                      detailStart['type'] = `exercise`
+                      detailStart['title'] = `开始薄弱知识点针对性练习「${i.name}」`
+
+                      detailEnd['time'] = moment(i.endAt).format('HH:mm')
+                      detailEnd['type'] = `exit`
+                      detailEnd['title'] = `提交薄弱知识点针对性练习`
+                      if (~~(i.doTime / 60)) {
+                        detailEnd['subTitle'] = `用时${~~(i.doTime / 60)}分${i.doTime % 60 || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      } else {
+                        detailEnd['subTitle'] = `用时${i.doTime || 0}秒；完成${i.completeQuestionCount}道题目练习`
+                      }
+                    }
+                  }
+                  if (Object.keys(detailStart).length !== 0) {
+                    detailList.push(detailStart)
+                  }
+                  if (Object.keys(detailEnd).length !== 0) {
+                    detailList.push(detailEnd)
+                  }
+                  hourTimeItem['list'].push(detailList)
+                  detailList = null
+                  detailStart = null
+                  detailEnd = null
+                }
+                listItem['list'].push(hourTimeItem)
+              })
+              list.push(listItem)
+            })
+
+            that.isGetData = true
+            if (list.length === 0) {
+              that.noTrend = true
+            } else {
+              that.list = list
+              that.list[0].unfold = true
+            }
+            that.$apply()
+          } else {
+            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+          }
+        },
+        fail (res) {
+          console.log('join-trend.wpy --> _getTrend --> success')
+          console.log(res)
+          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        }
+      })
+    }
+
+    events = {}
+
+    onLoad () {
+      console.log('join-trend.wpy --> onLoad')
+      mta.Page.init()
+    }
+
+    async onShow () {
+      console.log('join-trend.wpy --> onShow')
+      let that = this
+      let authorize = await wepy.$instance._getAuthorize()
+      if (!authorize) {
+        setTimeout(() => {
+          that._showAuthorizeModal()
+        }, 0)
+      } else {
+        that._checkLogin()
+      }
+
+      // if (!this.$parent.globalData.hasAuthorize) {
+      //   wx.redirectTo({
+      //     url: `/pages/authorizeIdx?to=/pages/join-trend`
+      //   })
+      //   return
+      // }
+      // this._checkLogin()
+    }
+  }
+// [{
+//   unfold: true,
+//   date: '06-30（星期三）',
+//   active: true,
+//   list: [
+//     {
+//       hourTime: '21:00',
+//       list: [
+//         [{
+//           time: '21:30',
+//           type: 'exercise', // exercise homework complete revisal exit
+//           title: '开始自主练习「智能出卷」',
+//           subTitle: ''
+//         },
+//         {
+//           time: '21:33',
+//           type: 'exit',
+//           title: '退出自主练习',
+//           afterDay: '',
+//           subTitle: '用时8分3秒；完成5道题目练习'
+//         }]
+//       ]
+//     }
+//   ]
+// }]
+</script>
+<style lang="scss" scoped>
+#joinTrend{
+  display: flex;
+  flex-direction: column;
+  border-top: 1rpx solid #EEEEEE;
+  &.noTrend{
+    border-top: 0;
+    flex: 1 1 auto;
+    height: 100vh;
+    .content{
+      display: flex;
+      flex-direction: column;
+      flex:1 1 auto;
+      align-items: center;
+      justify-content: center;
+      .paragraph{
+        display: flex;
+        color: #999999;
+        font-size: 36rpx;
+        line-height: 48rpx;  
+        justify-content: center;     
+      }
+    }
+  }
+  .content{
+    .footer{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #CCCCCC;
+      height: 88rpx;
+      font-size: 30rpx;
+    }
+  }
+  .loading{
+    display: flex;
+    height: 100vh;
+    background: #ffffff;
+    flex-direction: column;
+    flex:1 1 auto;
+    align-items: center;
+    justify-content: center;
+    .text{
+      font-weight: bold;
+      font-size: 30rpx;
+      line-height: 40rpx;  
+    }
+  }
+  @keyframes rotate{
+    0%{
+      transform: rotate(0);
+    }
+    50%{
+    	transform:rotate(180deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  .rotate{
+    display: block;
+    width: 60rpx;
+    height: 60rpx;
+    margin-bottom: 4rpx;
+    transition: 0.5s;
+    animation: rotate 0.8s linear infinite;
+  }
+}
+</style>

@@ -1,0 +1,16 @@
+{
+	"description": "悠数学家长端",
+	"setting": {
+		"urlCheck": false,
+		"es6": false,
+		"postcss": true,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wx01a40c521cb8f06b",
+	"projectname": "wechat-app",
+	"miniprogramRoot": "./dist",
+	"libVersion": "2.2.2",
+	"condition": {}
+}

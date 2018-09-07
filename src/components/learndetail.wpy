@@ -1,0 +1,376 @@
+<template>
+  <view class="learndetail {{active?'active':''}}">
+    <view class="detailContainer {{unfold?'unfold':''}}">
+      <view class="headerWrap">
+        <view class="title">{{date}}</view>
+        <image class="unfoldImg {{unfold?'unfold':''}}" src="../static/black-arrow.png" @tap="click" wx:if="{{active}}"/>
+      </view>
+      <!-- <view class="listWrap {{unfold?'unfold':''}}"> -->
+      <view class="listWrap" style="height:{{setHeight}}" wx:if="{{unfold}}">
+        <view class="list" wx:for="{{list}}" wx:key="listIdx" wx:for-index="listIdx" wx:for-item="listItem">
+          <view class="hourTimeHeader">
+            <image class="hourTimeImg" src="../static/baseClock.png" wx:if="{{!active}}"/>
+            <image class="hourTimeImg" src="../static/clock.png" wx:if="{{active}}"/>
+            <view class="hourTime">{{listItem.hourTime}}</view>
+          </view>
+          <view class="hourTimeContent" wx:for="{{listItem.list}}" wx:key="contentIdx" wx:for-index="contentIdx" wx:for-item="contentItem">
+            <view class="detailLineWrap" wx:if="{{contentItem.length == 2}}">
+              <view class="detailLine"></view>
+            </view>
+            <view class="detailTimeWrap {{contentItem.length == 2?'':'single'}}" wx:for="{{contentItem}}" wx:key="detailIdx" wx:for-index="detailIdx" wx:for-item="detailItem">
+              <view class="detailTime">{{detailItem.time}}</view>
+              <view class="detailAfterDay" wx:if="{{detailItem.afterDay}}">{{detailItem.afterDay}}</view>
+              <image class="detailTimeImg" src="../static/exercise.png" wx:if="{{detailItem.type=='exercise'}}"/>
+              <image class="detailTimeImg" src="../static/homework.png" wx:if="{{detailItem.type=='homework'}}"/>
+              <image class="detailTimeImg" src="../static/complete.png" wx:if="{{detailItem.type=='complete'}}"/>
+              <image class="detailTimeImg" src="../static/revisal.png" wx:if="{{detailItem.type=='revisal'}}"/>
+              <image class="detailTimeImg" src="../static/exit.png" wx:if="{{detailItem.type=='exit'}}"/>
+              <view class="titleWrap">
+                <view class="title">{{detailItem.title}}</view>
+                <view class="subTitle" wx:if="{{detailItem.subTitle}}">{{detailItem.subTitle}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class learndetail extends wepy.component {
+    components = {}
+
+    mixins = []
+
+    data = {
+      setHeight: 'auto',
+      getHeight: ''
+    }
+
+    props = {
+      index: String,
+      unfold: {
+        type: Boolean,
+        default: false
+      },
+      active: {
+        type: Boolean,
+        default: false
+      },
+      date: String,
+      list: {
+        type: Array,
+        default: []
+      }
+    }
+
+    watch = {}
+
+    computed = {}
+
+    methods = {
+      click () {
+        // let listWrap = await this._getlistWrap()
+        // if (listWrap) {
+        //   this.setHeight = `${listWrap.height}px`
+        // } else {
+        //   this.setHeight = 0
+        // }
+        // console.log(await this._getlistWrap())
+        this.$emit('on-click', this.index)
+      }
+    }
+
+    _getlistWrap () {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().select('.listWrap').boundingClientRect((rect) => {
+          resolve(rect)
+        }).exec()
+      })
+    }
+
+    _setlistWrap () {
+      return new Promise((resolve, reject) => {
+        wx.createSelectorQuery().select('.listWrap').boundingClientRect((rect) => {
+          resolve(rect)
+        }).exec()
+      })
+    }
+
+    events = {}
+
+    onLoad () {
+      // console.log(this)
+    }
+  }
+// date: '06-30（星期三）',
+// hourTime: '21:00',
+// list: [
+//   {
+//     hourTime: '21:00',
+//     list: [
+//       [{
+//         time: '21:30',
+//         type: 'exercise', // exercise homework complete revisal exit
+//         title: '开始自主练习「智能出卷」',
+//         subTitle: ''
+//       },
+//       {
+//         time: '21:33',
+//         type: 'exit',
+//         title: '退出自主练习',
+//         subTitle: '用时8分3秒；完成5道题目练习'
+//       }]
+//     ]
+//   },
+//   {
+//     hourTime: '20:00',
+//     list: [
+//       [{
+//         time: '20:10',
+//         type: 'exercise', // exercise homework complete revisal exit
+//         title: '开始自主练习「智能出卷」',
+//         subTitle: ''
+//       },
+//       {
+//         time: '20:16',
+//         type: 'exit',
+//         title: '退出自主练习',
+//         subTitle: '用时8分3秒；完成5道题目练习'
+//       }],
+//       [{
+//         time: '20:33',
+//         type: 'exercise', // exercise homework complete revisal exit
+//         title: '开始自主练习「智能出卷」',
+//         subTitle: ''
+//       },
+//       {
+//         time: '20:45',
+//         type: 'complete',
+//         title: '提交作业',
+//         afterDay: '',
+//         subTitle: '用时8分3秒；完成5道题目练习'
+//       }]
+//     ]
+//   }
+// ]
+</script>
+<style lang="scss" scoped>
+.learndetail{
+  display: flex;
+  flex-direction: column;
+  &.active{
+    // border-bottom: 1rpx solid #CCCCCC;
+    padding: 0 0 0 30rpx;
+    .detailContainer{
+      // padding: 0 0 0 30rpx;
+      border-bottom: 2rpx solid #CCCCCC;
+      &.unfold{
+        padding-bottom: 40rpx;
+      }
+      .listWrap{
+        // transition: max-height 0.2s;
+        // max-height: 0;
+        // overflow: hidden;
+        .list:first-child {
+          .hourTimeHeader{
+            margin: 0;
+          }
+        }
+        // &.unfold{
+        //   // max-height: 800vh;
+        //   overflow: auto;
+        // }
+      }
+      // .list{
+      //   &:last-child{
+      //     .hourTimeContent{
+      //       &:last-child{
+      //         margin-bottom: 40rpx;
+      //         border-bottom: 1rpx solid #CCCCCC;
+      //       }
+      //     }
+      //   }
+      // }
+      .headerWrap{
+        height: 100rpx;
+        .title{
+          color: #000000;
+        }
+      }
+      .hourTimeHeader{
+        .hourTime{
+          color: #007AFF;
+          background: #b3d7ff;
+        }
+      }
+      .hourTimeContent{
+        margin-right: 30rpx;
+        .detailTimeWrap{
+          .detailTime{
+            color: #000000;
+          }
+          .titleWrap{
+            padding-right: 12rpx;
+            .title{
+              color: #333333;
+            }
+          }
+        }
+      }
+    }
+  }
+  .headerWrap{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .title{
+      font-weight: bold;
+      font-size: 40rpx;
+      color: #AAAAAA;
+    }
+    .unfoldImg{
+      display: inline-block;
+      width: 37rpx;
+      height: 21rpx;
+      padding: 31.5rpx 28rpx;
+      transition:  transform 0.2s;
+      &.unfold{
+        transform: rotate(180deg);
+      }
+      // margin-right: 28rpx;
+    }
+  }
+  .hourTimeHeader{
+    margin: 30rpx 0 0 0;
+    display: flex;
+    align-items: center;
+    height: 40rpx;
+    .hourTimeImg{
+      display: inline-block;
+      width: 40rpx;
+      height: 40rpx;
+      z-index: 2;
+      position: relative;
+    }
+    .hourTime{
+      display: flex;
+      align-items: center;
+      color: #AAAAAA;
+      background: #e5e5e5;
+      font-weight: bold;
+      font-size: 30rpx;
+      height: 40rpx;
+      padding: 0 30rpx 0 60rpx;
+      border-radius: 40rpx;
+      margin-left: -40rpx;
+    }
+  }
+  .hourTimeContent{
+    margin: 20rpx 0 0;
+    display: flex;
+    flex-direction: column;
+    background: #f6f6f6;
+    border-radius: 10rpx;
+
+    flex-grow: 1;
+    position: relative;
+    // &::after{
+    //   align-self: flex-start;
+    //   content: "";
+    //   position: absolute;
+    //   box-sizing: border-box;
+    //   display: flex;
+    //   flex-grow: 1;
+    //   flex-direction: column;
+    //   width: 4rpx;
+    //   height: 100%;
+    //   left: 176rpx;
+    //   // left: 184rpx;
+    //   top: 0rpx;
+    //   background: red;
+    // }
+    .detailLineWrap{
+      position: absolute;
+      top: 0rpx;
+      height: 100%;
+      left: 172rpx;
+      top: 0rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .detailLine{
+        box-sizing: border-box;
+        width: 4rpx;
+        height: 50%;
+        margin: 40rpx 0;
+        background: #CCCCCC;
+      }
+    }
+    .detailTimeWrap{
+      margin: 40rpx 0 40rpx;
+      display: flex;
+      align-items: center;
+      position: relative;
+      &.single{
+        &:nth-child(odd){
+          margin: 40rpx 0 40rpx;
+        }
+      }
+      &:nth-child(even){
+        margin: 40rpx 0 24rpx;
+      }
+      &:nth-child(odd){
+        margin: 24rpx 0 40rpx;
+      }
+      // &:nth-child(n+2){
+      //   margin: 24rpx 0 40rpx;
+      // }
+      .detailAfterDay{
+        position: absolute;
+        color: #AAAAAA;
+        font-weight: bold;
+        font-size: 30rpx;
+        margin: -32rpx 0 0 30rpx;
+      }
+      .detailTime{
+        margin: 0 0 0 30rpx;
+        width: 100rpx;
+        color: #AAAAAA;
+        font-weight: bold;
+        font-size: 30rpx;
+        flex-shrink:0;
+        flex-grow:0;
+      }
+      .detailTimeImg{
+        // margin: 0 0 0 30rpx;
+        flex-shrink:0;
+        flex-grow:0;
+        display: inline-block;
+        width: 90rpx;
+        height: 90rpx;
+        border-radius: 50%;
+        z-index: 1;
+      }
+      .titleWrap{
+        margin: 0 0 0 30rpx;
+        display: flex;
+        flex-direction: column;
+        .title{
+          font-weight: bold;
+          font-size: 30rpx;
+          line-height: 40rpx;
+          color: #AAAAAA;
+        }
+        .subTitle{
+          font-size: 24rpx;
+          line-height: 40rpx;
+          color: #AAAAAA;
+        }
+      }
+    }
+  }
+}
+</style>

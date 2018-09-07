@@ -1,0 +1,372 @@
+<template>
+  <view class="container">
+    <view class="wrap">
+      <view class="topImg">
+        <image src="../../static/itrTop.png" />
+        <view @tap="showRule">活动规则</view>
+      </view>
+      <view class="btm">
+        <image class="title" src="../../static/itrtitle.png" />
+        <view class="conList">
+          <view class="lis">
+            <image src="../../static/itrlis.png" />
+            <view>作业秒级批改反馈</view>
+          </view>
+          <view class="lis">
+            <image src="../../static/itrlis.png" />
+            <view>AI智能推荐，错题精准练</view>
+          </view>
+          <view class="lis">
+            <image src="../../static/itrlis.png" />
+            <view>个性化错题本（可下载打印）</view>
+          </view>
+          <view class="lis">
+            <image src="../../static/itrlis.png" />
+            <view>全生命周期孩子学情报告</view>
+          </view>
+          <view class="lis">
+            <image src="../../static/itrlis.png" />
+            <view>300本在线同步教辅书免费练</view>
+          </view>
+        </view>
+      </view>
+      <view class="btn" @tap="toDetail">立即领取</view>
+      <view class="txt" @tap="toItr">点击了解悠数学</view>
+      <!-- 授权按钮 -->
+      <button wx:if="{{!authorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
+    </view>
+    <shareRuleModal :value.sync="showRuleModal"  @on-close.user="showRuleModalClose"></shareRuleModal>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import scroll from '../../components/scroll'
+  import shareRuleModal from '../../components/shareRuleModal'
+  import mta from '../../utils/mta_analysis.js'
+  export default class introduction extends wepy.page {
+    config = {
+      navigationBarTitleText: '悠数学-家长'
+    }
+    components = {
+      scroll: scroll,
+      shareRuleModal: shareRuleModal
+    }
+    mixins = []
+
+    data = {
+      showRuleModal: false,
+      // isShowPage: false
+      isAuthorize: false
+    }
+
+    computed = {}
+
+    methods = {
+      // 跳转详情
+      toDetail() {
+        this._hasBindChild()
+      },
+      toItr() {
+        // 公众号文章链接
+        this.$parent.globalData.webViewSrc = 'https://www.jianshu.com/'
+        wepy.navigateTo({
+          url: '/pages/web-view'
+        })
+      },
+      showRule () {
+        console.log('shareAct --> introduction.wpy --> showRule')
+        this.showRuleModal = true
+      },
+      showRuleModalClose() {
+        console.log('shareAct --> introduction.wpy --> showRuleModalClose')
+        this.showRuleModal = false
+      }
+    }
+
+    events = {}
+
+    // 后台请求：判断是否参加过活动
+    _hasJoinAct() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('introduction.wpy --> 是否参加过活动 --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果参加，判断是否绑定孩子
+            if (res.data.ret.hasBind) {
+              _this._hasBindChild()
+            } else {
+              // 展示页面
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('index.wpy --> _checkLogin --> hasBind --> fail')
+          console.log(res)
+        }
+      })
+    }
+
+    // 查看是否绑定孩子
+    _hasBindChild() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('introduction.wpy --> 绑定孩子请求接口成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果绑定,判断活动是否截止
+            if (res.data.ret.hasBind) {
+              _this._isEndAct()
+            } else {
+              // 如果没绑定，跳转绑定孩子页面
+              wx.navigateTo({
+                url: '/pages/associated-account'
+              })
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('introduction.wpy --> 是否绑定孩子接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+
+    // 是否活动截止
+    _isEndAct() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('introduction.wpy --> 活动是否截止接口请求成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果没有截止，去判断当前孩子和家长是否参加过活动
+            if (res.data.ret.hasBind) {
+              _this._ParentChildHasJoin()
+            } else {
+              // 活动截止，跳转活动截止页面
+              wx.navigateTo({
+                url: '/pages/shareAct/end'
+              })
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('introduction.wpy --> 活动是否截止接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+
+    // 孩子和家长是否参加
+    _ParentChildHasJoin() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('introduction.wpy --> 孩子和家长是否参加接口请求成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果能参加，跳转详情页
+            if (res.data.ret.hasBind) {
+              // wx.navigateTo({
+              //   url: '/pages/shareAct/detail'
+              // })
+            } else {
+              // 不能参加，跳转已参加页
+              // wx.navigateTo({
+              //   url: '/pages/shareAct/only-once'
+              // })
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('introduction.wpy --> 孩子和家长是否参加接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+
+    _getAuthorize () {
+      return new Promise((resolve, reject) => {
+        wx.getSetting({
+          success (res) {
+            console.log(res)
+            if (res.authSetting['scope.userInfo']) {
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          }
+        })
+      })
+    }
+
+    async onGotUserInfo (val) {
+      mta.Event.stat(val)
+      let authorize = await this._getAuthorize()
+      if (!authorize) {
+        return
+      }
+      this.$parent.globalData.hasAuthorize = authorize
+      await this.$parent._login()
+      this._hasBindChild()
+    }
+
+    async onLoad() {
+      wepy.$instance.globalData.hasAuthorize = await this._getAuthorize()
+      if (!wepy.$instance.globalData.hasAuthorize) {
+        console.log(1)
+        return
+      }
+      this._hasJoinAct()
+    }
+
+    onShareAppMessage (res) {
+      return {
+        title: '【悠数学】助力孩子学习，一起来领取开学大礼包',
+        path: '/pages/shareAct/introduction',
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/itrShare.png'
+      }
+    }
+
+    computed = {
+      authorize() {
+        if (this.$parent.globalData.hasAuthorize) {
+          return true
+        } else {
+          return false
+        }
+      }
+    }
+  }
+</script>
+<style lang="less" scoped>
+  .container{
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: #F9573F;
+    .wrap{
+      width: 100%;
+      height: auto;
+      .topImg{
+        width: 100%;
+        height: 530rpx;
+        image{
+          width: 100%;
+          height: 530rpx;
+        }
+        view{
+          color:rgba(145,100,20,1);
+          position: absolute;
+          top: 0rpx;
+          right: 0rpx;
+          font-size: 22rpx;
+          padding: 30rpx;
+        }
+      }
+      .btm{
+        width: 610rpx;
+        height: auto;
+        margin: 30rpx auto;
+        .title{
+          width: 466rpx;
+          height: 56rpx;
+          display: block;
+          margin: 0 auto;
+        }
+        .conList{
+          width: 100%;
+          height: auto;
+          margin-top: 40rpx;
+          .lis{
+            display: flex;
+            line-height:60px;
+            image{
+              display: block;
+              width: 40rpx;
+              height: 40rpx;
+              margin-right: 40rpx;
+              margin-top: 10rpx;
+              margin-left: 20rpx;
+            }
+            view{
+              font-size: 32rpx;
+              color:rgba(255,246,204,1);
+              line-height:60rpx;
+            }
+          }
+        }
+      }
+      .btn{
+        width:590rpx;
+        text-align: center;
+        height:80rpx;
+        line-height: 80rpx;
+        background:rgba(249,197,31,1);
+        border-radius:40px;
+        color: #916414;
+        margin: 0 auto;
+      }
+      .txt{
+        width: 176rpx;
+        text-align: center;
+        margin: 20rpx auto;
+        font-size: 24rpx;
+        color: #ffffff;
+        border-bottom: 1px solid #ffffff;
+        margin-top: 20rpx;
+      }
+      .btn1{
+        position: absolute;
+        top: 980rpx;
+        right: 70rpx;
+        width: 610rpx;
+        height: 150rpx;
+        opacity: 0;
+      }
+    }
+  }
+</style>

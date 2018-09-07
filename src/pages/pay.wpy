@@ -1,0 +1,506 @@
+<template>
+  <view id="pay">
+    <block wx:if="{{!isGetData}}">
+      <view class="loading">
+        <image class="rotate" src="../static/loading.png"/>
+        <view class="text">正在加载</view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="infoWrap">
+        <view class="viaWrap">
+          <image class="viaImg {{isVip?'vip':''}}" src="{{baseViaSrc}}"/>
+          <image class="vipImg" wx:if="{{isVip}}" src="../static/vip.png"/>
+        </view>
+        <view class="info">
+          <view class="name">{{userName}}</view>
+          <view class="join" wx:if="{{!isVip}}">您当前未加入VIP学习社</view>
+          <view class="join" wx:if="{{isVip}}">已加入VIP培优计划：{{endDate}}到期</view>
+        </view>
+      </view>
+      <view class="titleWrap">
+        <view class="line"></view>
+        <view class="title">VIP培优计划套餐</view>
+        <view class="line"></view>
+      </view>
+      <view class="item {{current==index?'active':''}}" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" data-tab="{{index}}" @tap="clickMemberPackage({{index}})">
+        <view class="goodsWrap">
+          <view class="goods">
+            <view class="text">{{item.month}}月VIP会员</view>
+            <view class="tag" wx:if="{{item.tagName}}">{{item.tagName}}</view>
+          </view>
+          <view class="extra" wx:if="{{item.extraMonth}}">赠送{{item.extraMonth}}月会员</view>
+        </view>
+        <view class="priceWrap">
+          <view class="discount">¥{{item.presentPrice}}</view>
+          <view class="price" wx:if="{{item.originalPrice}}">¥{{item.originalPrice}}</view>
+        </view>
+      </view>
+      <view class="agreementWrap">
+        <!-- <view class="checkbox readProtocol" wx:if="{{hasReadProtocol}}" @tap="clickCheckbox"></view> -->
+        <!-- <view class="checkbox noReadProtocol" wx:if="{{!hasReadProtocol}}" @tap="clickCheckbox"></view> -->
+        <image class="readProtocol" src="../static/selected.png" wx:if="{{hasReadProtocol}}" @tap="clickCheckbox(1)"/>
+        <image class="noReadProtocol" src="../static/select.png" wx:if="{{!hasReadProtocol}}" @tap="clickCheckbox(0)"/>
+        <view class="agreement" @tap="showProtocolPage">悠数学收费服务协议</view>
+      </view>
+      <button class="btn {{!hasReadProtocol?'disabled':''}}" disabled="{{!hasReadProtocol}}" @tap="payOrder">同意协议并开通</button>
+    </block>
+  </view>
+</template>
+
+<script>
+  const TRUE = 1
+  // const FALSE = 0
+  import wepy from 'wepy'
+  import moment from 'moment'
+  import mta from '../utils/mta_analysis.js'
+  export default class pay extends wepy.page {
+    config = {
+      navigationBarTitleText: '加入VIP培优计划'
+    }
+
+    components = {}
+
+    mixins = []
+
+    data = {
+      hasReadProtocol: true,
+      isGetData: false,
+      current: 0,
+      userName: '',
+      baseViaSrc: '',
+      hasJoin: false,
+      isVip: false,
+      endDate: '',
+      list: [],
+      memberPackageId: '',
+      appId: '',
+      nonceStr: '',
+      orderId: '',
+      package: '',
+      paySign: '',
+      signType: '',
+      timeStamp: ''
+    }
+
+    computed = {}
+
+    methods = {
+      clickCheckbox (flag) {
+        if (~~flag === ~~TRUE) {
+          this.hasReadProtocol = false
+        } else {
+          this.hasReadProtocol = true
+        }
+      },
+      clickMemberPackage (index) {
+        this.current = index
+        this.memberPackageId = this.list[index].id
+      },
+      payOrder () {
+        mta.Event.stat('Agree_And_Open')
+        wx.showLoading({title: '正在支付'})
+        this._getPayInfo()
+      },
+      showProtocolPage () {
+        wx.navigateTo({
+          url: '/pages/protocol'
+        })
+      }
+    }
+
+    _getMemberPackages () {
+      let that = this
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/micro/parent/member/memberPackages`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          success (res) {
+            console.log('pay.wpy --> _getMemberPackages --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              that.endDate = moment(res.data.ret.userMember.endAt).format('YYYY-MM-DD')
+              that.isVip = res.data.ret.userMember.memberType.toLowerCase().includes('vip')
+              // that.list = res.data.ret.memberPackages
+              let list = res.data.ret.memberPackages.map(item => {
+                item.tagName = item.tagName.trim()
+                return item
+              })
+              that.list = list
+              that.memberPackageId = that.list[that.current].id
+              that.$apply()
+              resolve(true)
+            } else {
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+              resolve(false)
+            }
+          },
+          fail (res) {
+            console.log('pay.wpy --> _getMemberPackages --> fail')
+            console.log(res)
+            wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            resolve(false)
+          }
+        })
+      })
+    }
+
+    _setIsGetData () {
+      let that = this
+      Promise.all([this._getUserInfo(), this._getMemberPackages()]).then((result) => {
+        console.log('pay.wpy --> _setIsGetData')
+        that.isGetData = true
+        that.$apply()
+      })
+    }
+
+    _getUserInfo () {
+      let that = this
+      return new Promise((resolve, reject) => {
+        wx.request({
+          url: `${this.$parent.globalData.baseURL}/wx/parent/getUserInfo`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wx.getStorageSync('token')
+          },
+          success (res) {
+            console.log('pay.wpy --> _getUserInfo --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              that.userName = res.data.ret.user.name
+              if (res.data.ret.user.minAvatarUrl) {
+                that.baseViaSrc = `${that.$parent.globalData.baseURL}${res.data.ret.user.minAvatarUrl}`
+              } else {
+                that.baseViaSrc = '../static/baseVia.png'
+              }
+              that.$apply()
+              resolve(true)
+            } else {
+              wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+              resolve(false)
+            }
+          },
+          fail (res) {
+            console.log('pay.wpy --> _getUserInfo --> fail')
+            console.log(res)
+            wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            resolve(false)
+          }
+        })
+      })
+    }
+
+    _getPayInfo () {
+      let that = this
+      wx.request({
+        url: `${that.$parent.globalData.baseURL}/wx/micro/parent/member/createWXOrder`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wx.getStorageSync('token')
+        },
+        data: {
+          source: 1,
+          memberPackageId: that.memberPackageId
+        },
+        success (res) {
+          console.log('pay.wpy --> _getPayInfo --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.appId = res.data.ret.appId
+            that.nonceStr = res.data.ret.nonceStr
+            that.orderId = res.data.ret.orderId
+            that.package = res.data.ret.package
+            that.paySign = res.data.ret.paySign
+            that.signType = res.data.ret.signType
+            that.timeStamp = res.data.ret.timeStamp
+            wx.setStorageSync('orderId', res.data.ret.orderId)
+            wx.setStorageSync('sign', res.data.ret.sign)
+            that.$apply()
+            that._wxPay()
+          } else {
+            // that.methods.setBindStatus(false)
+            wx.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+          }
+          wx.hideLoading()
+        },
+        fail (res) {
+          console.log('pay.wpy --> _getPayInfo --> fail')
+          console.log(res)
+          wx.hideLoading()
+          // that.methods.setBindStatus(false)
+          wx.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        }
+      })
+    }
+
+    _wxPay () {
+      let that = this
+      wx.requestPayment({
+        timeStamp: that.timeStamp + '',
+        nonceStr: that.nonceStr + '',
+        package: that.package + '',
+        signType: that.signType + '',
+        paySign: that.paySign + '',
+        success (res) {
+          console.log('pay.wpy --> _wxPay --> success')
+          console.log(res)
+          wx.navigateTo({
+            url: `/pages/pay-success`
+          })
+        },
+        fail (res) {
+          console.log('pay.wpy --> _wxPay --> fail')
+          console.log(res)
+          if (res.err_desc) {
+            wx.showToast({icon: 'none', title: res.err_desc, duration: 1400})
+          }
+        }
+      })
+    }
+
+    events = {}
+
+    onLoad () {
+      console.log('pay.wpy --> onLoad')
+      mta.Page.init()
+    }
+
+    onShow () {
+      console.log('pay.wpy --> onShow')
+      this._setIsGetData()
+    }
+  }
+</script>
+<style lang="scss" scoped>
+#pay{
+  .infoWrap{
+    margin: 30rpx;
+    padding: 40rpx 30rpx;
+    background: #f6f6f6;
+    border-radius: 10rpx;
+    display: flex;
+    align-items: center;
+    .viaWrap{
+      right: 40rpx;
+      display: flex;
+      flex-direction: column;
+      flex:0 1 auto;
+      align-items: center;
+      margin-right: 8rpx;
+      .viaImg{
+        display: block;
+        width: 100rpx;
+        height: 100rpx;
+        border-radius: 100%;
+        &.vip{
+          border: 1rpx solid #ffbc01;
+        }
+      }
+      .vipImg{
+        display: block;
+        width: 45rpx;
+        height: 24rpx;
+        margin-top: -14rpx; 
+      }
+    }
+    .info{
+      display: flex;
+      flex-direction: column;
+      .name{
+        font-weight: bold;
+        color: #000000;
+        font-size: 30rpx;
+        line-height: 40rpx;
+      }
+      .join{
+        color: #999999;
+        font-size: 30rpx;
+        line-height: 40rpx;
+        white-space: nowrap;
+      }
+    }
+  }
+  .titleWrap{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30rpx 0 0;
+    .line{
+      width: 30rpx;
+      height: 2rpx;
+      background:#999999;
+    }
+    .title{
+      color: #999999;
+      font-size: 30rpx;
+      line-height: 40rpx;
+      margin: 0 10rpx;
+    }
+  }
+  .item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    margin: 30rpx;
+    padding: 30rpx 40rpx;
+    height: 130rpx;
+    border: 2rpx solid #cccccc;
+    border-radius:12rpx;
+    &.active{
+      border-color: #007AFF;
+    }
+    .goodsWrap{
+      .goods{
+        display: flex;
+        align-items: center;
+      }
+      .text{
+        color: #000000;
+        font-size: 34rpx;
+        line-height: 40rpx;
+        font-weight: bold;
+      }
+      .tag{
+        position: relative;
+        margin-left: 12rpx;
+        box-sizing: border-box;
+        padding: 2rpx 14rpx;
+        background: #00BB9D;
+        letter-spacing: 1Px;
+        color: #ffffff;
+        font-size: 18rpx;
+        border-radius: 5rpx;
+        &::after{
+          position: absolute;
+          left: 0;
+          content: '';
+          width:0;
+          height:0;
+          margin-top: 5rpx;
+          margin-left: -8rpx;
+          border-width: 8rpx 14rpx 8rpx 0;
+          border-style: solid;
+          border-color: transparent #00BB9D transparent transparent;
+        }
+      }
+      .extra{
+        color: #999999;
+        font-size: 24rpx;
+      }
+    }
+    .priceWrap{
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      .discount{
+        font-weight: bold;
+        color: #F14B40;
+        font-size: 40rpx;
+        line-height: 40rpx;
+      }
+      .price{
+        text-decoration: line-through;
+        color: #999999;
+        font-size: 24rpx;
+        line-height: 24rpx;
+      }
+    }
+  }
+  .agreementWrap{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 120rpx;
+    .noReadProtocol{
+      display: inline-block;
+      height: 30rpx;
+      width: 30rpx;
+      // border-radius: 50%;
+      // border: 1rpx solid #999;
+    }
+    .readProtocol{
+      display: inline-block;
+      height: 30rpx;
+      width: 30rpx;
+      // background: #007AFF;
+      // border-radius: 50%;
+      // border: 1rpx solid #007AFF;
+    }
+    
+    .agreement{
+      color: #007AFF;
+      font-size: 30rpx;
+      line-height: 30rpx;
+      text-align: center;
+      text-decoration: underline;
+      margin-left: 10rpx;
+    }
+  }
+  .btn{
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+    width: 100%;
+    height: 90rpx;
+    background:#007aff;
+    color: #ffffff;
+    font-size: 30rpx;
+    line-height: 30rpx;
+    border-radius: 0;
+    border:0 solid #fff;
+    outline: none;
+    &.disabled{
+      border:0 solid #ccc;
+      color: #999;
+      background: #ccc;
+    }
+  }
+  .loading{
+    display: flex;
+    height: 100vh;
+    background: #ffffff;
+    flex-direction: column;
+    flex:1 1 auto;
+    align-items: center;
+    justify-content: center;
+    .text{
+      font-weight: bold;
+      font-size: 30rpx;
+      line-height: 40rpx;  
+    }
+  }
+  @keyframes rotate{
+    0%{
+      transform: rotate(0);
+    }
+    50%{
+    	transform:rotate(180deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  .rotate{
+    display: block;
+    width: 60rpx;
+    height: 60rpx;
+    margin-bottom: 4rpx;
+    transition: 0.5s;
+    animation: rotate 0.8s linear infinite;
+  }
+
+  button::after{
+    border:none;
+  }
+}
+</style>
