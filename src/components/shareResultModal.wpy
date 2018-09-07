@@ -50,15 +50,15 @@
       value (val) {
         if (val) {
           this.modalShow = true
+          this.$apply()
           setTimeout(() => {
             this.maskShow = true
-            this.modalShow = true
             this.$apply()
           }, 20)
         } else {
-          this.modalShow = false
+          this.maskShow = false
+          this.$apply()
           setTimeout(() => {
-            this.maskShow = false
             this.modalShow = false
             this.$apply()
           }, 200)

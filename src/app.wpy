@@ -23,11 +23,11 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/index',
       'pages/shareAct/home',
       'pages/shareAct/introduction',
       'pages/shareAct/only-once',
       'pages/shareAct/end',
-      'pages/index',
       'pages/honor-rank',
       'pages/analysis',
       'pages/not-join-trend',
@@ -396,7 +396,7 @@ export default class extends wepy.app {
         // 存全局个人信息
         wepy.getUserInfo({
           success (res) {
-            console.log('存全局个人信息')
+            // console.log('存全局个人信息')
             wepy.$instance.globalData.userInfoAll = res.userInfo
           },
           fail (res) {

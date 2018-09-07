@@ -34,15 +34,15 @@
       value (val) {
         if (val) {
           this.isShowIosPay = true
+          this.$apply()
           setTimeout(() => {
             this.iosPayMask = true
-            this.isShowIosPay = true
             this.$apply()
           }, 20)
         } else {
-          this.isShowIosPay = false
+          this.iosPayMask = false
+          this.$apply()
           setTimeout(() => {
-            this.iosPayMask = false
             this.isShowIosPay = false
             this.$apply()
           }, 200)

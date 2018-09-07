@@ -55,7 +55,7 @@
     mixins = []
 
     data = {
-      showRuleModal: false
+      showRuleModal: false,
       // isShowPage: false
       isAuthorize: false
     }

@@ -43,7 +43,7 @@
       </view>
       <!-- VIP培优服务 -->
       <view class="vip">
-        <view class="vipHead">VIP培优服务<image src="../static/vip.png" /></view>
+        <view class="vipHead">VIP培优服务<image @tap='test' src="../static/vip.png" /></view>
 
         <!-- 监控 -->
         <view class="monitor" wx:if="{{!isVip || !hasBind}}">
@@ -121,6 +121,7 @@
       <!-- 绑定孩子按钮 -->
       <view @tap="showBindingPage('Home_ToBind')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
     </view>
+    <bannerModal :value.sync="showBannerModal" :list="showBannerModalList"  @on-close.user="bannerModalClose" @on-click.user="bannerModalClick"></bannerModal>
   </view>
 </template>
 
@@ -128,13 +129,18 @@
   import wepy from 'wepy'
   import moment from 'moment'
   import mta from '../utils/mta_analysis.js'
+  import bannerModal from '../components/bannerModal'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
     }
-    components = {}
+    components = {
+      bannerModal: bannerModal
+    }
 
     data = {
+      showBannerModal: false, // 是否显示banner弹窗
+      showBannerModalList: [{imgSrc: '../static/aaaa.png', targetPath: 'aa'}, {imgSrc: '../static/achieve.png', targetPath: 'bb'}, {imgSrc: '../static/baseVia.png', targetPath: 'cc'}], // banner弹窗显示的banner
       hasBind: false, // 是否绑定孩子
       isReady: false,  // 身份是否判断成功
       isVip: false, // 是否是vip
@@ -167,6 +173,17 @@
     }
 
     methods = {
+      test () {
+        this.showBannerModal = true
+      },
+      // 关闭banner弹窗
+      bannerModalClose () {
+        this.showBannerModal = false
+      },
+      // banner弹窗点击
+      bannerModalClick () {
+        console.log(arguments)
+      },
       showBindingPage (val) {
         mta.Event.stat(val)
         wx.navigateTo({
@@ -734,7 +751,7 @@
   }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
   .container{
     width: 100%;
     height: auto;
