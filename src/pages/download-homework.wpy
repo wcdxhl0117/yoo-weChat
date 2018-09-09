@@ -3,7 +3,7 @@
     <!-- <image class="icon" wx:if="{{type == 'pdf'}}" src="../static/pdf.png"/> -->
     <image class="icon" src="../static/doc.png"/>
     <view class="title">{{title}}</view>
-    <view class="subtitle" @tap="preview" wx:if="{{isFinished}}">预览</view>
+    <view class="subTitle" @tap="preview" wx:if="{{isFinished}}">预览</view>
     <text  class="paragraph" selectable="true" wx:if="{{isFinished}}">{{url}}</text>
     <button class="button" loading="{{loading}}" @tap="download" wx:if="{{!isFinished}}">{{loading?'':'下载'}}</button>
     <button class="button" loading="{{loading}}" @tap="copy" wx:if="{{isFinished}}">{{loading?'':'复制下载链接'}}</button>
@@ -210,7 +210,7 @@
     font-weight: bold;
     font-size: 36rpx;
   }
-  .subtitle{
+  .subTitle{
     font-weight: bold;
     font-size: 36rpx;
     color: rgba(0,122,255,1);

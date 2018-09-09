@@ -65,7 +65,8 @@
     mixins = []
 
     data = {
-      isGetData: true
+      isGetData: true,
+      isUnbinding: false
     }
 
     computed = {
@@ -106,6 +107,10 @@
         }
       },
       showUnbindingModal () {
+        if (!this.isUnbinding) {
+          this.isUnbinding = true
+          return
+        }
         let that = this
         mta.Event.stat('Unbound_Student_Show')
         wepy.showModal({
@@ -274,6 +279,7 @@
 
     _unboundStudent () {
       let that = this
+      wepy.showLoading({title: '正在解除绑定'})
       wepy.request({
         url: `${wepy.$instance.globalData.baseURL}/wx/micro/parent/user/unbindStudent`,
         method: 'POST',
@@ -290,11 +296,15 @@
           } else {
             wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
           }
+          that.isUnbinding = false
+          wepy.hideLoading()
         },
         fail (res) {
           console.log('user.wpy --> _unboundStudent --> fail')
           console.log(res)
           wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          that.isUnbinding = false
+          wepy.hideLoading()
         }
       })
     }

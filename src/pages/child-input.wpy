@@ -15,7 +15,12 @@
       <view class="btn-area">
         <button formType="submit" class="{{hasBinding?'disabled':''}}"  disabled="{{hasBinding}}">关联账号</button>
       </view>
-
+      <view class="subTitle">忘记了孩子的账号或密码<image class="arrow {{isScroll?'scroll':''}}" @tap="scroll" src="../static/black-arrow.png"/></view>
+      <block wx:if="{{isScroll}}">
+        <view class="paragraph">方法1.  可让孩子在“悠数学-学生端”个人中心页面，截取二维码图片后发送给你。在家长端使用扫码绑定功能对孩子进行关联。<view class="point" @tap="scan">立即扫码绑定</view></view>
+        <view class="paragraph">方法2. 向孩子索要账号或密码</view>
+        <view class="paragraph">方法3. 联系客服，提供孩子详细信息，由客服进行密码重置，客服电话：400-828-6506</view>
+      </block>
       <!-- <view class="btn-area notSub" wx-if="{{!isSub}}">
         <button formType="submit">关联账号</button>
       </view> -->
@@ -27,13 +32,19 @@
   import wepy from 'wepy'
   import { connect } from 'wepy-redux'
   import { SET_IS_BIND } from '../store/types/user'
+  import CryptoJS from 'crypto-js'
   import mta from '../utils/mta_analysis.js'
-  @connect({
-    bindStatus (state) {
-      return state.user.bindStatus
-    }
-  }, {
-    setBindStatus: SET_IS_BIND
+  import {
+    SET_AVATAR_URL,
+    SET_SCHOOL_NAME,
+    SET_STUDENT_NAME,
+    SET_STUDENT_ID
+  } from '../store/types/associated-account'
+  @connect({}, {
+    setAvatarUrl: SET_AVATAR_URL,
+    setSchoolName: SET_SCHOOL_NAME,
+    setStudentName: SET_STUDENT_NAME,
+    setStudentId: SET_STUDENT_ID
   })
   export default class ChildInput extends wepy.page {
     config = {
@@ -44,11 +55,42 @@
     data = {
       showPsd: false,
       hasBinding: false,
+      isScroll: false,
       count: '',
       psd: ''
     }
 
     methods = {
+      scan () {
+        let that = this
+        mta.Event.stat('scan_code')
+        wepy.scanCode({
+          success (res) {
+            console.log('associated-account.wpy --> scan --> succcess')
+            console.log(res)
+            try {
+              that._getAccountInfo(that._decryptByDES(res.result, 'elanking'))
+            } catch (error) {
+              wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+            }
+          },
+          fail (res) {
+            console.log('associated-account.wpy --> scan --> fail')
+            console.log(res)
+            if (!res.errMsg.includes('cancel')) {
+              wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+            }
+          }
+        })
+      },
+      showBindingPage () {
+        wepy.navigateTo({
+          url: '/pages/associated-account'
+        })
+      },
+      scroll () {
+        this.isScroll = !this.isScroll
+      },
       formSubmit (e) {
         // 后台交互
         console.log('form发生了submit事件，携带数据为：', e.detail.value)
@@ -72,6 +114,56 @@
         this.psd = e.detail.value
         console.log(e.detail.value)
       }
+    }
+
+    _decryptByDES (ciphertext, key) {
+      let keyHex = CryptoJS.enc.Utf8.parse(key)
+      let decrypted = CryptoJS.DES.decrypt({
+        ciphertext: CryptoJS.enc.Base64.parse(ciphertext)
+      }, keyHex, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      })
+      return decrypted.toString(CryptoJS.enc.Utf8)
+    }
+
+    _getAccountInfo (id) {
+      let that = this
+      wepy.request({
+        url: `${this.$parent.globalData.baseURL}/wx/micro/parent/scanFindStu`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': wepy.getStorageSync('token')
+        },
+        data: {
+          stuId: id
+        },
+        success (res) {
+          console.log('associated-account.wpy --> _getAccountInfo --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.methods.setStudentId(id)
+            if (res.data.ret.photoUrl) {
+              that.methods.setAvatarUrl(`${that.$parent.globalData.baseURL}${res.data.ret.photoUrl}`)
+            } else {
+              that.methods.setAvatarUrl('../static/baseVia.png')
+            }
+            that.methods.setSchoolName(res.data.ret.schoolName)
+            that.methods.setStudentName(res.data.ret.studentName)
+            wepy.navigateTo({
+              url: '/pages/verify-account'
+            })
+          } else {
+            wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+          }
+        },
+        fail (res) {
+          console.log('associated-account.wpy --> _getAccountInfo --> fail')
+          console.log(res)
+          wepy.showToast({icon: 'none', title: '扫码失败', duration: 1400})
+        }
+      })
     }
 
     _bindAccount (account, password) {
@@ -143,7 +235,7 @@
   }
 
 </script>
-<style lang="less">
+<style lang="scss" scoped>
   .container{
     width: 690rpx;
     margin: 0 auto;
@@ -193,6 +285,36 @@
     .notSub button{
       background: #cccccc;
       color: #999999;
+    }
+    .subTitle{
+      display: flex;
+      align-items: center;
+      margin-top: 90rpx;
+      font-size: 30rpx;
+      font-weight:400;
+      color: #000000;
+      line-height: 40rpx;
+    }
+    .arrow{
+      display: block;
+      width: 24rpx;
+      height: 14rpx;
+      padding: 16rpx;
+      transition: transform 0.2s ease-in-out;
+      transform: rotate(-90deg);
+      &.scroll{
+        transform: rotate(0);
+      }
+    }
+    .paragraph, .point{
+      margin-top: 20rpx;
+      font-size: 30rpx;
+      color:#999999;
+      line-height: 42rpx;
+    }
+    .point{
+      display: inline;
+      color:#007AFF;
     }
   }
   .container .btn-area button.disabled{

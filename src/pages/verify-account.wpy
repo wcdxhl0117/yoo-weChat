@@ -38,7 +38,9 @@
 
     mixins = []
 
-    data = {}
+    data = {
+      isBind: false
+    }
 
     computed = {}
 
@@ -46,23 +48,27 @@
       isMy () {
         console.log('verify-account.wpy --> isMy')
         mta.Event.stat('Is_My_Child')
-        this._bindAccount()
+        if (!this.isBind) {
+          this.isBind = true
+          this._bindAccount()
+        }
       },
       notMy () {
         console.log('verify-account.wpy --> notMy')
         mta.Event.stat('Not_My_Child')
-        wx.navigateBack({delta: 1})
+        wepy.navigateBack({delta: 1})
       }
     }
 
     _bindAccount () {
       let that = this
-      wx.request({
+      wepy.showLoading({title: '正在绑定'})
+      wepy.request({
         url: `${that.$parent.globalData.baseURL}/wx/micro/parent/bindStuById`,
         method: 'POST',
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'S_T': wx.getStorageSync('token')
+          'S_T': wepy.getStorageSync('token')
         },
         data: {
           stuId: that.studentId
@@ -71,15 +77,19 @@
           console.log('verify-account.wpy --> _bindAccount --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            wx.navigateBack({delta: 2})
+            wepy.navigateBack({delta: 2})
           } else {
-            wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+            wepy.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
           }
+          that.isBind = false
+          wepy.hideLoading()
         },
         fail (res) {
           console.log('verify-account.wpy --> _bindAccount --> fail')
           console.log(res)
-          wx.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+          wepy.showToast({icon: 'none', title: '关联孩子失败', duration: 1400})
+          that.isBind = false
+          wepy.hideLoading()
         }
       })
     }
