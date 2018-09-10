@@ -140,12 +140,13 @@
 
     data = {
       showBannerModal: false, // 是否显示banner弹窗
-      showBannerModalList: [{imgSrc: '../static/aaaa.png', targetPath: 'aa'}, {imgSrc: '../static/achieve.png', targetPath: 'bb'}, {imgSrc: '../static/baseVia.png', targetPath: 'cc'}], // banner弹窗显示的banner
+      showBannerModalList: [{imgSrc: '../static/aaaa.png', targetPath: '/pages/shareAct/introduction'}, {imgSrc: '../static/achieve.png', targetPath: '/pages/shareAct/introduction'}, {imgSrc: '../static/baseVia.png', targetPath: '/pages/shareAct/introduction'}], // banner弹窗显示的banner
       hasBind: false, // 是否绑定孩子
       isReady: false,  // 身份是否判断成功
       isVip: false, // 是否是vip
       newShow: false, // 学习动态
       tipNow: true, // 是否展示上面的tip
+      parentHasdJoin: false, // 是否参加助力活动
       dynamic: {}, // 学习动态对象
       idxData: {
         homework: '', // 作业报告
@@ -181,8 +182,15 @@
         this.showBannerModal = false
       },
       // banner弹窗点击
-      bannerModalClick () {
-        console.log(arguments)
+      bannerModalClick (val) {
+        console.log(val)
+        // 助力活动先判断在跳转
+        wx.showLoading({
+          title: '正在加载'
+        })
+        if (val.targetPath.indexOf('shareAct/introduction') != -1) {
+          this._hasJoinAct()
+        }
       },
       showBindingPage (val) {
         mta.Event.stat(val)
@@ -403,6 +411,175 @@
         })
       })
     }
+
+
+/* 
+    下面是助力活动相关判断 
+*/
+////////////////////////////////////////////////////////////////////////////////////////////
+    // 参看家长信息，是否已参加活动和活动是否过期
+    _hasJoinAct() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('index.wpy --> 是否参加过活动 --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果活动过期，跳转过期页面
+            if (res.data.ret.expireTime) {
+              wx.navigateTo({
+                url: '/pages/shareAct/end'
+              })
+            } else if (res.data.ret.parent.joinIn) {
+              // 如果活动时间为截止且参加，判断是否绑定孩子
+              _this.parentHasdJoin = true
+              _this._hasBindChild()
+            } else {
+              // 取消loding, 展示页面
+              wx.hideLoading()
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('index.wpy --> _checkLogin --> hasBind --> fail')
+          console.log(res)
+        }
+      })
+    }
+
+    // 查看是否绑定孩子
+    _hasBindChild() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('index.wpy --> 绑定孩子请求接口成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果绑定,判断孩子和家长是否能进入活动
+            if (res.data.ret.hasBind) {
+              _this._ParentChildHasJoin()
+            } else {
+              // 如果没绑定，跳转绑定孩子页面
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/associated-account'
+              })
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('index.wpy --> 是否绑定孩子接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+
+    // 孩子和家长是否参加
+    _ParentChildHasJoin() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/hasJoin`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('index.wpy --> 孩子和家长是否参加接口请求成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 已参加，同时和绑定的孩子对应，能跳进活动页
+            if (res.data.ret.canSee && _this.parentHasdJoin) {
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/shareAct/home'
+              })
+            } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
+              // 未参加，和孩子都没参加，调参加活动接口，成功后跳转
+              _this._joinAct()
+            } else {
+              // 已参加，同时和孩子不匹配
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/shareAct/only-once'
+              })
+            }
+          } else {
+            console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('index.wpy --> 孩子和家长是否参加接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+
+    _joinAct() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/receiveMy`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('index.wpy --> 参加活动接口 --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            wx.showToast({
+              title: '领取成功！',
+              icon: 'none',
+              duration: 2000
+            })
+            wx.hideLoading()
+            wx.navigateTo({
+              url: '/pages/shareAct/home'
+            })
+          } else if (res.data.ret_code === 3010) {
+            wx.showToast({
+              title: '你已经领取！',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        },
+        fail (res) {
+          console.log('参加活动接口 --> fail')
+        }
+      })
+    } 
+////////////////////////////////////////////////////////////////////////////////////////////
 
     // 时间处理函数
     timestampToTime(timestamp, date) {

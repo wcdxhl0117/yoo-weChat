@@ -101,7 +101,7 @@
           'S_T': token
         },
         success (res) {
-          console.log('introduction.wpy --> 是否参加过活动 --> success')
+          console.log('introduction.wpy --> 个人信息 --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
             // 如果参加，判断是否绑定孩子
@@ -117,7 +117,7 @@
           }
         },
         fail (res) {
-          console.log('index.wpy --> _checkLogin --> hasBind --> fail')
+          console.log('introduction.wpy --> 个人信息 --> hasBind --> fail')
           console.log(res)
         }
       })
@@ -218,14 +218,16 @@
           if (res.data.ret_code === 0) {
             // 已参加，同时和绑定的孩子对应，能跳进活动页
             if (res.data.ret.canSee && _this.parentHasdJoin) {
+              wx.hideLoading()
               wx.navigateTo({
-                url: '/pages/shareAct/detail'
+                url: '/pages/shareAct/home'
               })
             } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
               // 未参加，和孩子都没参加，调参加活动接口，成功后跳转
               _this._joinAct()
             } else {
               // 已参加，同时和孩子不匹配
+              wx.hideLoading()
               wx.navigateTo({
                 url: '/pages/shareAct/only-once'
               })
@@ -242,7 +244,43 @@
     }
 
     _joinAct() {
-      
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/receiveMy`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('introduction.wpy --> 参加活动接口 --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            wx.showToast({
+              title: '领取成功！',
+              icon: 'none',
+              duration: 2000
+            })
+            wx.hideLoading()
+            wx.navigateTo({
+              url: '/pages/shareAct/home'
+            })
+          } else if (res.data.ret_code === 3010) {
+            wx.showToast({
+              title: '你已经领取！',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        },
+        fail (res) {
+          console.log('参加活动接口 --> fail')
+        }
+      })
     }
 
     _getAuthorize () {
@@ -274,7 +312,6 @@
     }
 
     async onLoad() {
-      wx.setStorageSync('itrOff', '1')
       wx.showLoading({
         title: '正在加载'
       })
