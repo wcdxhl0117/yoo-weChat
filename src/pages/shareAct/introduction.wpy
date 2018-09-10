@@ -33,7 +33,7 @@
       <view class="btn" @tap="toDetail">立即领取</view>
       <view class="txt" @tap="toItr">点击了解悠数学</view>
       <!-- 授权按钮 -->
-      <button wx:if="{{!authorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
+      <button wx:if="{{!isAuthorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
     </view>
     <shareRuleModal :value.sync="showRuleModal"  @on-close.user="showRuleModalClose"></shareRuleModal>
   </view>
@@ -56,9 +56,8 @@
 
     data = {
       showRuleModal: false,
-      // isShowPage: false
       isAuthorize: false,
-      parentId: ''
+      parentHasdJoin: false
     }
 
     computed = {}
@@ -87,7 +86,7 @@
 
     events = {}
 
-    // 后台请求：判断是否参加过活动
+    // 参看家长信息，是否已参加活动
     _hasJoinAct() {
       let token = wx.getStorageSync('token')
       let _this = this
@@ -105,9 +104,9 @@
           console.log('introduction.wpy --> 是否参加过活动 --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            _this.parentId = res.data.ret.parent.parentId
             // 如果参加，判断是否绑定孩子
             if (res.data.ret.parent.joinIn) {
+              _this.parentHasdJoin = true
               _this._hasBindChild()
             } else {
               // 取消loding, 展示页面
@@ -144,6 +143,7 @@
               _this._isEndAct()
             } else {
               // 如果没绑定，跳转绑定孩子页面
+              wx.hideLoading()
               wx.navigateTo({
                 url: '/pages/associated-account'
               })
@@ -164,8 +164,11 @@
       let token = wx.getStorageSync('token')
       let _this = this
       wx.request({
-        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/hasJoin`,
         method: 'POST',
+        data: {
+          'activityId': 1
+        },
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'S_T': token
@@ -175,10 +178,11 @@
           console.log(res)
           if (res.data.ret_code === 0) {
             // 如果没有截止，去判断当前孩子和家长是否参加过活动
-            if (res.data.ret.hasBind) {
+            if (!res.data.ret.expireTime) {
               _this._ParentChildHasJoin()
             } else {
               // 活动截止，跳转活动截止页面
+              wx.hideLoading()
               wx.navigateTo({
                 url: '/pages/shareAct/end'
               })
@@ -199,8 +203,11 @@
       let token = wx.getStorageSync('token')
       let _this = this
       wx.request({
-        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/hasJoin`,
         method: 'POST',
+        data: {
+          'activityId': 1
+        },
         header: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'S_T': token
@@ -209,19 +216,22 @@
           console.log('introduction.wpy --> 孩子和家长是否参加接口请求成功')
           console.log(res)
           if (res.data.ret_code === 0) {
-            // 如果能参加，跳转详情页
-            if (res.data.ret.hasBind) {
-              // wx.navigateTo({
-              //   url: '/pages/shareAct/detail'
-              // })
+            // 已参加，同时和绑定的孩子对应，能跳进活动页
+            if (res.data.ret.canSee && _this.parentHasdJoin) {
+              wx.navigateTo({
+                url: '/pages/shareAct/detail'
+              })
+            } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
+              // 未参加，和孩子都没参加，调参加活动接口，成功后跳转
+              _this._joinAct()
             } else {
-              // 不能参加，跳转已参加页
-              // wx.navigateTo({
-              //   url: '/pages/shareAct/only-once'
-              // })
+              // 已参加，同时和孩子不匹配
+              wx.navigateTo({
+                url: '/pages/shareAct/only-once'
+              })
             }
           } else {
-            // console.log(res)
+            console.log(res)
           }
         },
         fail (res) {
@@ -229,6 +239,10 @@
           console.log(res)
         }
       })
+    }
+
+    _joinAct() {
+      
     }
 
     _getAuthorize () {
@@ -253,16 +267,21 @@
         return
       }
       this.$parent.globalData.hasAuthorize = authorize
+      this.isAuthorize = await this._getAuthorize()
+      this.$apply()
       await this.$parent._login()
-      this._hasBindChild()
+      this._hasJoinAct()
     }
 
     async onLoad() {
+      wx.setStorageSync('itrOff', '1')
       wx.showLoading({
         title: '正在加载'
       })
-      wepy.$instance.globalData.hasAuthorize = await this._getAuthorize()
-      if (!wepy.$instance.globalData.hasAuthorize) {
+      this.isAuthorize = await this._getAuthorize()
+      this.$apply()
+      if (!this.isAuthorize) {
+        wx.hideLoading()
         return
       }
       this._hasJoinAct()
@@ -276,15 +295,7 @@
       }
     }
 
-    computed = {
-      authorize() {
-        if (this.$parent.globalData.hasAuthorize) {
-          return true
-        } else {
-          return false
-        }
-      }
-    }
+    computed = {}
   }
 </script>
 <style lang="less" scoped>
