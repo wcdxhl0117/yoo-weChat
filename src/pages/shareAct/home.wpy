@@ -1,8 +1,10 @@
 <template>
   <view id="home">
     <view class="tip">
-      <view class="carousel">周杰 免费领取成功</view>
+      <scroll class="carousel" :list='successList'></scroll>
+      <!-- <view class="carousel"></view> -->
       <view class="rule" @tap="showRule">活动规则</view>
+      <!-- <view class="rule" @tap="showConcernModal">活动规则</view> -->
     </view>
     <!-- parentId-{{parentId}}  -->
     <view class="text-hide">
@@ -16,16 +18,17 @@
         <view class="progressNow" style='{{progress}}'></view>
       </view>
       <view class="explain" wx:if="{{status == 'underway'}}">还差<view class="point">{{~~total-~~current}}</view>人助力，即可领取7天VIP培优会员</view>
-      <view class="explain" wx:if="{{status == 'finish' && isSelf}}">已成功领取7天VIP培优会员<view class="search" @tap="search">如何查询</view></view>
+      <view class="explain" wx:if="{{status == 'finish' && isSelf}}">已成功领取7天VIP培优会员<view class="search" @tap="showHelpPage">如何查询</view></view>
       <view class="explain" wx:if="{{status == 'finish' && !isSelf}}">助力结束，对方已成功领取7天VIP培优会员</view>
 
       <!-- <view class="shareBtnWrap expand" wx:if="{{status == 'underway'}}">分享到群，请其他家长助力</view> -->
       <button class="shareBtnWrap expand" wx:if="{{status == 'underway' && isSelf}}" open-type="share">分享到群，请其他家长助力</button>
-      <view class="shareBtnWrap expand" wx:if="{{status == 'underway' && !isSelf}}">我也要帮孩子免费领取</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'underway' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
 
-      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern}}">关注公众号，再送1天会员</view>
-      <view class="shareBtnWrap" wx:if="{{status == 'finish' && isSelf && receiveConcern}}">回首页</view>
-      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && !isSelf}}">我也要帮孩子免费领取</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && !concern}}" @tap="showConcernModal">关注公众号，再送1天会员</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && concern}}" @tap="obtainMember">已关注，领取1天会员</view>
+      <view class="shareBtnWrap" wx:if="{{status == 'finish' && isSelf && receiveConcern}}" @tap="showHomePage">回首页</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
     </view>
     <view class="text-hide">
       好友助力榜
@@ -53,6 +56,7 @@
     </view> -->
     <shareResultModal :value.sync="showResultModal" :type.sync="resultModalType" :extra.sync='resultModalExtra' @on-close.user="closeResultModal" @on-confirm.user="confirmResultModal"></shareResultModal>
     <shareRuleModal :value.sync="showRuleModal"  @on-close.user="closeRuleModal"></shareRuleModal>
+    <concernModal :value.sync="showConcernModal"  @on-close.user="closeConcernModal"></concernModal>
     <authorizeModal :value.sync="showAuthorizeModal" @on-close.user="closeAuthorizeModal" @on-confirm.user="confirmAuthorizeModal"></authorizeModal>
   </view>
 </template>
@@ -61,8 +65,10 @@
   import wepy from 'wepy'
   import authorizeModal from '../../components/authorizeModal'
   import mta from '../../utils/mta_analysis.js'
-  import shareResultModal from '../../components/shareResultModal'
-  import shareRuleModal from '../../components/shareRuleModal'
+  import shareResultModal from '../../components/shareAct/shareResultModal'
+  import shareRuleModal from '../../components/shareAct/shareRuleModal'
+  import concernModal from '../../components/shareAct/concernModal'
+  import scroll from '../../components/scroll'
   export default class shareActHome extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -70,7 +76,9 @@
     components = {
       shareResultModal: shareResultModal,
       shareRuleModal: shareRuleModal,
-      authorizeModal: authorizeModal
+      authorizeModal: authorizeModal,
+      concernModal: concernModal,
+      scroll: scroll
     }
 
     mixins = []
@@ -81,17 +89,25 @@
       showResultModal: false,
       showRuleModal: false,
       showAuthorizeModal: false,
+      showConcernModal: false,
       helpList: [],
+      successList: [
+        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '1'},
+        {'portrait': '', 'name': '22222'},
+        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '2'},
+        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '3'},
+        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '4'}
+      ],
       resultModalType: '', // success fail repeat finish
       resultModalExtra: '',
       status: '', // underway finish
       activityFinish: false,
       targetUrl: '',
       current: 0,
-      total: 7,
+      total: 3,
       concern: false,
       receiveConcern: false,
-      parentId: '1071650077149306880'
+      parentId: ''
       // "1071650077149306880 -王辉id"
       // "1037677880852627456 - 王超id"
     }
@@ -109,10 +125,20 @@
       testTap () {
         this._helpOther()
       },
-      search () {
+      showHelpPage () {
         this.$parent.globalData.webViewSrc = 'http://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510327342&idx=1&sn=05c731eaa6dd5d87224b8749675f67c6&chksm=7705067040728f66bcc7d4456f4a2f3663bc93f63dc38ec9ac5c6b5d854b3a6899e8e2ffdaef#rd'
         wepy.navigateTo({
           url: '/pages/web-view'
+        })
+      },
+      showHomePage () {
+        wepy.navigateTo({
+          url: '/pages/index'
+        })
+      },
+      showIntroPage () {
+        wepy.navigateTo({
+          url: '/pages/shareAct/introduction'
         })
       },
       closeAuthorizeModal () {
@@ -133,6 +159,9 @@
       confirmResultModal () {
         console.log('shareAct --> home.wpy --> confirmResultModal')
         this.showResultModal = false
+        wepy.navigateTo({
+          url: '/pages/shareAct/introduction'
+        })
       },
       showRule () {
         console.log('shareAct --> home.wpy --> showRule')
@@ -141,6 +170,59 @@
       closeRuleModal () {
         console.log('shareAct --> home.wpy --> closeRuleModal')
         this.showRuleModal = false
+      },
+      showConcernModal () {
+        console.log('shareAct --> home.wpy --> showConcernModal')
+        this.showConcernModal = true
+      },
+      closeConcernModal () {
+        console.log('shareAct --> home.wpy --> closeConcernModal')
+        this.showConcernModal = false
+        this._getUserInfo()
+      },
+      obtainMember () {
+        let that = this
+        wepy.request({
+          url: `${wepy.$instance.globalData.baseURL}/wx/giveMemberActivity/parent/concernPlus`,
+          method: 'POST',
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': wepy.getStorageSync('token')
+          },
+          data: {
+            activityId: 1
+          },
+          success (res) {
+            console.log('shareAct --> home.wpy --> obtainMember --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              if (res.data.ret && res.data.ret.expireTime) {
+                wepy.showToast({icon: 'none', title: '活动已经到期', duration: 1400})
+              } else {
+                that._getUserInfo(() => {
+                  wx.showToast({
+                    title: '领取成功',
+                    icon: 'success',
+                    duration: 1400
+                  })
+                })
+              }
+            } else if (res.data.ret_code === 3014) {
+              wepy.showToast({icon: 'none', title: '用户没有关注公众号', duration: 1400})
+            } else if (res.data.ret_code === 3015) {
+              wepy.showToast({icon: 'none', title: '用户没有完成助力', duration: 1400})
+            } else if (res.data.ret_code === 3016) {
+              wepy.showToast({icon: 'none', title: '用户已经领取过关注公众号奖励', duration: 1400})
+            } else {
+              wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            }
+          },
+          fail (res) {
+            console.log('shareAct --> home.wpy --> obtainMember --> fail')
+            console.log(res)
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          }
+        })
       }
     }
 
@@ -169,7 +251,7 @@
           if (res.data.ret_code === 0) {
 
           } else {
-            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
         },
         fail (res) {
@@ -180,7 +262,7 @@
       })
     }
 
-    _getUserInfo () {
+    _getUserInfo (cb) {
       let that = this
       wepy.request({
         url: `${wepy.$instance.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
@@ -199,9 +281,11 @@
           if (res.data.ret_code === 0) {
             that.concern = res.data.ret.concern
             that.receiveConcern = res.data.ret.receiveConcern
-            // that.receiveConcern = true
+            // that.concern = true
+            // that.receiveConcern = false
+            cb && cb()
           } else {
-            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
           that.$apply()
         },
@@ -260,8 +344,13 @@
             that.resultModalExtra = '已经给自己助力过，不能再次助力'
             that.showResultModal = true
             // that.$apply()
+          } else if (res.data.ret_code === 3013) {
+            that.resultModalType = 'fail'
+            that.resultModalExtra = '对方已退出当前活动'
+            that.showResultModal = true
+            // that.$apply()
           } else {
-            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
           that.$apply()
         },
@@ -289,14 +378,14 @@
           console.log('shareAct --> home.wpy --> _hasJoin --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            if (res.data.ret.join) {
-              // 如果已经参加过活动 跳到活动已参加页面
+            if (!res.data.ret.canSee) {
+              // 如果孩子和家长不对应，跳到活动已参加页面
               wepy.navigateTo({
                 url: '/pages/shareAct/only-once'
               })
             }
           } else {
-            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
         },
         fail (res) {
@@ -305,6 +394,19 @@
           wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
       })
+    }
+
+    async _decideToBind () {
+      // 判断是否绑定
+      let hasBind = await wepy.$instance._getBindStatus()
+      if (!hasBind) {
+        wepy.navigateTo({
+          url: '/pages/associated-account'
+        })
+      } else {
+        // 判断是否已经参加过活动
+        this._hasJoin()
+      }
     }
 
     _getShareInfo () {
@@ -331,7 +433,8 @@
             that.isSelf = res.data.ret.myself
             that.targetUrl = res.data.ret.targetUrl
             that.activityFinish = !!res.data.ret.expireTime
-            if (~~that.current === ~~that.total) {
+            if (~~that.current >= ~~that.total) {
+              that.current = that.total
               that.status = 'finish'
             } else {
               that.status = 'underway'
@@ -345,13 +448,12 @@
                   url: '/pages/shareAct/end'
                 })
               } else {
-                // 判断是否已经参加过活动
-                // that._hasJoin()
+                that._decideToBind()
               }
             }
             that.$apply()
           } else {
-            wepy.showToast({icon: 'none', title: res.data.ret_msg, duration: 1400})
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
           wx.hideLoading()
         },
@@ -369,6 +471,7 @@
       if (wepy.$instance.globalData.hasCheckToken) {
         this._getShareInfo()
         this._getUserInfo()
+        // this.showConcernModal = true
         // this._helpOther()
         // this._receiveMy()
       } else {
@@ -388,8 +491,8 @@
 
     onLoad ({parentId}) {
       console.log('shareAct --> home.wpy --> onLoad')
-      // console.log(parentId)
-      // this.parentId = parentId
+      console.log(parentId)
+      this.parentId = parentId
       mta.Page.init()
     }
 

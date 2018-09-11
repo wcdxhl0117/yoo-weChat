@@ -2,7 +2,7 @@
   <view class="bannerModal" wx:if="{{modalShow}}">
     <view class="wrap {{maskShow?'active':''}}">
 
-      <image class="close" src="../static/bannermodalClose.png" @touchstart="close"/>
+      <image class="close" src="../static/close.png" @touchstart="close"/>
       <view class="content">
         <swiper class="swiper" bindchange='change' current="{{curr}}">
           <block wx:for="{{imgUrls}}" wx:key="idx" wx:for-index="idx" wx:for-item="item">

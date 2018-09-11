@@ -31,7 +31,7 @@
 <script>
   import wepy from 'wepy'
   import { connect } from 'wepy-redux'
-  import { SET_IS_BIND } from '../store/types/user'
+  // import { SET_IS_BIND } from '../store/types/user'
   import CryptoJS from 'crypto-js'
   import mta from '../utils/mta_analysis.js'
   import {

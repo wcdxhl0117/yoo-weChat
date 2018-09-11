@@ -1,0 +1,154 @@
+<template>
+  <view class="concernModal" wx:if="{{modalShow}}">
+    <view class="wrap {{maskShow?'active':''}}">
+
+      <!-- <image class="arrowImg" src="../../static/arrow.png"/> -->
+      <view class="arrowWrap">
+        <image class="arrowImg" src="../../static/arrow.png"/>
+      </view>
+      <image class="contentImg" src="http://qnstatic.file.yoomath.com/parent/V1.0.5/zhuliguanzhu.gif"/>
+
+      <view class="point">关注成功后，请返回此页面领取奖励</view>
+      <image class="closeImg" src="../../static/close.png" @tap="close"/>
+    </view>
+
+    <view class="mask {{maskShow?'active':''}}" @touchstart="close"></view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  // import mta from '../../utils/mta_analysis.js'
+  export default class concernModal extends wepy.component {
+    components = {}
+
+    mixins = []
+
+    data = {
+      modalShow: false,
+      maskShow: false
+    }
+
+    props = {
+      value: {
+        type: Boolean,
+        default: false
+      }
+    }
+
+    watch = {
+      value (val) {
+        if (val) {
+          this.modalShow = true
+          this.$apply()
+          setTimeout(() => {
+            this.maskShow = true
+            this.$apply()
+          }, 20)
+        } else {
+          this.maskShow = false
+          this.$apply()
+          setTimeout(() => {
+            this.modalShow = false
+            this.$apply()
+          }, 200)
+        }
+      }
+    }
+
+    computed = {}
+
+    methods = {
+      close () {
+        this.$emit('on-close')
+      }
+    }
+
+    events = {}
+
+    onLoad () {
+      console.log('shareAct --> concernModal.wpy --> onLoad')
+    }
+  }
+</script>
+<style lang="scss" scoped>
+.concernModal{
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  .mask{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    transition: opacity 0.2s;
+    opacity: 0;
+    &.active{
+      opacity: 0.5;
+    }
+  }
+  .wrap{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    transition: opacity 0.2s;
+    opacity: 0;
+    &.active{
+      opacity: 1;
+    }
+    .arrowWrap{
+      position:absolute;
+      top:20rpx;
+      right:110rpx;
+      animation: moveframe 2s linear infinite;
+      .arrowImg{
+        display:block;
+        width:52rpx;
+        height:59rpx;
+      }
+    }
+    @keyframes moveframe{
+      0%{
+        transform: translateY(0);
+      }
+      25%{
+        transform: translateY(16rpx);
+      }
+      50%{
+        transform: translateY(0rpx);
+      }
+      75%{
+        transform: translateY(-16rpx);
+      }
+      100%{
+        transform: translateY(0);
+      }
+    }
+    .contentImg{
+      display: block;
+      width: 440rpx;
+      height: 780rpx;
+    }
+    .point{
+      font-size: 30rpx;
+      font-weight: bold;
+      color: #fff;
+      margin: 30rpx 0;
+    }
+    .closeImg{
+      display: block;
+      width: 94rpx;
+      height: 94rpx;
+    }
+  }
+}
+</style>

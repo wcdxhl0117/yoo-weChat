@@ -61,10 +61,8 @@
       },
       confirmModal () {
         this.isShow = false
+        this._decideToBindAfterLaunch()
         this.$apply()
-        wepy.$instance._onLaunch(() => {
-          this._shouldToBindPage()
-        })
       }
     }
 
@@ -73,8 +71,8 @@
       this.$apply()
     }
 
-    _shouldToBindPage () {
-      wepy.$instance._shouldToBindPage(() => {
+    _decideToBindAfterLaunch () {
+      wepy.$instance._decideToBindAfterLaunch(() => {
         this._getTrend()
       })
     }
@@ -83,7 +81,7 @@
     _checkLogin () {
       console.log('join-trend.wpy --> _checkLogin')
       if (this.$parent.globalData.hasCheckToken) {
-        this._shouldToBindPage()
+        this._decideToBindAfterLaunch()
       } else {
         setTimeout(() => {
           this._checkLogin()

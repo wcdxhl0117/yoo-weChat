@@ -320,11 +320,9 @@
         let _this = this
         this.isShow = false
         this.$apply()
-        wepy.$instance._onLaunch(() => {
-          wepy.$instance._shouldToBindPage(() => {
-            // 数据请求
-            _this._checkLogin()
-          })
+        wepy.$instance._decideToBindAfterLaunch(() => {
+          // 数据请求
+          _this._checkLogin()
         })
       }
     }
@@ -333,7 +331,7 @@
       let _this = this
       console.log('work-report.wpy --> _checkLogin')
       if (wepy.$instance.globalData.hasCheckToken) {
-        wepy.$instance._shouldToBindPage(() => {
+        wepy.$instance._decideToBindAfterLaunch(() => {
           _this._gitDetialUnfo()
         })
       } else {

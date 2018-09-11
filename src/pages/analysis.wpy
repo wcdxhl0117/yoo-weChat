@@ -34,10 +34,8 @@
       },
       confirmModal () {
         this.isShow = false
+        this._decideToBindAfterLaunch()
         this.$apply()
-        wepy.$instance._onLaunch(() => {
-          this._shouldToBindPage()
-        })
       }
     }
 
@@ -46,8 +44,8 @@
       this.$apply()
     }
 
-    _shouldToBindPage () {
-      wepy.$instance._shouldToBindPage(() => {
+    _decideToBindAfterLaunch () {
+      wepy.$instance._decideToBindAfterLaunch(() => {
         this.src = `${wepy.$instance.globalData.h5URL}/stureportwx/?token=${wx.getStorageSync('token')}`
         this.$apply()
       })
@@ -57,7 +55,7 @@
     _checkLogin () {
       console.log('analysis.wpy --> _checkLogin')
       if (wepy.$instance.globalData.hasCheckToken) {
-        this._shouldToBindPage()
+        this._decideToBindAfterLaunch()
       } else {
         setTimeout(() => {
           this._checkLogin()

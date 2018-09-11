@@ -146,6 +146,7 @@
       isVip: false, // 是否是vip
       newShow: false, // 学习动态
       tipNow: true, // 是否展示上面的tip
+      parentId: '',
       parentHasdJoin: false, // 是否参加助力活动
       dynamic: {}, // 学习动态对象
       idxData: {
@@ -435,6 +436,7 @@
           console.log('index.wpy --> 是否参加过活动 --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
+            _this.parentId = res.data.ret.parent.parentId
             // 如果活动过期，跳转过期页面
             if (res.data.ret.expireTime) {
               wx.navigateTo({
@@ -520,7 +522,7 @@
             if (res.data.ret.canSee && _this.parentHasdJoin) {
               wx.hideLoading()
               wx.navigateTo({
-                url: '/pages/shareAct/home'
+                url: '/pages/shareAct/home?parentId' + _this.parentId 
               })
             } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
               // 未参加，和孩子都没参加，跳介绍页

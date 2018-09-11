@@ -42,7 +42,7 @@
 <script>
   import wepy from 'wepy'
   import scroll from '../../components/scroll'
-  import shareRuleModal from '../../components/shareRuleModal'
+  import shareRuleModal from '../../components/shareAct/shareRuleModal'
   import mta from '../../utils/mta_analysis.js'
   export default class introduction extends wepy.page {
     config = {
@@ -55,6 +55,7 @@
     mixins = []
 
     data = {
+      parentId: '',
       showRuleModal: false,
       isAuthorize: false,
       parentHasdJoin: false
@@ -105,6 +106,7 @@
           console.log(res)
           if (res.data.ret_code === 0) {
             // 如果活动过期，跳转过期页面
+            _this.parentId = res.data.ret.parent.parentId
             if (res.data.ret.expireTime) {
               wx.navigateTo({
                 url: '/pages/shareAct/end'
@@ -185,7 +187,7 @@
             if (res.data.ret.canSee && _this.parentHasdJoin) {
               wx.hideLoading()
               wx.navigateTo({
-                url: '/pages/shareAct/home'
+                url: '/pages/shareAct/home?parentId=' + _this.parentId
               })
             } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
               // 未参加，和孩子都没参加，调参加活动接口，成功后跳转

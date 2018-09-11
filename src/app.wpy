@@ -24,16 +24,16 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/shareAct/introduction',
-      'pages/index',
       'pages/shareAct/home',
       'pages/shareAct/only-once',
       'pages/shareAct/end',
+      'pages/index',
+      'pages/work-report',
+      'pages/join-trend',
       'pages/honor-rank',
       'pages/analysis',
       'pages/not-join-trend',
-      'pages/join-trend',
       'pages/report-detail',
-      'pages/work-report',
       'pages/associated-account',
       'pages/user',
       'pages/verify-account',
@@ -173,7 +173,7 @@ export default class extends wepy.app {
   }
 
   // 是否跳转到绑定页面
-  _shouldToBindPage (cb) {
+  _decideToBindAfterLaunch (cb) {
     this._onLaunch(async () => {
       let hasBind = await wepy.$instance._getBindStatus()
       if (!hasBind) {
@@ -365,7 +365,7 @@ export default class extends wepy.app {
           'S_T': wepy.getStorageSync('token')
         },
         success (res) {
-          console.log('user.wpy --> _getBindStatus --> success')
+          console.log('app.wpy --> _getBindStatus --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
             resolve(res.data.ret.hasBind)
@@ -375,7 +375,7 @@ export default class extends wepy.app {
           }
         },
         fail (res) {
-          console.log('user.wpy --> _getBindStatus --> fail')
+          console.log('app.wpy --> _getBindStatus --> fail')
           console.log(res)
           wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           reject(new Error('请求fail'))
