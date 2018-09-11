@@ -76,6 +76,8 @@
 
     methods = {
       close () {
+        // 关闭就不在展示，接口没出，用本地缓存
+        wx.setStorageSync('seeAD', true)
         this.$emit('on-close')
       },
       clickItem (val) {

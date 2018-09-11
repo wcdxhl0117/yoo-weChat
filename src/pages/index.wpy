@@ -43,7 +43,7 @@
       </view>
       <!-- VIP培优服务 -->
       <view class="vip">
-        <view class="vipHead">VIP培优服务<image @tap='test' src="../static/vip.png" /></view>
+        <view class="vipHead">VIP培优服务<image src="../static/vip.png" /></view>
 
         <!-- 监控 -->
         <view class="monitor" wx:if="{{!isVip || !hasBind}}">
@@ -140,7 +140,7 @@
 
     data = {
       showBannerModal: false, // 是否显示banner弹窗
-      showBannerModalList: [{imgSrc: '../static/aaaa.png', targetPath: '/pages/shareAct/introduction'}, {imgSrc: '../static/achieve.png', targetPath: '/pages/shareAct/introduction'}, {imgSrc: '../static/baseVia.png', targetPath: '/pages/shareAct/introduction'}], // banner弹窗显示的banner
+      showBannerModalList: [{imgSrc: '../static/aaaa.png', targetPath: '/pages/shareAct/introduction'}, {imgSrc: '../static/achieve.png', targetPath: '/pages/vip-learn-club'}, {imgSrc: '../static/baseVia.png', targetPath: 'https:baidu.com'}], // banner弹窗显示的banner
       hasBind: false, // 是否绑定孩子
       isReady: false,  // 身份是否判断成功
       isVip: false, // 是否是vip
@@ -175,9 +175,6 @@
     }
 
     methods = {
-      test () {
-        this.showBannerModal = true
-      },
       // 关闭banner弹窗
       bannerModalClose () {
         this.showBannerModal = false
@@ -189,8 +186,32 @@
         wx.showLoading({
           title: '正在加载'
         })
-        if (val.targetPath.indexOf('shareAct/introduction') != -1) {
+        let pathUrl = val.targetPath
+        if (pathUrl.indexOf('shareAct/introduction') !== -1) {
           this._hasJoinAct()
+          return
+        } else if (pathUrl === '/pages/vip-learn-club' || pathUrl === '/pages/index' || pathUrl === '/pages/user') {
+          console.log('index.wpy --> BannerClick --> switchTab --> ' + pathUrl)
+          wx.hideLoading()
+          wepy.switchTab({
+            url: pathUrl
+          })
+          return
+        } else if (pathUrl.indexOf('/pages') === -1) {
+          console.log('index.wpy --> BannerClick --> navigateTo --> ' + pathUrl)
+          wx.hideLoading()
+          this.$parent.globalData.webViewSrc = pathUrl
+          wepy.navigateTo({
+            url: '/pages/web-view'
+          })
+          return
+        } else {
+          console.log('index.wpy --> BannerClick --> pathUrl --> ' + pathUrl)
+          wx.hideLoading()
+          wepy.navigateTo({
+            url: pathUrl
+          })
+          return
         }
       },
       showBindingPage (val) {
@@ -330,6 +351,16 @@
       })
     }
 
+    getAD () {
+      // 后台获取接口写逻辑
+      let _this = this
+      let showAD = wx.getStorageSync('seeAD')
+      if (_this.showBannerModalList.length > 0 && !showAD) {
+        _this.showBannerModal = true
+        _this.$apply()
+      }
+    }
+
     _checkLogin () {
       console.log('index.wpy --> _checkLogin')
       let _this = this
@@ -353,6 +384,8 @@
                 _this.isReady = true
                 _this.$apply()
                 _this.getDataIdx()
+                // 获取广告接口
+                _this.getAD()
               } else {
                 // console.log(res)
               }
@@ -412,7 +445,6 @@
         })
       })
     }
-
 
 /* 
     下面是助力活动相关判断 
@@ -522,8 +554,6 @@
             // 已参加，同时和绑定的孩子对应，能跳进活动页
             if (res.data.ret.canSee && _this.parentHasdJoin) {
               wx.hideLoading()
-              console.log('****************************')
-              console.log(_this.parentId )
               wx.navigateTo({
                 url: '/pages/shareAct/home?parentId=' + _this.parentId 
               })
