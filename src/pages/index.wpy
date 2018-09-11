@@ -354,14 +354,19 @@
     getAD () {
       // 后台获取接口写逻辑
       let _this = this
-      let token = wx.getStorageSync('token')
+      // let token = wx.getStorageSync('token')
       // let showAD = wx.getStorageSync('seeAD')
       wx.request({
         url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/queryAdvert`,
         method: 'POST',
+        data: {
+          'app': 'MATH_PARENT',
+          'location': 'HOME',
+          'status': 'INPUSH'
+        },
         header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'S_T': token
+          'Content-Type': 'application/x-www-form-urlencoded'
+          // 'S_T': token
         },
         success (res) {
           console.log('index.wpy -->  获取广告 --> success')
@@ -938,9 +943,7 @@
       console.log('index.wpy --> onLoad')
       mta.Page.init()
       // 获取广告接口
-      setTimeout(function() {
-        _this.getAD()
-      }, 2000)
+      _this.getAD()
       // 是否展示tip
       wx.getStorage({
         key: 'tipNow',

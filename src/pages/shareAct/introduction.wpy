@@ -35,7 +35,7 @@
       <!-- 授权按钮 -->
       <button wx:if="{{!isAuthorize}}" class="btn1" open-type="getUserInfo" lang="zh_CN" @getuserinfo="onGotUserInfo('Home_ToBind')"></button>
     </view>
-    <shareRuleModal :value.sync="showRuleModal"  @on-close.user="showRuleModalClose"></shareRuleModal>
+    <shareRuleModal :value.sync="showRuleModal" :time.sync="time"  @on-close.user="showRuleModalClose"></shareRuleModal>
   </view>
 </template>
 
@@ -43,6 +43,7 @@
   import wepy from 'wepy'
   import scroll from '../../components/scroll'
   import shareRuleModal from '../../components/shareAct/shareRuleModal'
+  import moment from 'moment'
   import mta from '../../utils/mta_analysis.js'
   export default class introduction extends wepy.page {
     config = {
@@ -55,6 +56,7 @@
     mixins = []
 
     data = {
+      time: '',
       parentId: '',
       showRuleModal: false,
       isAuthorize: false,
@@ -88,6 +90,35 @@
     }
 
     events = {}
+
+    _getEndTime () {
+      let that = this
+      wx.request({
+        url: `${wepy.$instance.globalData.baseURL}/zy/m/activity/giveMember/activityEndTime`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        success (res) {
+          console.log('introduction.wpy --> _getEndTime --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            that.time = moment(~~res.data.ret.endTime).format('YYYY-MM-DD')
+          } else {
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          }
+          that.$apply()
+        },
+        fail (res) {
+          console.log('introduction.wpy --> _getEndTime --> hasBind --> fail')
+          console.log(res)
+          wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        }
+      })
+    }
 
     // 参看家长信息，是否已参加活动
     _hasJoinAct() {
@@ -292,6 +323,7 @@
         return
       }
       this._hasJoinAct()
+      this._getEndTime()
     }
 
     onShareAppMessage (res) {

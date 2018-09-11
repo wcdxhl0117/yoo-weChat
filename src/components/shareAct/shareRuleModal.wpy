@@ -33,8 +33,7 @@
 
     data = {
       modalShow: false,
-      maskShow: false,
-      time: '2018.09.30'
+      maskShow: false
     }
 
     props = {
@@ -44,6 +43,9 @@
       },
       type: {
         type: String // success fail repeat finish
+      },
+      time: {
+        type: String
       }
     }
 

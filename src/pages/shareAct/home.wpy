@@ -55,7 +55,7 @@
       <view class="itemExtra">顶自己</view>
     </view> -->
     <shareResultModal :value.sync="showResultModal" :type.sync="resultModalType" :extra.sync='resultModalExtra' @on-close.user="closeResultModal" @on-confirm.user="confirmResultModal"></shareResultModal>
-    <shareRuleModal :value.sync="showRuleModal"  @on-close.user="closeRuleModal"></shareRuleModal>
+    <shareRuleModal :value.sync="showRuleModal" :time.sync="time"  @on-close.user="closeRuleModal"></shareRuleModal>
     <concernModal :value.sync="showConcernModal"  @on-close.user="closeConcernModal"></concernModal>
     <authorizeModal :value.sync="showAuthorizeModal" @on-close.user="closeAuthorizeModal" @on-confirm.user="confirmAuthorizeModal"></authorizeModal>
   </view>
@@ -65,6 +65,7 @@
   import wepy from 'wepy'
   import authorizeModal from '../../components/authorizeModal'
   import mta from '../../utils/mta_analysis.js'
+  import moment from 'moment'
   import shareResultModal from '../../components/shareAct/shareResultModal'
   import shareRuleModal from '../../components/shareAct/shareRuleModal'
   import concernModal from '../../components/shareAct/concernModal'
@@ -84,6 +85,7 @@
     mixins = []
 
     data = {
+      time: '',
       hasGetShareData: false,
       hasGetUserData: false,
       isSelf: false,
@@ -304,6 +306,36 @@
       })
     }
 
+    _getEndTime () {
+      let that = this
+      wx.request({
+        url: `${wepy.$instance.globalData.baseURL}/zy/m/activity/giveMember/activityEndTime`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        success (res) {
+          console.log('shareAct --> home.wpy --> _getEndTime --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            console.log('***********************')
+            that.time = moment(~~res.data.ret.endTime).format('YYYY-MM-DD')
+          } else {
+            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+          }
+          that.$apply()
+        },
+        fail (res) {
+          console.log('shareAct --> home.wpy --> _getEndTime --> hasBind --> fail')
+          console.log(res)
+          wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+        }
+      })
+    }
+
     _helpOther () {
       let that = this
       wepy.request({
@@ -512,6 +544,7 @@
     onLoad (options) {
       console.log('shareAct --> home.wpy --> onLoad')
       this.parentId = options.parentId
+      this._getEndTime()
       mta.Page.init()
     }
 
