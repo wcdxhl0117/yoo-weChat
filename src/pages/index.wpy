@@ -456,6 +456,7 @@
           } else {
             // console.log(res)
           }
+          _this.$apply()
         },
         fail (res) {
           console.log('index.wpy --> _checkLogin --> hasBind --> fail')
@@ -521,8 +522,10 @@
             // 已参加，同时和绑定的孩子对应，能跳进活动页
             if (res.data.ret.canSee && _this.parentHasdJoin) {
               wx.hideLoading()
+              console.log('****************************')
+              console.log(_this.parentId )
               wx.navigateTo({
-                url: '/pages/shareAct/home?parentId' + _this.parentId 
+                url: '/pages/shareAct/home?parentId=' + _this.parentId 
               })
             } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
               // 未参加，和孩子都没参加，跳介绍页

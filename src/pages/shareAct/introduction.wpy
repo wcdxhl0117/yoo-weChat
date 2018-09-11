@@ -121,6 +121,7 @@
           } else {
             // console.log(res)
           }
+          _this.$apply()
         },
         fail (res) {
           console.log('introduction.wpy --> 个人信息 --> hasBind --> fail')
@@ -234,7 +235,7 @@
             })
             wx.hideLoading()
             wx.navigateTo({
-              url: '/pages/shareAct/home'
+              url: '/pages/shareAct/home?parentId=' + _this.parentId
             })
           } else if (res.data.ret_code === 3010) {
             wx.showToast({

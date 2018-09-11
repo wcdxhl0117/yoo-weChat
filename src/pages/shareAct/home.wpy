@@ -4,6 +4,7 @@
       <scroll class="carousel" :list='successList'></scroll>
       <!-- <view class="carousel"></view> -->
       <view class="rule" @tap="showRule">活动规则</view>
+      hasGetData--{{hasGetData}}
       <!-- <view class="rule" @tap="showConcernModal">活动规则</view> -->
     </view>
     <!-- parentId-{{parentId}}  -->
@@ -25,7 +26,7 @@
       <button class="shareBtnWrap expand" wx:if="{{status == 'underway' && isSelf}}" open-type="share">分享到群，请其他家长助力</button>
       <view class="shareBtnWrap expand" wx:if="{{status == 'underway' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
 
-      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && !concern}}" @tap="showConcernModal">关注公众号，再送1天会员</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && !concern}}" @tap="showConcern">关注公众号，再送1天会员</view>
       <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && concern}}" @tap="obtainMember">已关注，领取1天会员</view>
       <view class="shareBtnWrap" wx:if="{{status == 'finish' && isSelf && receiveConcern}}" @tap="showHomePage">回首页</view>
       <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
@@ -84,7 +85,8 @@
     mixins = []
 
     data = {
-      testId: '',
+      hasGetShareData: false,
+      hasGetUserData: false,
       isSelf: false,
       showResultModal: false,
       showRuleModal: false,
@@ -115,6 +117,9 @@
     computed = {
       progress () {
         return `width: ${~~this.current / ~~this.total * 100}%`
+      },
+      hasGetData () {
+        return this.hasGetShareData && this.hasGetUserData
       }
     }
 
@@ -132,11 +137,13 @@
         })
       },
       showHomePage () {
-        wepy.navigateTo({
+        if (!this.hasGetData) return
+        wepy.switchTab({
           url: '/pages/index'
         })
       },
       showIntroPage () {
+        if (!this.hasGetData) return
         wepy.navigateTo({
           url: '/pages/shareAct/introduction'
         })
@@ -171,7 +178,8 @@
         console.log('shareAct --> home.wpy --> closeRuleModal')
         this.showRuleModal = false
       },
-      showConcernModal () {
+      showConcern () {
+        if (!this.hasGetData) return
         console.log('shareAct --> home.wpy --> showConcernModal')
         this.showConcernModal = true
       },
@@ -181,6 +189,7 @@
         this._getUserInfo()
       },
       obtainMember () {
+        if (!this.hasGetData) return
         let that = this
         wepy.request({
           url: `${wepy.$instance.globalData.baseURL}/wx/giveMemberActivity/parent/concernPlus`,
@@ -279,14 +288,13 @@
           console.log('shareAct --> home.wpy --> _getUserInfo --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.concern = res.data.ret.concern
-            that.receiveConcern = res.data.ret.receiveConcern
-            // that.concern = true
-            // that.receiveConcern = false
+            that.concern = res.data.ret.parent.concern
+            that.receiveConcern = res.data.ret.parent.receiveConcern
             cb && cb()
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
+          that.hasGetUserData = true
           that.$apply()
         },
         fail (res) {
@@ -318,6 +326,7 @@
             that.resultModalType = 'success'
             that.resultModalExtra = ''
             that.showResultModal = true
+            that._getShareInfo()
             // that.$apply()
           } else if (res.data.ret_code === 3007) {
             that.resultModalType = 'fail'
@@ -451,6 +460,7 @@
                 that._decideToBind()
               }
             }
+            that.hasGetShareData = true
             that.$apply()
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
@@ -471,6 +481,7 @@
       if (wepy.$instance.globalData.hasCheckToken) {
         this._getShareInfo()
         this._getUserInfo()
+
         // this.showConcernModal = true
         // this._helpOther()
         // this._receiveMy()
@@ -489,10 +500,9 @@
       }
     }
 
-    onLoad ({parentId}) {
+    onLoad (options) {
       console.log('shareAct --> home.wpy --> onLoad')
-      console.log(parentId)
-      this.parentId = parentId
+      this.parentId = options.parentId
       mta.Page.init()
     }
 

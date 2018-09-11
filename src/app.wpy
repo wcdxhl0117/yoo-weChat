@@ -23,11 +23,11 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/index',
       'pages/shareAct/introduction',
       'pages/shareAct/home',
       'pages/shareAct/only-once',
       'pages/shareAct/end',
-      'pages/index',
       'pages/work-report',
       'pages/join-trend',
       'pages/honor-rank',
