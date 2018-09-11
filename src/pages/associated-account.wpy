@@ -17,7 +17,7 @@
       <view class="paragraph">1.将学生端APP中的个人二维码进行拍照或截图；</view>
       <view class="paragraph">2.点击页面底部的“扫码关联孩子账号”按钮；</view>
       <view class="paragraph">3.进入扫码页后，点击右上方的“相册”按钮，选择个人二维码图片，进行扫码关联。</view>
-      <image class="pic" src="http://qnstatic.file.yoomath.com/jiazhangduanguanlianzhiyin.gif"/>
+      <image class="pic" src="../static/album.png"/>
     </view>
     <view class="section">
       <view class="subTitle">三、输入孩子的账号密码进行关联</view>

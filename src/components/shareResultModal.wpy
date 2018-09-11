@@ -11,10 +11,12 @@
       <view class="title" wx:if="{{type == 'repeat'}}">已经帮他助力过了</view>
       <view class="title" wx:if="{{type == 'finish'}}">助力结束</view>
 
-      <view class="subTitle" wx:if="{{type == 'fail'}}">每天只有3次助力机会，你已经用光了</view>
-      <view class="subTitle" wx:if="{{type == 'finish'}}">对方已成功领取7天VIP会员</view>
+      <!-- <view class="subTitle" wx:if="{{type == 'fail'}}">每天只有3次助力机会，你已经用光了</view> -->
+      <!-- <view class="subTitle" wx:if="{{type == 'finish'}}">对方已成功领取7天VIP会员</view> -->
+      <!-- <view class="subTitle" wx:if="{{type == 'exit'}}">对方已退出当前活动</view> -->
+      <view class="subTitle" wx:if="{{extra}}">{{extra}}</view>
 
-      <view class="btnWrap {{type=='success'||type=='repeat'?'extra':''}}" @tap="confirm({{type}})" wx:if="{{type=='success'||type=='fail'||type=='repeat'||type=='finish'}}">
+      <view class="btnWrap {{extra?'extra':''}}" @tap="confirm({{type}})">
         <view class="btn">我也要帮孩子免费领取</view>
       </view>
     </view>
@@ -42,7 +44,11 @@
         default: false
       },
       type: {
-        type: String // success fail repeat finish
+        type: String // success fail exit repeat finish
+      },
+      extra: {
+        type: String,
+        default: ''
       }
     }
 
@@ -142,8 +148,9 @@
     }
     .btnWrap{
       width: 100%;
+      margin-top: 35rpx;
       &.extra{
-        margin-top: 35rpx;
+        margin-top: 0;
       }
       .btn{
         display: flex;
