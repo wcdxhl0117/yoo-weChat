@@ -66,10 +66,12 @@
     methods = {
       // 跳转详情
       toDetail() {
+        mta.Event.stat('Share_Activity_Join')
         this._hasBindChild()
       },
       toItr() {
         // 公众号文章链接
+        mta.Event.stat('Share_Activity_Know')
         this.$parent.globalData.webViewSrc = 'http://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510327342&idx=2&sn=6ee376fbd84f7981163e5b615f2e29db&chksm=7705067040728f66feb51d914efa23935537d51c392a723ff75804c9cdb0cb4eaac1a2ac054e#rd'
         wepy.navigateTo({
           url: '/pages/web-view'
@@ -267,7 +269,6 @@
     }
 
     async onGotUserInfo (val) {
-      mta.Event.stat(val)
       let authorize = await this._getAuthorize()
       if (!authorize) {
         return
@@ -280,6 +281,7 @@
     }
 
     async onLoad() {
+      mta.Page.init()
       wx.showLoading({
         title: '正在加载'
       })

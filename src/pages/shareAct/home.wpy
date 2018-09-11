@@ -1,10 +1,9 @@
 <template>
   <view id="home">
     <view class="tip">
-      <scroll class="carousel" :list='successList'></scroll>
+      <scroll class="carousel" :list.sync='successList'></scroll>
       <!-- <view class="carousel"></view> -->
       <view class="rule" @tap="showRule">活动规则</view>
-      hasGetData--{{hasGetData}}
       <!-- <view class="rule" @tap="showConcernModal">活动规则</view> -->
     </view>
     <!-- parentId-{{parentId}}  -->
@@ -93,13 +92,7 @@
       showAuthorizeModal: false,
       showConcernModal: false,
       helpList: [],
-      successList: [
-        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '1'},
-        {'portrait': '', 'name': '22222'},
-        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '2'},
-        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '3'},
-        {'portrait': 'http://qnstatic.file.yoomath.com/parent/itrShare.png', 'name': '4'}
-      ],
+      successList: [],
       resultModalType: '', // success fail repeat finish
       resultModalExtra: '',
       status: '', // underway finish
@@ -131,6 +124,7 @@
         this._helpOther()
       },
       showHelpPage () {
+        mta.Event.stat('Share_Activity_How_Search')
         this.$parent.globalData.webViewSrc = 'http://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510327342&idx=1&sn=05c731eaa6dd5d87224b8749675f67c6&chksm=7705067040728f66bcc7d4456f4a2f3663bc93f63dc38ec9ac5c6b5d854b3a6899e8e2ffdaef#rd'
         wepy.navigateTo({
           url: '/pages/web-view'
@@ -138,12 +132,14 @@
       },
       showHomePage () {
         if (!this.hasGetData) return
+        mta.Event.stat('Share_Activity_Home')
         wepy.switchTab({
           url: '/pages/index'
         })
       },
       showIntroPage () {
         if (!this.hasGetData) return
+        mta.Event.stat('Share_Activity_Help_Share')
         wepy.navigateTo({
           url: '/pages/shareAct/introduction'
         })
@@ -166,6 +162,7 @@
       confirmResultModal () {
         console.log('shareAct --> home.wpy --> confirmResultModal')
         this.showResultModal = false
+        mta.Event.stat('Share_Activity_Modal_Share')
         wepy.navigateTo({
           url: '/pages/shareAct/introduction'
         })
@@ -180,6 +177,7 @@
       },
       showConcern () {
         if (!this.hasGetData) return
+        mta.Event.stat('Share_Activity_Concern')
         console.log('shareAct --> home.wpy --> showConcernModal')
         this.showConcernModal = true
       },
@@ -190,6 +188,7 @@
       },
       obtainMember () {
         if (!this.hasGetData) return
+        mta.Event.stat('Share_Activity_Get')
         let that = this
         wepy.request({
           url: `${wepy.$instance.globalData.baseURL}/wx/giveMemberActivity/parent/concernPlus`,
@@ -359,7 +358,10 @@
             that.showResultModal = true
             // that.$apply()
           } else {
-            wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
+            that.resultModalType = 'fail'
+            that.resultModalExtra = ''
+            that.showResultModal = true
+            // wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
           that.$apply()
         },
@@ -419,7 +421,6 @@
     }
 
     _getShareInfo () {
-      wx.showLoading({title: '正在获取数据'})
       let that = this
       wepy.request({
         url: `${wepy.$instance.globalData.baseURL}/wx/giveMemberActivity/parent/helpList`,
@@ -441,6 +442,13 @@
             // that.current = 7
             that.isSelf = res.data.ret.myself
             that.targetUrl = res.data.ret.targetUrl
+            let list = (res.data.ret.successUsers || []).map(item => {
+              return {
+                portrait: item.avatarUrl ? `${wepy.$instance.globalData.baseURL}${item.avatarUrl}` : '../../static/baseVia.png',
+                name: item.name
+              }
+            })
+            that.successList = list
             that.activityFinish = !!res.data.ret.expireTime
             if (~~that.current >= ~~that.total) {
               that.current = that.total
@@ -465,12 +473,10 @@
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
-          wx.hideLoading()
         },
         fail (res) {
           console.log('shareAct --> home.wpy --> _getShareInfo --> fail')
           console.log(res)
-          wx.hideLoading()
           wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
         }
       })
@@ -482,6 +488,8 @@
         this._getShareInfo()
         this._getUserInfo()
 
+        // wepy.showLoading({title: '正在获取数据'})
+        // wepy.hideLoading()
         // this.showConcernModal = true
         // this._helpOther()
         // this._receiveMy()
@@ -493,6 +501,7 @@
     }
 
     onShareAppMessage (res) {
+      mta.Event.stat('Share_Activity_User_Share')
       return {
         title: '【悠数学】帮我点一下，和我一起得7天VIP培优会员',
         path: `/pages/shareAct/home?parentId=${this.parentId}`,
@@ -549,6 +558,10 @@
       color: #fff;
       font-size: 30rpx;
       font-weight: bold;
+      border-top-left-radius: 35rpx;
+      border-bottom-left-radius: 35rpx;
+      padding-left: 18rpx;
+      box-sizing: border-box;
     }
   }
   .titleImg{

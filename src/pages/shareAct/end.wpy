@@ -12,6 +12,7 @@
 
 <script>
   import wepy from 'wepy'
+  import mta from '../../utils/mta_analysis.js'
   export default class End extends wepy.page {
     config = {
       navigationBarTitleText: '悠数学-家长'
@@ -37,6 +38,7 @@
     events = {}
 
     onLoad(options) {
+      mta.Page.init()
       let _this = this
       let timer = setInterval(function () {
         if (_this.$parent.globalData.userInfoAll.avatarUrl) {

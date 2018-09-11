@@ -121,7 +121,7 @@
       <!-- 绑定孩子按钮 -->
       <view @tap="showBindingPage('Home_ToBind')" wx:if="{{authorize&&!hasBind}}" class="btn2"></view>
     </view>
-    <bannerModal :value.sync="showBannerModal" :list="showBannerModalList"  @on-close.user="bannerModalClose" @on-click.user="bannerModalClick"></bannerModal>
+    <bannerModal :value.sync="showBannerModal" :list.sync="showBannerModalList"  @on-close.user="bannerModalClose" @on-click.user="bannerModalClick"></bannerModal>
   </view>
 </template>
 
@@ -140,7 +140,7 @@
 
     data = {
       showBannerModal: false, // 是否显示banner弹窗
-      showBannerModalList: [{imgSrc: '../static/aaaa.png', targetPath: '/pages/shareAct/introduction'}, {imgSrc: '../static/achieve.png', targetPath: '/pages/vip-learn-club'}, {imgSrc: '../static/baseVia.png', targetPath: 'https:baidu.com'}], // banner弹窗显示的banner
+      showBannerModalList: [], // banner弹窗显示的banner
       hasBind: false, // 是否绑定孩子
       isReady: false,  // 身份是否判断成功
       isVip: false, // 是否是vip
@@ -186,7 +186,7 @@
         wx.showLoading({
           title: '正在加载'
         })
-        let pathUrl = val.targetPath
+        let pathUrl = val.url
         if (pathUrl.indexOf('shareAct/introduction') !== -1) {
           this._hasJoinAct()
           return
@@ -354,11 +354,41 @@
     getAD () {
       // 后台获取接口写逻辑
       let _this = this
-      let showAD = wx.getStorageSync('seeAD')
-      if (_this.showBannerModalList.length > 0 && !showAD) {
-        _this.showBannerModal = true
-        _this.$apply()
-      }
+      let token = wx.getStorageSync('token')
+      // let showAD = wx.getStorageSync('seeAD')
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/queryAdvert`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('index.wpy -->  获取广告 --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            let list = (res.data.ret.ads || []).map(item => {
+              return {
+                imageUrl: `${wepy.$instance.globalData.baseURL}${item.imageUrl}`,
+                url: item.url
+              }
+            })
+            _this.showBannerModalList = list
+            _this.$apply()
+            // if (_this.showBannerModalList.length > 0 && !showAD) {
+            if (_this.showBannerModalList.length > 0) {
+              _this.showBannerModal = true
+              _this.$apply()
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('index.wpy --> 获取广告 --> fail')
+          console.log(res)
+        }
+      })
     }
 
     _checkLogin () {
@@ -385,7 +415,7 @@
                 _this.$apply()
                 _this.getDataIdx()
                 // 获取广告接口
-                _this.getAD()
+                // _this.getAD()
               } else {
                 // console.log(res)
               }
@@ -452,49 +482,55 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
     // 参看家长信息，是否已参加活动和活动是否过期
     _hasJoinAct() {
-      let token = wx.getStorageSync('token')
-      let _this = this
-      wx.request({
-        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
-        method: 'POST',
-        data: {
-          'activityId': 1
-        },
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'S_T': token
-        },
-        success (res) {
-          console.log('index.wpy --> 是否参加过活动 --> success')
-          console.log(res)
-          if (res.data.ret_code === 0) {
-            _this.parentId = res.data.ret.parent.parentId
-            // 如果活动过期，跳转过期页面
-            if (res.data.ret.expireTime) {
-              wx.navigateTo({
-                url: '/pages/shareAct/end'
-              })
-            } else if (res.data.ret.parent.joinIn) {
-              // 如果活动时间为截止且参加，判断是否绑定孩子
-              _this.parentHasdJoin = true
-              _this._hasBindChild()
-            } else if(!res.data.ret.parent.joinIn) {
-              // 取消loding, 展示页面
-              wx.hideLoading()
-              wx.navigateTo({
-                url: '/pages/shareAct/introduction'
-              })
+      if (!this.authorize) {
+        wx.navigateTo({
+          url: '/pages/shareAct/introduction'
+        })
+      } else {
+        let token = wx.getStorageSync('token')
+        let _this = this
+        wx.request({
+          url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
+          method: 'POST',
+          data: {
+            'activityId': 1
+          },
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'S_T': token
+          },
+          success (res) {
+            console.log('index.wpy --> 是否参加过活动 --> success')
+            console.log(res)
+            if (res.data.ret_code === 0) {
+              _this.parentId = res.data.ret.parent.parentId
+              // 如果活动过期，跳转过期页面
+              if (res.data.ret.expireTime) {
+                wx.navigateTo({
+                  url: '/pages/shareAct/end'
+                })
+              } else if (res.data.ret.parent.joinIn) {
+                // 如果活动时间为截止且参加，判断是否绑定孩子
+                _this.parentHasdJoin = true
+                _this._hasBindChild()
+              } else if(!res.data.ret.parent.joinIn) {
+                // 取消loding, 展示页面
+                wx.hideLoading()
+                wx.navigateTo({
+                  url: '/pages/shareAct/introduction'
+                })
+              }
+            } else {
+              // console.log(res)
             }
-          } else {
-            // console.log(res)
+            _this.$apply()
+          },
+          fail (res) {
+            console.log('index.wpy --> _checkLogin --> hasBind --> fail')
+            console.log(res)
           }
-          _this.$apply()
-        },
-        fail (res) {
-          console.log('index.wpy --> _checkLogin --> hasBind --> fail')
-          console.log(res)
-        }
-      })
+        })
+      }
     }
 
     // 查看是否绑定孩子
@@ -901,6 +937,10 @@
       let _this = this
       console.log('index.wpy --> onLoad')
       mta.Page.init()
+      // 获取广告接口
+      setTimeout(function() {
+        _this.getAD()
+      }, 2000)
       // 是否展示tip
       wx.getStorage({
         key: 'tipNow',

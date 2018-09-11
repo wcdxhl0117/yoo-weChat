@@ -7,7 +7,7 @@
         <swiper class="swiper" bindchange='change' current="{{curr}}">
           <block wx:for="{{imgUrls}}" wx:key="idx" wx:for-index="idx" wx:for-item="item">
             <swiper-item>
-              <image src="{{item.imgSrc}}" @tap="clickItem({{item}})" class="swiperItem"/>
+              <image src="{{item.imageUrl}}" @tap="clickItem({{item}})" class="swiperItem"/>
             </swiper-item>
           </block>
         </swiper>
@@ -34,7 +34,8 @@
     data = {
       modalShow: false,
       maskShow: false,
-      curr: 0
+      curr: 0,
+      baseURL: ''
     }
 
     props = {
@@ -68,6 +69,11 @@
       }
     }
 
+    onLoad () {
+      this.baseURL = this.$parent.globalData.baseURL
+      $thia.$apply()
+    }
+
     computed = {
       imgUrls () {
         return this.list
@@ -77,7 +83,7 @@
     methods = {
       close () {
         // 关闭就不在展示，接口没出，用本地缓存
-        wx.setStorageSync('seeAD', true)
+        // wx.setStorageSync('seeAD', true)
         this.$emit('on-close')
       },
       clickItem (val) {
