@@ -508,13 +508,15 @@
             console.log('index.wpy --> 是否参加过活动 --> success')
             console.log(res)
             if (res.data.ret_code === 0) {
-              _this.parentId = res.data.ret.parent.parentId
               // 如果活动过期，跳转过期页面
               if (res.data.ret.expireTime) {
                 wx.navigateTo({
                   url: '/pages/shareAct/end'
                 })
-              } else if (res.data.ret.parent.joinIn) {
+                return
+              }
+              _this.parentId = res.data.ret.parent.parentId
+              if (res.data.ret.parent.joinIn) {
                 // 如果活动时间为截止且参加，判断是否绑定孩子
                 _this.parentHasdJoin = true
                 _this._hasBindChild()

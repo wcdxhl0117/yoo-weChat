@@ -15,7 +15,7 @@
       <view class="btn-area">
         <button formType="submit" class="{{hasBinding?'disabled':''}}"  disabled="{{hasBinding}}">关联账号</button>
       </view>
-      <view class="subTitle">忘记了孩子的账号或密码<image class="arrow {{isScroll?'scroll':''}}" @tap="scroll" src="../static/black-arrow.png"/></view>
+      <view class="subTitle" @tap="scroll">忘记了孩子的账号或密码<image class="arrow {{isScroll?'scroll':''}}" src="../static/black-arrow.png"/></view>
       <block wx:if="{{isScroll}}">
         <view class="paragraph">方法1.  可让孩子在“悠数学-学生端”个人中心页面，截取二维码图片后发送给你。在家长端使用扫码绑定功能对孩子进行关联。<view class="point" @tap="scan">立即扫码绑定</view></view>
         <view class="paragraph">方法2. 向孩子索要账号或密码</view>

@@ -28,7 +28,7 @@
       <view class="shareBtnWrap expand" wx:if="{{status == 'underway' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
 
       <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && !concern}}" @tap="showConcern">关注公众号，再送1天会员</view>
-      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && concern}}" @tap="obtainMember">已关注，领取1天会员</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && concern}}" @tap="obtainMember">已关注公众号，再领取1天会员</view>
       <view class="shareBtnWrap" wx:if="{{status == 'finish' && isSelf && receiveConcern}}" @tap="showHomePage">回首页</view>
       <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
     </view>
@@ -90,8 +90,10 @@
     data = {
       time: '',
       hasHelp: false,
+      hasToEnd: false,
       hasGetShareData: false,
       hasGetUserData: false,
+      hasGetObtainMember: false,
       isSelf: false,
       showResultModal: false,
       showRuleModal: false,
@@ -187,7 +189,7 @@
         this._getUserInfo()
       },
       obtainMember () {
-        if (!this.hasGetData) return
+        if (!this.hasGetData && !this.hasGetObtainMember) return
         mta.Event.stat('Share_Activity_Get')
         let that = this
         wepy.request({
@@ -205,8 +207,9 @@
             console.log(res)
             if (res.data.ret_code === 0) {
               if (res.data.ret && res.data.ret.expireTime) {
-                wepy.showToast({icon: 'none', title: '活动已经到期', duration: 1400})
+                return that._showActivityEndPage()
               } else {
+                that.hasGetObtainMember = true
                 that._getUserInfo(() => {
                   wx.showToast({
                     title: '领取成功',
@@ -224,6 +227,7 @@
             } else {
               wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
             }
+            that.$apply()
           },
           fail (res) {
             console.log('shareAct --> home.wpy --> obtainMember --> fail')
@@ -270,6 +274,15 @@
       })
     }
 
+    _showActivityEndPage () {
+      if (!this.hasToEnd) {
+        this.hasToEnd = true
+        wepy.navigateTo({
+          url: '/pages/shareAct/end'
+        })
+      }
+    }
+
     _getUserInfo (cb) {
       let that = this
       console.log('************************ _getUserInfo = ' + that.parentId)
@@ -287,6 +300,9 @@
         success (res) {
           console.log('shareAct --> home.wpy --> _getUserInfo --> success')
           console.log(res)
+          if (res.data.ret && res.data.ret.expireTime) {
+            return that._showActivityEndPage()
+          }
           if (res.data.ret_code === 0) {
             that.concern = res.data.ret.parent.concern
             that.receiveConcern = res.data.ret.parent.receiveConcern
@@ -317,13 +333,15 @@
           'activityId': 1
         },
         header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cache-Control': 'public',
+          'Pragma': 'Pragma'
         },
         success (res) {
           console.log('shareAct --> home.wpy --> _getEndTime --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.time = moment(~~res.data.ret.endTime).format('YYYY-MM-DD')
+            that.time = moment(~~res.data.ret.endTime).format('YYYY.MM.DD')
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
@@ -355,6 +373,9 @@
         success (res) {
           console.log('shareAct --> home.wpy --> _helpOther --> success')
           console.log(res)
+          if (res.data.ret && res.data.ret.expireTime) {
+            return that._showActivityEndPage()
+          }
           if (res.data.ret_code === 0) {
             that.resultModalType = 'success'
             that.resultModalExtra = ''
@@ -470,6 +491,9 @@
         success (res) {
           console.log('shareAct --> home.wpy --> _getShareInfo --> success')
           console.log(res)
+          if (res.data.ret && res.data.ret.expireTime) {
+            return that._showActivityEndPage()
+          }
           if (res.data.ret_code === 0) {
             that.helpList = res.data.ret.helps || []
             that.current = (res.data.ret.helps || []).length
@@ -496,14 +520,7 @@
               that._helpOther()
             }
             if (that.isSelf) {
-              if (that.activityFinish) {
-                // 跳到活动结束页面
-                wepy.navigateTo({
-                  url: '/pages/shareAct/end'
-                })
-              } else {
-                that._decideToBind()
-              }
+              that._decideToBind()
             }
             that.hasGetShareData = true
             that.$apply()
@@ -528,7 +545,8 @@
         wepy.showLoading({title: '正在获取数据'})
         this._getShareInfo()
         this._getUserInfo()
-
+        this.showConcernModal = false
+        this.$apply()
         // wepy.showLoading({title: '正在获取数据'})
         // wepy.hideLoading()
         // this.showConcernModal = true

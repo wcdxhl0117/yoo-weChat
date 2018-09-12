@@ -69,11 +69,6 @@
       }
     }
 
-    onLoad () {
-      this.baseURL = this.$parent.globalData.baseURL
-      this.$apply()
-    }
-
     computed = {
       imgUrls () {
         return this.list
@@ -101,6 +96,8 @@
 
     onLoad () {
       console.log('bannerModal.wpy --> onLoad')
+      this.baseURL = wepy.$instance.globalData.baseURL
+      this.$apply()
     }
   }
 </script>

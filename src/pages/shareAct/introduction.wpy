@@ -3,7 +3,8 @@
     <view class="wrap">
       <view class="topImg">
         <image src="../../static/itrTop.png" />
-        <view @tap="showRule">活动规则</view>
+        <view class="rule" @tap="showRule">活动规则</view>
+        <view class="times">活动时间{{time1}}</view>
       </view>
       <view class="btm">
         <image class="title" src="../../static/itrtitle.png" />
@@ -57,6 +58,7 @@
 
     data = {
       time: '',
+      time1: '',
       parentId: '',
       showRuleModal: false,
       isAuthorize: false,
@@ -100,13 +102,16 @@
           'activityId': 1
         },
         header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Cache-Control': 'public',
+          'Pragma': 'Pragma'
         },
         success (res) {
           console.log('introduction.wpy --> _getEndTime --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.time = moment(~~res.data.ret.endTime).format('YYYY-MM-DD')
+            that.time = moment(~~res.data.ret.endTime).format('YYYY.MM.DD')
+            that.time1 = moment(~~res.data.ret.endTime).format('MM月DD日')
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
@@ -139,12 +144,15 @@
           console.log(res)
           if (res.data.ret_code === 0) {
             // 如果活动过期，跳转过期页面
-            _this.parentId = res.data.ret.parent.parentId
             if (res.data.ret.expireTime) {
+              console.log(123456)
               wx.navigateTo({
                 url: '/pages/shareAct/end'
               })
-            } else if (res.data.ret.parent.joinIn) {
+              return
+            }
+            _this.parentId = res.data.ret.parent.parentId
+            if (res.data.ret.parent.joinIn) {
               _this.parentHasdJoin = true
               _this._hasBindChild()
             } else {
@@ -343,6 +351,7 @@
 <style lang="less" scoped>
   .container{
     width: 100%;
+    height: 100%;
     position: absolute;
     top: 0;
     left: 0;
@@ -355,17 +364,27 @@
       .topImg{
         width: 100%;
         height: 530rpx;
+        position: relative;
         image{
           width: 100%;
           height: 530rpx;
         }
-        view{
+        .rule{
           color:rgba(145,100,20,1);
           position: absolute;
           top: 0rpx;
           right: 0rpx;
           font-size: 22rpx;
           padding: 30rpx;
+        }
+        .times{
+          width: 100%;
+          height: auto;
+          position: absolute;
+          top: 290rpx;
+          text-align: center;
+          font-size: 24rpx;
+          color: #F17100;
         }
       }
       .btm{
@@ -414,7 +433,7 @@
       .txt{
         width: 176rpx;
         text-align: center;
-        margin: 20rpx auto;
+        margin: 0 auto;
         font-size: 24rpx;
         color: #ffffff;
         border-bottom: 1px solid #ffffff;
