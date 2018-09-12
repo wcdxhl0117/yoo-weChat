@@ -271,11 +271,14 @@
               url: '/pages/shareAct/home?parentId=' + _this.parentId
             })
           } else if (res.data.ret_code === 3010) {
-            wx.showToast({
-              title: '你已经领取！',
-              icon: 'none',
-              duration: 2000
+            wx.navigateTo({
+              url: '/pages/shareAct/home?parentId=' + _this.parentId
             })
+            // wx.showToast({
+            //   title: '你已经领取！',
+            //   icon: 'none',
+            //   duration: 2000
+            // })
           }
         },
         fail (res) {
