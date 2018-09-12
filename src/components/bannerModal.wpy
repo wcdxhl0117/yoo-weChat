@@ -71,7 +71,7 @@
 
     onLoad () {
       this.baseURL = this.$parent.globalData.baseURL
-      $thia.$apply()
+      this.$apply()
     }
 
     computed = {
