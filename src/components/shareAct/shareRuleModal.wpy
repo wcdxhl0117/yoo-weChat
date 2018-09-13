@@ -7,9 +7,9 @@
       <view class="content">
         <view class="paragraph">1.活动时间：即日起至<view class="point">{{time}}</view>;</view>
         <view class="paragraph">2.每个用户可领取1次会员，每天最多给别人助力3次;</view>
-        <view class="paragraph">3.邀请<view class="point">7位</view>好友助力后，才可获得7天VIP培优会员;</view>
+        <view class="paragraph">3.邀请<view class="point">6位</view>好友助力后，才可获得7天VIP培优会员;</view>
         <view class="paragraph">4.<view class="point">新关注公众号</view>的用户可额外再获得1天VIP培优会员（每个微信号仅可得1次);</view>
-        <view class="paragraph">5.获得的VIP培优会员预计在24小时内到账，如有问题，请添加客服微信：<view class="point">yoomath1</view> 进行咨询;</view>
+        <view class="paragraph">5.获得的VIP培优会员预计在24小时内到账，如有问题，请添加客服微信：<view class="point">yoomath123</view> 进行咨询;</view>
         <view class="paragraph">6.因违规操作获得的VIP培优会员，悠数学查明后有权利收回;</view>
         <view class="paragraph">7.本活动的最终解释权归悠数学所有。</view>
       </view>

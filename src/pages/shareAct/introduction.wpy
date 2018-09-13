@@ -4,7 +4,7 @@
       <view class="topImg">
         <image src="../../static/itrTop.png" />
         <view class="rule" @tap="showRule">活动规则</view>
-        <view class="times">活动时间{{time1}}</view>
+        <view class="times">活动截止{{time1}}</view>
       </view>
       <view class="btm">
         <image class="title" src="../../static/itrtitle.png" />
@@ -102,16 +102,14 @@
           'activityId': 1
         },
         header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Cache-Control': 'public',
-          'Pragma': 'Pragma'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
         success (res) {
           console.log('introduction.wpy --> _getEndTime --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.time = moment(~~res.data.ret.endTime).format('YYYY.MM.DD')
-            that.time1 = moment(~~res.data.ret.endTime).format('MM月DD日')
+            that.time = moment(parseInt(res.data.ret.endTime)).format('YYYY.MM.DD')
+            that.time1 = moment(parseInt(res.data.ret.endTime)).format('MM月DD日')
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
@@ -341,7 +339,7 @@
       return {
         title: '【悠数学】助力孩子学习，一起来领取开学大礼包',
         path: '/pages/shareAct/introduction',
-        imageUrl: 'http://qnstatic.file.yoomath.com/parent/itrShare.png'
+        imageUrl: 'http://qnstatic.file.yoomath.com/parent/V1.0.5/kapian.png'
       }
     }
 
@@ -351,12 +349,8 @@
 <style lang="less" scoped>
   .container{
     width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+    min-height: 100vh;
+    position: relative;
     background: #F9573F;
     .wrap{
       width: 100%;

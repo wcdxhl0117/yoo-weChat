@@ -333,15 +333,13 @@
           'activityId': 1
         },
         header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Cache-Control': 'public',
-          'Pragma': 'Pragma'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
         success (res) {
           console.log('shareAct --> home.wpy --> _getEndTime --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
-            that.time = moment(~~res.data.ret.endTime).format('YYYY.MM.DD')
+            that.time = moment(parseInt(res.data.ret.endTime)).format('YYYY.MM.DD')
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
@@ -729,6 +727,7 @@
       height: 100rpx;
       border-radius: 100%;
       margin-left: 10rpx;
+      flex-shrink: 0;
     }
     .itemName, .itemExtra{
       font-size: 34rpx;
@@ -738,8 +737,13 @@
     .itemName{
       flex-grow: 1;
       margin-left: 30rpx;
+      overflow: hidden;
+      overflow: hidden;
+      text-overflow:ellipsis;
+      white-space: nowrap;
     }
     .itemExtra{
+      flex-shrink: 0;
       margin-right: 10rpx;
     }
   }

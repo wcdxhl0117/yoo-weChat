@@ -1,6 +1,6 @@
 <template>
   <view class="container">
-    <text>你已参与过此次活动\n不可重复参加</text>
+    <text>你或孩子已参与过此次活动\n不可重复参加</text>
     <view @tap="backHome">回首页</view>
   </view>
 </template>
