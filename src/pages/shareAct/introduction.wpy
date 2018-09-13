@@ -62,7 +62,8 @@
       parentId: '',
       showRuleModal: false,
       isAuthorize: false,
-      parentHasdJoin: false
+      parentHasdJoin: false,
+      clickOff: true
     }
 
     computed = {}
@@ -71,7 +72,10 @@
       // 跳转详情
       toDetail() {
         mta.Event.stat('Share_Activity_Join')
-        this._hasBindChild()
+        if (this.clickOff) {
+          this.clickOff = false
+          this._hasBindChild()
+        }
       },
       toItr() {
         // 公众号文章链接
@@ -143,7 +147,6 @@
           if (res.data.ret_code === 0) {
             // 如果活动过期，跳转过期页面
             if (res.data.ret.expireTime) {
-              console.log(123456)
               wx.navigateTo({
                 url: '/pages/shareAct/end'
               })
@@ -191,15 +194,19 @@
             } else {
               // 如果没绑定，跳转绑定孩子页面
               wx.hideLoading()
+              _this.clickOff = true
               wx.navigateTo({
                 url: '/pages/associated-account'
               })
             }
           } else {
+            console.console.log(147852369)
+            _this.clickOff = true
             // console.log(res)
           }
         },
         fail (res) {
+          _this.clickOff = true
           console.log('introduction.wpy --> 是否绑定孩子接口请求失败')
           console.log(res)
         }
@@ -229,6 +236,7 @@
               console.log('1当前用户的id，记录********************************')
               console.log(_this.parentId)
               wx.hideLoading()
+                _this.clickOff = true
               if (_this.parentId) {
                 wx.navigateTo({
                   url: '/pages/shareAct/home?parentId=' + _this.parentId
@@ -242,15 +250,18 @@
             } else {
               // 已参加，同时和孩子不匹配
               wx.hideLoading()
+              _this.clickOff = true
               wx.navigateTo({
                 url: '/pages/shareAct/only-once'
               })
             }
           } else {
+            _this.clickOff = true
             console.log(res)
           }
         },
         fail (res) {
+          _this.clickOff = true
           console.log('introduction.wpy --> 孩子和家长是否参加接口请求失败')
           console.log(res)
         }
@@ -276,12 +287,13 @@
           if (res.data.ret_code === 0) {
             console.log('2当前用户的id，记录********************************')
             console.log(_this.parentId)
-            wx.showToast({
-              title: '领取成功！',
-              icon: 'none',
-              duration: 2000
-            })
+            // wx.showToast({
+            //   title: '领取成功！',
+            //   icon: 'none',
+            //   duration: 2000
+            // })
             wx.hideLoading()
+            _this.clickOff = true
             if (_this.parentId) {
               wx.navigateTo({
                 url: '/pages/shareAct/home?parentId=' + _this.parentId
@@ -292,6 +304,7 @@
           } else if (res.data.ret_code === 3010) {
             console.log('3当前用户的id，记录********************************')
             console.log(_this.parentId)
+            _this.clickOff = true
             if (_this.parentId) {
               wx.navigateTo({
                 url: '/pages/shareAct/home?parentId=' + _this.parentId
@@ -307,6 +320,7 @@
           }
         },
         fail (res) {
+          _this.clickOff = true
           console.log('参加活动接口 --> fail')
         }
       })

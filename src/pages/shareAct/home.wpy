@@ -1,5 +1,8 @@
 <template>
   <view id="home">
+    <view id="mask" wx:if="{{!status||!hasGetData}}">
+      <view class="loading">正在加载...</view>
+    </view>
     <view class="tip">
       <scroll class="carousel" :list.sync='successList'></scroll>
       <!-- <view class="carousel"></view> -->
@@ -11,24 +14,24 @@
       助力孩子学习 7天vip培优会员限时免费领
       <image class="titleImg" src="../../static/shareAct/title.png"/>
     </view>
-    <image class="childViaImg" src="{{targetUrl || '../../static/baseVia.png'}}"/>
+    <image class="childViaImg" src="{{targetUrl}}"/>
     <view class="progressWrap">
       <view class="number">{{current}}/{{total}}</view>
       <view class="progressBg">
         <view class="progressNow" style='{{progress}}'></view>
       </view>
 
-      <view class="explain" wx:if="{{status == ''}}">　</view>
+      <!-- <view class="explain" wx:if="{{status == ''}}">　</view> -->
       <view class="explain" wx:if="{{status == 'underway'}}">还差<view class="point">{{~~total-~~current}}</view>人助力，即可领取7天VIP培优会员</view>
       <view class="explain" wx:if="{{status == 'finish' && isSelf}}">已成功领取7天VIP培优会员<view class="search" @tap="showHelpPage">如何查询</view></view>
       <view class="explain" wx:if="{{status == 'finish' && !isSelf}}">助力结束，对方已成功领取7天VIP培优会员</view>
 
-      <view class="shareBtnWrap expand" wx:if="{{status == ''}}"></view>
+      <!-- <view class="shareBtnWrap expand" wx:if="{{status == ''}}"></view> -->
       <button class="shareBtnWrap expand" wx:if="{{status == 'underway' && isSelf}}" open-type="share">分享到群，请其他家长助力</button>
       <view class="shareBtnWrap expand" wx:if="{{status == 'underway' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
 
       <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && !concern}}" @tap="showConcern">关注公众号，再送1天会员</view>
-      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && concern}}" @tap="obtainMember">已关注公众号，再领取1天会员</view>
+      <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && isSelf && !receiveConcern && concern}}" @tap="obtainMember">已关注公众号，点击领取1天会员</view>
       <view class="shareBtnWrap" wx:if="{{status == 'finish' && isSelf && receiveConcern}}" @tap="showHomePage">回首页</view>
       <view class="shareBtnWrap expand" wx:if="{{status == 'finish' && !isSelf}}" @tap="showIntroPage">我也要帮孩子免费领取</view>
     </view>
@@ -103,10 +106,10 @@
       successList: [],
       resultModalType: '', // success fail repeat finish
       resultModalExtra: '',
-      status: '', // underway finish
+      status: 'underway', // underway finish
       activityFinish: false,
-      targetUrl: '',
-      current: 0,
+      targetUrl: '../../static/baseVia.png',
+      current: 1,
       total: 3,
       concern: false,
       receiveConcern: false,
@@ -120,6 +123,9 @@
         return `width: ${~~this.current / ~~this.total * 100}%`
       },
       hasGetData () {
+        // if (this.hasGetShareData && this.hasGetUserData) {
+        //   wepy.hideLoading()
+        // }
         return this.hasGetShareData && this.hasGetUserData
       }
     }
@@ -211,7 +217,7 @@
               } else {
                 that.hasGetObtainMember = true
                 that._getUserInfo(() => {
-                  wx.showToast({
+                  wepy.showToast({
                     title: '领取成功',
                     icon: 'success',
                     duration: 1400
@@ -306,15 +312,19 @@
           if (res.data.ret_code === 0) {
             that.concern = res.data.ret.parent.concern
             that.receiveConcern = res.data.ret.parent.receiveConcern
-            cb && cb()
+            // that.concern = true
+            // that.receiveConcern = false
+            setTimeout(() => {
+              cb && cb()
+            }, 0)
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
           that.hasGetUserData = true
           that.$apply()
-          if (that.hasGetData) {
-            wepy.hideLoading()
-          }
+          // if (that.hasGetData) {
+          //   wepy.hideLoading()
+          // }
         },
         fail (res) {
           console.log('shareAct --> home.wpy --> _getUserInfo --> fail')
@@ -497,7 +507,7 @@
             that.current = (res.data.ret.helps || []).length
             // that.current = 7
             that.isSelf = res.data.ret.myself
-            that.targetUrl = res.data.ret.targetUrl
+            that.targetUrl = res.data.ret.targetUrl || '../../static/baseVia.png'
             let list = (res.data.ret.successUsers || []).map(item => {
               return {
                 portrait: item.avatarUrl ? `${wepy.$instance.globalData.baseURL}${item.avatarUrl}` : '../../static/baseVia.png',
@@ -522,9 +532,9 @@
             }
             that.hasGetShareData = true
             that.$apply()
-            if (that.hasGetData) {
-              wepy.hideLoading()
-            }
+            // if (that.hasGetData) {
+            //   wepy.hideLoading()
+            // }
           } else {
             wepy.showToast({icon: 'none', title: '请求失败', duration: 1400})
           }
@@ -540,12 +550,12 @@
     _checkLogin () {
       // console.log('shareAct --> home.wpy --> _checkLogin')
       if (wepy.$instance.globalData.hasCheckToken) {
-        wepy.showLoading({title: '正在获取数据'})
+        // wepy.showLoading({title: '正在加载'})
         this._getShareInfo()
         this._getUserInfo()
         this.showConcernModal = false
         this.$apply()
-        // wepy.showLoading({title: '正在获取数据'})
+        // wepy.showLoading({title: '正在加载'})
         // wepy.hideLoading()
         // this.showConcernModal = true
         // this._helpOther()
@@ -589,6 +599,24 @@
   }
 </script>
 <style lang="scss" scoped>
+#mask{
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.3);
+  .loading{
+    padding: 6rpx 24rpx;
+    border-radius: 5rpx;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+  }
+}
 #home{
   display: flex;
   flex-direction: column;
