@@ -150,6 +150,7 @@
               return
             }
             _this.parentId = res.data.ret.parent.parentId
+            _this.$apply()
             if (res.data.ret.parent.joinIn) {
               _this.parentHasdJoin = true
               _this._hasBindChild()
@@ -225,10 +226,16 @@
           if (res.data.ret_code === 0) {
             // 已参加，同时和绑定的孩子对应，能跳进活动页
             if (res.data.ret.canSee && _this.parentHasdJoin) {
+              console.log('1当前用户的id，记录********************************')
+              console.log(_this.parentId)
               wx.hideLoading()
-              wx.navigateTo({
-                url: '/pages/shareAct/home?parentId=' + _this.parentId
-              })
+              if (_this.parentId) {
+                wx.navigateTo({
+                  url: '/pages/shareAct/home?parentId=' + _this.parentId
+                })
+              } else {
+                _this._hasJoinAct()
+              }
             } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
               // 未参加，和孩子都没参加，调参加活动接口，成功后跳转
               _this._joinAct()
@@ -267,19 +274,31 @@
           console.log('introduction.wpy --> 参加活动接口 --> success')
           console.log(res)
           if (res.data.ret_code === 0) {
+            console.log('2当前用户的id，记录********************************')
+            console.log(_this.parentId)
             wx.showToast({
               title: '领取成功！',
               icon: 'none',
               duration: 2000
             })
             wx.hideLoading()
-            wx.navigateTo({
-              url: '/pages/shareAct/home?parentId=' + _this.parentId
-            })
+            if (_this.parentId) {
+              wx.navigateTo({
+                url: '/pages/shareAct/home?parentId=' + _this.parentId
+              })
+            } else {
+              _this._hasJoinAct()
+            }
           } else if (res.data.ret_code === 3010) {
-            wx.navigateTo({
-              url: '/pages/shareAct/home?parentId=' + _this.parentId
-            })
+            console.log('3当前用户的id，记录********************************')
+            console.log(_this.parentId)
+            if (_this.parentId) {
+              wx.navigateTo({
+                url: '/pages/shareAct/home?parentId=' + _this.parentId
+              })
+            } else {
+              _this._hasJoinAct()
+            }
             // wx.showToast({
             //   title: '你已经领取！',
             //   icon: 'none',
@@ -349,8 +368,12 @@
 <style lang="less" scoped>
   .container{
     width: 100%;
-    min-height: 100vh;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
     background: #F9573F;
     .wrap{
       width: 100%;

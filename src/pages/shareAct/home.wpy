@@ -568,6 +568,7 @@
 
     onLoad (options) {
       console.log('shareAct --> home.wpy --> onLoad')
+      console.log(options)
       this.parentId = options.parentId
       this._getEndTime()
       mta.Page.init()

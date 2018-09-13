@@ -23,8 +23,8 @@ setStore(store)
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/shareAct/introduction',
       'pages/index',
+      'pages/shareAct/introduction',
       'pages/shareAct/home',
       'pages/shareAct/only-once',
       'pages/shareAct/end',
@@ -87,11 +87,11 @@ export default class extends wepy.app {
     // baseURL: 'http://192.168.66.69:80', // 龙哥
     // baseURL: 'http://192.168.66.134:8080', // 赵鹏
     // release
-    // baseURL: 'http://wx.test.yoomath.com',
-    // h5URL: 'http://h5.test.yoomath.com',
+    baseURL: 'http://wx.test.yoomath.com',
+    h5URL: 'http://h5.test.yoomath.com',
     // test1
-    baseURL: 'http://wx.test1.yoomath.com',
-    h5URL: 'http://h5.test1.yoomath.com',
+    // baseURL: 'http://wx.test1.yoomath.com',
+    // h5URL: 'http://h5.test1.yoomath.com',
     // test2
     // baseURL: 'http://wx.test2.yoomath.com',
     // h5URL: 'http://h5.test2.yoomath.com',
