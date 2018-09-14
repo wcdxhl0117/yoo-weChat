@@ -110,10 +110,12 @@
       activityFinish: false,
       targetUrl: '../../static/baseVia.png',
       current: 1,
-      total: 3,
+      total: 7,
       concern: false,
       receiveConcern: false,
-      parentId: ''
+      parentId: '',
+      parentIdToHome: '',
+      parentHasdJoin: ''
       // "1071650077149306880 -王辉id"
       // "1037677880852627456 - 王超id"
     }
@@ -148,9 +150,10 @@
       showIntroPage () {
         if (!this.hasGetData) return
         mta.Event.stat('Share_Activity_Help_Share')
-        wepy.navigateTo({
-          url: '/pages/shareAct/introduction'
-        })
+        this._hasJoinAct()
+        // wepy.navigateTo({
+        //   url: '/pages/shareAct/introduction'
+        // })
       },
       closeAuthorizeModal () {
         this.showAuthorizeModal = false
@@ -171,9 +174,10 @@
         console.log('shareAct --> home.wpy --> confirmResultModal')
         this.showResultModal = false
         mta.Event.stat('Share_Activity_Modal_Share')
-        wepy.navigateTo({
-          url: '/pages/shareAct/introduction'
-        })
+        this._hasJoinAct()
+        // wepy.navigateTo({
+        //   url: '/pages/shareAct/introduction'
+        // })
       },
       showRule () {
         console.log('shareAct --> home.wpy --> showRule')
@@ -469,6 +473,141 @@
         }
       })
     }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+    // 参看家长信息，是否已参加活动和活动是否过期
+    _hasJoinAct() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/parentInfo`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('home.wpy --> 是否参加过活动 --> success')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果活动过期，跳转过期页面
+            if (res.data.ret.expireTime) {
+              wx.navigateTo({
+                url: '/pages/shareAct/end'
+              })
+              return
+            }
+            _this.parentIdToHome = res.data.ret.parent.parentId
+            if (res.data.ret.parent.joinIn) {
+              // 如果活动时间为截止且参加，判断是否绑定孩子
+              _this.parentHasdJoin = true
+              _this._hasBindChild()
+            } else if(!res.data.ret.parent.joinIn) {
+              // 取消loding, 展示页面
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/shareAct/introduction'
+              })
+            }
+          } else {
+            // console.log(res)
+          }
+          _this.$apply()
+        },
+        fail (res) {
+          console.log('home.wpy --> _checkLogin --> hasBind --> fail')
+          console.log(res)
+        }
+      })
+    }
+
+    // 查看是否绑定孩子
+    _hasBindChild() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/micro/parent/hasBind`,
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('home.wpy --> 绑定孩子请求接口成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 如果绑定,判断孩子和家长是否能进入活动
+            if (res.data.ret.hasBind) {
+              _this._ParentChildHasJoin()
+            } else {
+              // 如果没绑定，跳转绑定孩子页面
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/associated-account'
+              })
+            }
+          } else {
+            // console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('home.wpy --> 是否绑定孩子接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+
+    // 孩子和家长是否参加
+    _ParentChildHasJoin() {
+      let token = wx.getStorageSync('token')
+      let _this = this
+      wx.request({
+        url: `${_this.$parent.globalData.baseURL}/wx/giveMemberActivity/parent/hasJoin`,
+        method: 'POST',
+        data: {
+          'activityId': 1
+        },
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'S_T': token
+        },
+        success (res) {
+          console.log('home.wpy --> 孩子和家长是否参加接口请求成功')
+          console.log(res)
+          if (res.data.ret_code === 0) {
+            // 已参加，同时和绑定的孩子对应，能跳进活动页
+            if (res.data.ret.canSee && _this.parentHasdJoin) {
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/shareAct/home?parentId=' + _this.parentIdToHome 
+              })
+            } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
+              // 未参加，和孩子都没参加，跳介绍页
+              wx.navigateTo({
+                url: '/pages/shareAct/introduction'
+              })
+            } else {
+              // 已参加，同时和孩子不匹配
+              wx.hideLoading()
+              wx.navigateTo({
+                url: '/pages/shareAct/only-once'
+              })
+            }
+          } else {
+            console.log(res)
+          }
+        },
+        fail (res) {
+          console.log('home.wpy --> 孩子和家长是否参加接口请求失败')
+          console.log(res)
+        }
+      })
+    }
+////////////////////////////////////////////////////////////////////////////////////////////
 
     async _decideToBind () {
       // 判断是否绑定
