@@ -60,6 +60,8 @@
       <view class="itemName">姓名</view>
       <view class="itemExtra">顶自己</view>
     </view> -->
+    <!-- 回首页 -->
+    <image class="toIndex" @tap="toIndex" src="../../static/shareAct/toHome.png" />
     <shareResultModal :value.sync="showResultModal" :type.sync="resultModalType" :extra.sync='resultModalExtra' @on-close.user="closeResultModal" @on-confirm.user="confirmResultModal"></shareResultModal>
     <shareRuleModal :value.sync="showRuleModal" :time.sync="time"  @on-close.user="closeRuleModal"></shareRuleModal>
     <concernModal :value.sync="showConcernModal"  @on-close.user="closeConcernModal"></concernModal>
@@ -133,6 +135,12 @@
     }
 
     methods = {
+      // 回首页
+      toIndex () {
+        wepy.switchTab({
+          url: '/pages/index'
+        })
+      },
       showHelpPage () {
         mta.Event.stat('Share_Activity_How_Search')
         this.$parent.globalData.webViewSrc = 'http://mp.weixin.qq.com/s?__biz=MzI5OTEyNjA2NQ==&mid=510327342&idx=1&sn=05c731eaa6dd5d87224b8749675f67c6&chksm=7705067040728f66bcc7d4456f4a2f3663bc93f63dc38ec9ac5c6b5d854b3a6899e8e2ffdaef#rd'
@@ -474,8 +482,7 @@
       })
     }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////
+    /**/
     // 参看家长信息，是否已参加活动和活动是否过期
     _hasJoinAct() {
       let token = wx.getStorageSync('token')
@@ -506,7 +513,7 @@
               // 如果活动时间为截止且参加，判断是否绑定孩子
               _this.parentHasdJoin = true
               _this._hasBindChild()
-            } else if(!res.data.ret.parent.joinIn) {
+            } else if (!res.data.ret.parent.joinIn) {
               // 取消loding, 展示页面
               wx.hideLoading()
               wx.navigateTo({
@@ -583,7 +590,7 @@
             if (res.data.ret.canSee && _this.parentHasdJoin) {
               wx.hideLoading()
               wx.navigateTo({
-                url: '/pages/shareAct/home?parentId=' + _this.parentIdToHome 
+                url: '/pages/shareAct/home?parentId=' + _this.parentIdToHome
               })
             } else if (res.data.ret.canSee && !_this.parentHasdJoin) {
               // 未参加，和孩子都没参加，跳介绍页
@@ -607,7 +614,7 @@
         }
       })
     }
-////////////////////////////////////////////////////////////////////////////////////////////
+    /**/
 
     async _decideToBind () {
       // 判断是否绑定
@@ -738,6 +745,14 @@
   }
 </script>
 <style lang="scss" scoped>
+.toIndex{
+  position: fixed;
+  bottom: 30rpx;
+  right: 30rpx;
+  width: 136rpx;
+  height: 136rpx;
+  opacity: 0.9;
+}
 #mask{
   position: absolute;
   display: flex;

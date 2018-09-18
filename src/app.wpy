@@ -101,7 +101,7 @@ export default class extends wepy.app {
     // hotfix
     // baseURL: 'http://wx.hotfix.yoomath.com',
     // h5URL: 'http://h5.hotfix.yoomath.com',
-    mtaAanalysis: false, // 开启移动分析埋点
+    mtaAanalysis: true, // 开启移动分析埋点
     // 状态
     // wepy.$instance.globalData
     hasAuthorize: false,
