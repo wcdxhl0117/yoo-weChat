@@ -1,13 +1,14 @@
 <template>
   <view id="downHomework">
     <!-- <image class="icon" wx:if="{{type == 'pdf'}}" src="../static/pdf.png"/> -->
-    <image class="icon" src="../static/doc.png"/>
+    <image class="icon" src="../static/pdf.png"/>
+    <!-- <view class="title">正在生成PDF文档</view> -->
     <view class="title">{{title}}</view>
     <view class="subTitle" @tap="preview" wx:if="{{isFinished}}">预览</view>
     <text  class="paragraph" selectable="true" wx:if="{{isFinished}}">{{url}}</text>
     <button class="button" loading="{{loading}}" @tap="download" wx:if="{{!isFinished}}">{{loading?'':'下载'}}</button>
     <button class="button" loading="{{loading}}" @tap="copy" wx:if="{{isFinished}}">{{loading?'':'复制下载链接'}}</button>
-    <view class="describe" wx:if="{{isFinished}}">建议使用Word2007以上的版本进行打开</view>
+    <!-- <view class="describe" wx:if="{{isFinished}}">建议使用Word2007以上的版本进行打开</view> -->
     <view class="extra" @tap="toWorkflowPage">作业打印流程</view>
   </view>
 </template>
@@ -114,6 +115,36 @@
         })
       }
     }
+    _preview () {
+      console.log('download-homework.wpy --> preview')
+      mta.Event.stat('Down_Homework_Preview')
+      wx.openDocument({
+        filePath: this.filePath,
+        success (res) {
+          console.log('download-homework.wpy --> preview --> openDocument --> success')
+          // console.log(res)
+        },
+        fail (res) {
+          console.log('download-homework.wpy --> preview --> openDocument --> res')
+          console.log(res)
+          wx.showToast({title: '预览失败', icon: 'none', duration: 1400})
+        }
+      })
+    }
+    _download () {
+      console.log('download-homework.wpy --> _download')
+      let that = this
+      if (!that.loading) {
+        that.loading = true
+        if (that.exist) {
+          // 如果url存在，则直接下载文件
+          that._downFile()
+        } else {
+          // 否则先转存文件再下载
+          that._createFile()
+        }
+      }
+    }
     // 转存文件
     _createFile () {
       let that = this
@@ -164,6 +195,7 @@
           that.loading = false
           that.isFinished = true
           that.filePath = res.tempFilePath
+          // that._preview()
           that.$apply()
         },
         fail (res) {
@@ -183,14 +215,39 @@
     onLoad (options) {
       console.log('download-homework --> onLoad')
       mta.Page.init()
+      let that = this
+      // that._download()
     }
 
     onShow (options) {
       console.log('download-homework --> onShow')
+
     }
   }
 </script>
 <style lang="scss" scoped>
+// #downHomework{
+//   display: flex;
+//   align-items: center;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   padding: 0 30rpx;
+//   height: 100vh;
+//   box-sizing: border-content;
+//   .icon{
+//     margin: -90rpx 0 0;
+//     display: block;
+//     width: 200rpx;
+//     height: 200rpx;
+//     flex-shrink:0;
+//   }
+//   .title{
+//     margin: 40rpx 0 40rpx;
+//     font-weight: bold;
+//     font-size: 36rpx;
+//   }
+// }
 #downHomework{
   display: flex;
   align-items: center;

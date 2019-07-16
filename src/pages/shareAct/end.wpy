@@ -1,6 +1,6 @@
 <template>
   <view class="container">
-    <image class="top" src="../../static/endTop.jpg" />
+    <image class="top" src="../../static/endtop.jpg" />
     <view class="content">
       <image class="head" src="{{headUrl}}" />
       <image class="middle" src="../../static/endlg.png" />

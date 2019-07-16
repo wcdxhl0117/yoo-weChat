@@ -10,7 +10,9 @@
 	"compileType": "miniprogram",
 	"appid": "wx01a40c521cb8f06b",
 	"projectname": "wechat-app",
-	"miniprogramRoot": "./dist",
+	"miniprogramRoot": "dist/",
 	"libVersion": "2.2.2",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
 	"condition": {}
 }

@@ -4,31 +4,31 @@
       <view class="topImg">
         <image src="../../static/itrTop.png" />
         <view class="rule" @tap="showRule">活动规则</view>
-        <view class="times">活动截止{{time1}}</view>
+        <!-- <view class="times">活动截止{{time1}}</view> -->
       </view>
       <view class="btm">
         <image class="title" src="../../static/itrtitle.png" />
         <view class="conList">
           <view class="lis">
             <image src="../../static/itrlis.png" />
-            <view>作业秒级批改反馈</view>
+            <view>300+本在线教辅和试卷免费使用</view>
           </view>
           <view class="lis">
             <image src="../../static/itrlis.png" />
-            <view>AI智能推荐，错题精准练</view>
+            <view>题目秒级批改反馈</view>
           </view>
           <view class="lis">
             <image src="../../static/itrlis.png" />
-            <view>个性化错题本（可下载打印）</view>
+            <view>AI提分训练，称霸全班</view>
           </view>
           <view class="lis">
             <image src="../../static/itrlis.png" />
-            <view>全生命周期孩子学情报告</view>
+            <view>全生命周期学情报告</view>
           </view>
-          <view class="lis">
+          <!-- <view class="lis">
             <image src="../../static/itrlis.png" />
             <view>300本在线同步教辅书免费练</view>
-          </view>
+          </view> -->
         </view>
       </view>
       <view class="btn" @tap="toDetail">立即领取</view>
