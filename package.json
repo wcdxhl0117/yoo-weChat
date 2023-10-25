@@ -17,7 +17,7 @@
   "author": "chao.wang <chao.wang@elanking.com>",
   "license": "MIT",
   "dependencies": {
-    "crypto-js": "3.1.9-1",
+    "crypto-js": "4.2.0",
     "less": "^3.9.0",
     "moment": "2.22.2",
     "node-sass": "^4.9.0",
